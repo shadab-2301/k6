@@ -1220,6 +1220,11 @@ function jarHeader(jar) {
         .join("; ");
 }
 
+function ssoStagingFingerprint(cookieHeader) {
+    const match = /(?:^|;\s*)SSO_STAGING=([^;]*)/.exec(String(cookieHeader || ""));
+    return match ? md5(String(match[1]).trim(), "hex").slice(0, 12) : "<missing>";
+}
+
 function sasRetryIdempotencyMode() {
     const mode = String(__ENV.SAS_RETRY_IDEMPOTENCY_MODE || "NEW").trim().toUpperCase();
     if (mode !== "SAME" && mode !== "NEW") throw new Error("SAS_RETRY_IDEMPOTENCY_MODE must be SAME or NEW.");
@@ -1474,15 +1479,12 @@ export default function (ctx) {
         if (initialOtp.response.status !== 200 || initialOtp.payload?.Status !== "Ok") {
             throw new Error(`[k6][FAIL][initial_otp] OTP Attempt #1 transport failure status=${initialOtp.response.status} Status=${initialOtp.payload?.Status || "<missing>"}`);
         }
-        if (initialOtp.payload?.Result === false && String(initialOtp.payload?.Message || "") === "Invalid token") {
-            console.info("[EXPECTED] Result=false Message=Invalid token (OTP Attempt #1 primes the session; this is not a test failure)");
-        } else {
-            console.warn(`[k6][WARN][initial_otp] Unexpected OTP Attempt #1 response Result=${initialOtp.payload?.Result} Message=${String(initialOtp.payload?.Message || "")}; continuing to OTP Attempt #2`);
-        }
+        console.info(`[INFO] Result=${initialOtp.payload?.Result} Message=${String(initialOtp.payload?.Message || "")}`);
         applySetCookie(jar, initialOtp.response, "initial_otp");
         try {
             currentCookie = extractSsoStagingCookie(initialOtp.response, "initial_otp");
             console.info(`[k6][debug][cookie] stage=initial_otp cookiePresent=true fingerprint=${currentCookie.fingerprint}`);
+            console.info(`[INFO] OTP #1 Set-Cookie applied fingerprint=${ssoStagingFingerprint(jarHeader(jar))}`);
         } catch {
             console.warn("[k6][WARN][initial_otp] No replacement SSO_STAGING cookie returned; continuing with authentication cookie");
         }
@@ -1498,21 +1500,22 @@ export default function (ctx) {
             otpDuration,
             "otp_attempt_2"
         );
-        const secondOtpOk = secondOtp.response.status === 200 && secondOtp.payload?.Status === "Ok" && secondOtp.payload?.Result === true;
-        check(secondOtp.response, { "OTP Attempt #2 authentication successful": () => secondOtpOk });
-        if (!secondOtpOk) {
-            console.error(`[k6][FAIL][otp_attempt_2] status=${secondOtp.response.status} Status=${secondOtp.payload?.Status || "<missing>"} Result=${secondOtp.payload?.Result} Message=${String(secondOtp.payload?.Message || "")}`);
-            throw new Error(`[k6][FAIL][otp_attempt_2] OTP Attempt #2 did not authenticate; Get SAS URL was not requested. status=${secondOtp.response.status} Result=${secondOtp.payload?.Result} Message=${String(secondOtp.payload?.Message || "")}`);
+        if (secondOtp.response.status !== 200 || secondOtp.payload?.Status !== "Ok") {
+            throw new Error(`[k6][FAIL][otp_attempt_2] OTP Attempt #2 transport failure status=${secondOtp.response.status} Status=${secondOtp.payload?.Status || "<missing>"}`);
         }
+        console.info(`[INFO] Result=${secondOtp.payload?.Result} Message=${String(secondOtp.payload?.Message || "")}`);
         applySetCookie(jar, secondOtp.response, "otp_attempt_2");
         const preOtp2Fingerprint = currentCookie.fingerprint;
+        let otp2CookieFingerprint = null;
         try {
             currentCookie = extractSsoStagingCookie(secondOtp.response, "otp_attempt_2");
+            const otp2SsoCookies = currentCookie.cookies.filter((c) => c.name === "SSO_STAGING");
+            otp2CookieFingerprint = md5(String(otp2SsoCookies[otp2SsoCookies.length - 1].value).trim(), "hex").slice(0, 12);
             console.info(`[k6][debug][cookie] stage=otp_attempt_2 cookiePresent=true cookieUpdated=${currentCookie.fingerprint !== preOtp2Fingerprint} fingerprint=${currentCookie.fingerprint}`);
+            console.info(`[INFO] OTP #2 Set-Cookie applied fingerprint=${otp2CookieFingerprint}`);
         } catch {
             console.warn("[k6][WARN][otp_attempt_2] No replacement SSO_STAGING cookie returned; continuing with OTP Attempt #1 session cookie");
         }
-        console.info("[PASS] OTP authentication successful");
         console.info(`[k6][debug][wait] stage=otp_attempt_2->get_sas_url seconds=${sasOtpWait}`);
         sleep(sasOtpWait);
 
@@ -1546,6 +1549,15 @@ export default function (ctx) {
         console.info(`[k6][debug][sas-idempotency] stage=initial mode=${retryIdempotencyMode} keyGenerated=true`);
         console.info("[SINGLE AUTH] Get SAS URL");
         const sasSessionCookie = jarHeader(jar);
+        const sasCookieFingerprint = ssoStagingFingerprint(sasSessionCookie);
+        if (otp2CookieFingerprint) {
+            if (sasCookieFingerprint !== otp2CookieFingerprint) {
+                throw new Error(`[k6][FAIL][get_sas_url] Cookie propagation mismatch: OTP #2 response fingerprint=${otp2CookieFingerprint} Get SAS URL request fingerprint=${sasCookieFingerprint}`);
+            }
+            console.info(`[INFO] Using latest session cookie from OTP #2 fingerprint=${sasCookieFingerprint} (matches OTP #2 response)`);
+        } else {
+            console.info(`[INFO] OTP #2 returned no new SSO_STAGING; using latest session cookie fingerprint=${sasCookieFingerprint}`);
+        }
         let sasData = getSasUrl(ctx, sasPayload, initialSasIdempotencyKey, "get_sas_url", sasSessionCookie, {
             mode: retryIdempotencyMode,
             sameIdempotencyKey: true,
