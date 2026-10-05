@@ -1,0 +1,19 @@
+{
+  "name": "k6-performance-tests",
+  "version": "1.0.0",
+  "description": "Performance testing suite using k6 for API and UI testing",
+  "scripts": {
+    "perf:batch:k6": "node scripts/run-performance-k6.js"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2"
+  },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "moduleResolution": "node"
+    }
+  }
+}

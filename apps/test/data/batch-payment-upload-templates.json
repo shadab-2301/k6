@@ -1,0 +1,102 @@
+{
+    "SINGLE_BATCH_DETAILS_STANDARD": {
+        "paymentType": "EFT",
+        "currency": "ZAR",
+        "singleDebit": "false",
+        "allowDuplicate": "false",
+        "fileDesc": "Single batch details validation template",
+        "numPayments": 1,
+        "baseAmount": 100,
+        "transactions": [
+            {
+                "creditAccountId": "101355",
+                "creditAccountScheme": "BENEID",
+                "amount": 101.25,
+                "remittanceInfo": "Single batch detail payment {index}",
+                "endToEndId": "BATCH-DETAIL-SINGLE-{timestamp}-{index}",
+                "notify": "N"
+            }
+        ]
+    },
+    "MULTI_BATCH_DETAILS_STANDARD": {
+        "paymentType": "EFT",
+        "currency": "ZAR",
+        "singleDebit": "false",
+        "allowDuplicate": "false",
+        "fileDesc": "Batch details validation template",
+        "numPayments": 3,
+        "baseAmount": 100,
+        "transactions": [
+            {
+                "creditAccountId": "101355",
+                "creditAccountScheme": "BENEID",
+                "amount": 101.25,
+                "remittanceInfo": "Batch detail payment {index}",
+                "endToEndId": "BATCH-DETAIL-{timestamp}-{index}",
+                "notify": "N"
+            },
+            {
+                "creditAccountId": "101356",
+                "creditAccountScheme": "BENEID",
+                "amount": 202.5,
+                "remittanceInfo": "Batch detail payment {index}",
+                "endToEndId": "BATCH-DETAIL-{timestamp}-{index}",
+                "notify": "N"
+            },
+            {
+                "creditAccountId": "101357",
+                "creditAccountScheme": "BENEID",
+                "amount": 303.75,
+                "remittanceInfo": "Batch detail payment {index}",
+                "endToEndId": "BATCH-DETAIL-{timestamp}-{index}",
+                "notify": "N"
+            }
+        ]
+    },
+    "SINGLE_BATCH_DETAILS_REJECTED": {
+        "paymentType": "EFT",
+        "currency": "ZAR",
+        "singleDebit": "false",
+        "allowDuplicate": "false",
+        "fileDesc": "Single batch details rejected template",
+        "numPayments": 1,
+        "baseAmount": 100,
+        "transactions": [
+            {
+                "creditAccountId": "INVALID_BENEFICIARY_001",
+                "creditAccountScheme": "BENEID",
+                "amount": 120.5,
+                "remittanceInfo": "Rejected single batch payment {index}",
+                "endToEndId": "BATCH-REJECT-SINGLE-{timestamp}-{index}",
+                "notify": "N"
+            }
+        ]
+    },
+    "MULTI_BATCH_DETAILS_REJECTED": {
+        "paymentType": "EFT",
+        "currency": "ZAR",
+        "singleDebit": "false",
+        "allowDuplicate": "false",
+        "fileDesc": "Batch details rejected template",
+        "numPayments": 2,
+        "baseAmount": 100,
+        "transactions": [
+            {
+                "creditAccountId": "INVALID_BENEFICIARY_001",
+                "creditAccountScheme": "BENEID",
+                "amount": 120.5,
+                "remittanceInfo": "Rejected batch payment {index}",
+                "endToEndId": "BATCH-REJECT-{timestamp}-{index}",
+                "notify": "N"
+            },
+            {
+                "creditAccountId": "INVALID_BENEFICIARY_002",
+                "creditAccountScheme": "BENEID",
+                "amount": 80.25,
+                "remittanceInfo": "Rejected batch payment {index}",
+                "endToEndId": "BATCH-REJECT-{timestamp}-{index}",
+                "notify": "N"
+            }
+        ]
+    }
+}

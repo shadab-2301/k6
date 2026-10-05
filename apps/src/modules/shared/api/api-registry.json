@@ -1,0 +1,16 @@
+{
+  "getAccountsList": {
+    "baseUrl": "baapi",
+    "endPoint": "/accounts",
+    "requestMethod": "GET",
+    "requestBody": null,
+    "responseSchema": "accounts/accounts-list-schema.json",
+    "Headers": {
+      "Content-Type": "application/json"
+    },
+    "jpaths": {
+      "totalCount": "$.meta.totalCount",
+      "firstAccountNumber": "$.data[0].AccountNumber"
+    }
+  }
+}

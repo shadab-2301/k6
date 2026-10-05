@@ -1,0 +1,32 @@
+{
+  "debitAccount": "1300433815580",
+  "currency": "ZAR",
+  "paymentType": "INT",
+  "companyId": "1805",
+  "userId": "8865",
+  "channel": "WEB",
+  "singleDebit": "true",
+  "allowDuplicate": "false",
+  "internalTransfer": {
+    "localInstrument": "INT",
+    "debitAccount": "1300433815580",
+    "creditAccountScheme": "ACCT",
+    "creditMemberId": "580105",
+    "creditAccounts": [
+      "1300433815500"
+    ]
+  },
+  "transactions": [
+    {
+      "creditAccountNumber": "1300433815500",
+      "branchCode": "580105",
+      "amount": "1.00",
+      "currency": "ZAR",
+      "paymentType": "INTERNAL",
+      "paymentDate": "22/09/2026",
+      "instructionId": "INT-1",
+      "endToEndId": "E2E-1-INT",
+      "notify": "N"
+    }
+  ]
+}

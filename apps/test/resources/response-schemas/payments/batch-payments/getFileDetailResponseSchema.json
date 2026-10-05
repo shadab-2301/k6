@@ -1,0 +1,129 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Get File Detail Response Schema",
+    "type": "object",
+    "required": [
+        "data"
+    ],
+    "properties": {
+        "data": {
+            "type": "object",
+            "required": [
+                "fileId",
+                "fileName",
+                "fileDescription",
+                "uploaderName",
+                "channel",
+                "fileType",
+                "templateVersion",
+                "status",
+                "encrypted",
+                "autoInitiate",
+                "canBeDeleted",
+                "allowedDuplicates",
+                "numBatches",
+                "numVisibleBatches",
+                "numRecords",
+                "numAcceptedRecords",
+                "numErrorRecords",
+                "fileSizeBytes",
+                "fileAmount",
+                "acceptedAmount",
+                "totalAmount",
+                "createdDate"
+            ],
+            "properties": {
+                "fileId": {
+                    "type": "string"
+                },
+                "fileName": {
+                    "type": "string"
+                },
+                "fileDescription": {
+                    "type": "string"
+                },
+                "uploaderName": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string"
+                },
+                "fileType": {
+                    "type": "string"
+                },
+                "templateVersion": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "object",
+                    "required": [
+                        "code",
+                        "description"
+                    ],
+                    "properties": {
+                        "code": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "encrypted": {
+                    "type": "boolean"
+                },
+                "autoInitiate": {
+                    "type": "boolean"
+                },
+                "canBeDeleted": {
+                    "type": "boolean"
+                },
+                "allowedDuplicates": {
+                    "type": "boolean"
+                },
+                "numBatches": {
+                    "type": "integer"
+                },
+                "numVisibleBatches": {
+                    "type": "integer"
+                },
+                "numRecords": {
+                    "type": "integer"
+                },
+                "numAcceptedRecords": {
+                    "type": "integer"
+                },
+                "numErrorRecords": {
+                    "type": "integer"
+                },
+                "numInitiated": {
+                    "type": "integer"
+                },
+                "fileSizeBytes": {
+                    "type": "integer"
+                },
+                "fileAmount": {
+                    "type": "number"
+                },
+                "acceptedAmount": {
+                    "type": "number"
+                },
+                "errorPercentage": {
+                    "type": "number"
+                },
+                "rejectionPercentagePref": {
+                    "type": "number"
+                },
+                "totalAmount": {
+                    "type": "number"
+                },
+                "createdDate": {
+                    "type": "string"
+                },
+                "numPendingInitiation": {
+                    "type": "integer"
+                }
+            }
+        }
+    }
+}

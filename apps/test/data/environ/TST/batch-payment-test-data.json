@@ -1,0 +1,30 @@
+{
+  "debitAccount": "1300307803582",
+  "currency": "ZAR",
+  "paymentType": "EFT",
+  "companyId": "1805",
+  "userId": "8865",
+  "channel": "WEB",
+  "singleDebit": "false",
+  "allowDuplicate": "false",
+  "transactions": [
+    {
+      "creditAccountId": "101355",
+      "creditAccountScheme": "BENEID",
+      "amount": 50.00,
+      "remittanceInfo": "ben ref 2",
+      "endToEndId": "to ref 2",
+      "notify": "Y",
+      "email": "test@example.com"
+    },
+    {
+      "creditAccountId": "101355",
+      "creditAccountScheme": "BENEID",
+      "amount": 20.00,
+      "remittanceInfo": "ben ref",
+      "endToEndId": "to ref",
+      "notify": "N",
+      "email": ""
+    }
+  ]
+}

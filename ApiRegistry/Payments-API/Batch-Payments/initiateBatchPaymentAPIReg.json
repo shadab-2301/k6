@@ -1,0 +1,20 @@
+{
+    "initiateBatchPayment": {
+        "baseUrl": "baapi",
+        "endPoint": "/payments-manager/api/v1/batch-payments/{transactionID}/initiate?operation=CREATE",
+        "requestMethod": "POST",
+        "requestBody": "Payments-API/Batch-Payments/initiateBatchPaymentRequestBody.json",
+        "responseSchema": null,
+        "Headers": {
+            "GCN": "",
+            "channel": "WEB"
+        },
+        "jpaths": {
+            "transactionId": "$.transactionId",
+            "status": "$.status",
+            "message": "$.message",
+            "errorMessages": "$.error.errors[*].message",
+            "errorMessage": "$.error.errors[0].message"
+        }
+    }
+}

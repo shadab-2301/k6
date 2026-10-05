@@ -14,7 +14,7 @@ config/.env
 
 # Results and artifacts
 results/
-*.json
+
 *.html
 .k6
 
@@ -33,3 +33,9 @@ Thumbs.db
 # Docker
 .docker
 docker-compose.override.yml
+ApiRegistry/adoTokenClient.json
+ApiRegistry/adoTokenV2APIReg.json
+ApiRegistry/DynamicBearerToken.json
+ApiRegistry/Tokens.json
+
+apps/test/resources/generated-batch-files/

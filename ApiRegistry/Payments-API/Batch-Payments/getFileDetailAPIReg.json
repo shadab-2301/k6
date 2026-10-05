@@ -1,0 +1,27 @@
+{
+    "getFileDetail": {
+        "baseUrl": "baapi",
+        "endPoint": "/payments-manager/api/v1/files/{fileId}",
+        "requestMethod": "GET",
+        "requestBody": "Payments-API/Batch-Payments/getFileDetailRequestBody.json",
+        "responseSchema": "payments/batch-payments/getFileDetailResponseSchema.json",
+        "Headers": {
+            "GCN": ""
+        },
+        "jpaths": {
+            "fileId": "$.data.fileId",
+            "fileName": "$.data.fileName",
+            "statusCode": "$.data.status.code",
+            "statusDescription": "$.data.status.description",
+            "numRecords": "$.data.numRecords",
+            "fileAmount": "$.data.fileAmount",
+            "totalAmount": "$.data.totalAmount",
+            "acceptedAmount": "$.data.acceptedAmount",
+            "numBatches": "$.data.numBatches",
+            "numAcceptedRecords": "$.data.numAcceptedRecords",
+            "channel": "$.data.channel",
+            "errorTopMessage": "$.error.message",
+            "errorMessage": "$.error.errors[0].message"
+        }
+    }
+}

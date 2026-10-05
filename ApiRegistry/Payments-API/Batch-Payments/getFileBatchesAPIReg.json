@@ -1,0 +1,32 @@
+{
+	"getFileBatches": {
+		"baseUrl": "baapi",
+		"endPoint": "/payments-manager/api/v1/batch-payments/{fileId}/batches",
+		"requestMethod": "GET",
+		"requestBody": "Payments-API/Batch-Payments/getFileBatchesRequestBody.json",
+		"responseSchema": "Payments//Batch-Payments//getFileBatchesResponseSchema.json",
+		"Headers": {
+			"GCN": ""
+		},
+		"jpaths": {
+			"metaResultCount": "$.meta.resultCount",
+			"metaTotalCount": "$.meta.totalCount",
+			"metaTotalPages": "$.meta.totalPages",
+			"metaCurrentPage": "$.meta.currentPage",
+			"metaCurrentPageSize": "$.meta.currentPageSize",
+			"dataTransactionId": "$.data[*].transactionId",
+			"dataBatchName": "$.data[*].batchName",
+			"dataAmount": "$.data[*].amount",
+			"dataStatus": "$.data[*].status.code",
+			"firstTransactionId": "$.data[0].transactionId",
+			"firstBatchName": "$.data[0].batchName",
+			"firstStatus": "$.data[0].status.code",
+			"errorMessages": "$.error.errors[*].message",
+			"errorMessage": "$.error.errors[0].message",
+			"errorTopMessage": "$.error.message",
+			"matchedBatchTransactionId": "$.data[?(@.batchName==\"{batchName}\")].transactionId",
+			"matchedBatchStatus": "$.data[?(@.batchName==\"{batchName}\")].status.code",
+			"matchedBatchIndex": "$.data[?(@.batchName==\"{batchName}\")][0]"
+		}
+	}
+}

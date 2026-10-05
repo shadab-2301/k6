@@ -1,0 +1,31 @@
+{
+    "getFiles": {
+        "baseUrl": "baapi",
+        "endPoint": "/payments-manager/api/v1/files",
+        "requestMethod": "GET",
+        "requestBody": "Payments-API/Batch-Payments/getFilesRequestBody.json",
+        "responseSchema": "Payments//Batch-Payments//getFilesResponseSchema.json",
+        "Headers": {},
+        "jpaths": {
+            "metaResultCount": "$.meta.resultCount",
+            "metaTotalCount": "$.meta.totalCount",
+            "metaTotalPages": "$.meta.totalPages",
+            "metaCurrentPage": "$.meta.currentPage",
+            "metaCurrentPageSize": "$.meta.currentPageSize",
+            "dataFileName": "$.data[*].fileName",
+            "dataStatus": "$.data[*].status.code",
+            "firstFileName": "$.data[0].fileName",
+            "firstStatus": "$.data[0].status.code",
+            "errorMessages": "$.error.errors[*].message",
+            "errorMessage": "$.error.errors[0].message",
+            "dataItemRefId": "$.data[?(@.fileName==\"{fileName}\")].refId",
+            "dataItemFileName": "$.data[?(@.fileName==\"{fileName}\")].fileName",
+            "dataItemRecords": "$.data[?(@.fileName==\"{fileName}\")].records",
+            "dataItemAmount": "$.data[?(@.fileName==\"{fileName}\")].amount",
+            "dataItemCreatedDate": "$.data[?(@.fileName==\"{fileName}\")].createdDate",
+            "dataItemStatus": "$.data[?(@.fileName==\"{fileName}\")].status.code",
+            "dataItemUploader": "$.data[?(@.fileName==\"{fileName}\")].uploaderName",
+            "matchedFileIndex": "$.data[?(@.fileName==\"{fileName}\")][0]"
+        }
+    }
+}

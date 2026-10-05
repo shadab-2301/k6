@@ -1,0 +1,7 @@
+{
+    "expectedStatusCode": "PENDINIT",
+    "expectedStatusDescription": "Pending initiation",
+    "expectedFileType": "CSV",
+    "expectedTemplateVersion": "V2",
+    "expectedChannel": "web"
+}

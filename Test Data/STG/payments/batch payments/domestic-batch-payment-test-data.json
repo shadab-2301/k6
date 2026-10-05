@@ -1,0 +1,30 @@
+{
+  "debitAccount": "1300307803582",
+  "currency": "ZAR",
+  "paymentType": "TPT",
+  "companyId": "1805",
+  "userId": "8865",
+  "channel": "WEB",
+  "singleDebit": "false",
+  "allowDuplicate": "false",
+  "transactions": [
+    {
+      "creditAccountId": "101355",
+      "creditAccountScheme": "BENEID",
+      "amount": 50.0,
+      "remittanceInfo": "TPT performance payment 1",
+      "endToEndId": "TPT-PERF-1",
+      "notify": "Y",
+      "email": "test@example.com"
+    },
+    {
+      "creditAccountId": "101355",
+      "creditAccountScheme": "BENEID",
+      "amount": 20.0,
+      "remittanceInfo": "TPT performance payment 2",
+      "endToEndId": "TPT-PERF-2",
+      "notify": "N",
+      "email": ""
+    }
+  ]
+}

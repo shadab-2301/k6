@@ -1,0 +1,11 @@
+{
+    "mockUploadBatchFile": {
+        "baseUrl": "baapi",
+        "endPoint": "/batch/api/v1/mock/batch-file",
+        "requestMethod": "POST",
+        "requestBody": "Payments-API/Batch-Payments/mockUploadBatchFileRequestBody.json",
+        "responseSchema": "Payments//Batch-Payments//uploadBatchFileResponseSchema.json",
+        "Headers": {},
+        "jpaths": {}
+    }
+}

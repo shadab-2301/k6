@@ -1,0 +1,54 @@
+{
+    "debitAccount": "1300307803582",
+    "currency": "ZAR",
+    "paymentType": "TPT",
+    "companyId": "1805",
+    "userId": "8865",
+    "channel": "WEB",
+    "singleDebit": "false",
+    "allowDuplicate": "false",
+    "transactions": [
+        {
+            "beneficiaryId": "71455",
+            "creditAccountId": "71455",
+            "creditAccountNumber": "62168148635",
+            "creditAccountScheme": "ACCT",
+            "branchCode": "250655",
+            "beneficiaryName": "Client71455",
+            "bankName": "FIRST NATIONAL BANK",
+            "amount": 50.0,
+            "remittanceInfo": "GBEW - BEWANDCO",
+            "endToEndId": "TPT-DOMESTIC-71455",
+            "notify": "Y",
+            "email": "icib_testing@investec.co.za"
+        },
+        {
+            "beneficiaryId": "361981",
+            "creditAccountId": "361981",
+            "creditAccountNumber": "1649069438",
+            "creditAccountScheme": "ACCT",
+            "branchCode": "470010",
+            "beneficiaryName": "Client361981",
+            "bankName": "CAPITEC BANK LIMITED",
+            "amount": 20.0,
+            "remittanceInfo": "BEWCO - Casual Wages",
+            "endToEndId": "TPT-DOMESTIC-361981",
+            "notify": "N",
+            "email": "icib_testing@investec.co.za"
+        },
+        {
+            "beneficiaryId": "363385",
+            "creditAccountId": "363385",
+            "creditAccountNumber": "62168148635",
+            "creditAccountScheme": "ACCT",
+            "branchCode": "250655",
+            "beneficiaryName": "Client363385",
+            "bankName": "FIRST NATIONAL BANK",
+            "amount": 30.0,
+            "remittanceInfo": "GBEW - BEWANDCO",
+            "endToEndId": "TPT-DOMESTIC-363385",
+            "notify": "Y",
+            "email": "icib_testing@investec.co.za"
+        }
+    ]
+}

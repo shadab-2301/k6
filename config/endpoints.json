@@ -1,0 +1,163 @@
+{
+  "dev": {
+    "baseUrl": "http://localhost:3000",
+    "endpoints": [
+      {
+        "name": "Get All Posts",
+        "method": "GET",
+        "path": "/posts",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 500,
+          "errorRate": 0.1
+        }
+      },
+      {
+        "name": "Get Single Post",
+        "method": "GET",
+        "path": "/posts/1",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 400,
+          "errorRate": 0.05
+        }
+      },
+      {
+        "name": "Create Post",
+        "method": "POST",
+        "path": "/posts",
+        "expectedStatus": 201,
+        "payload": {
+          "title": "Test Post",
+          "body": "This is a test post",
+          "userId": 1
+        },
+        "thresholds": {
+          "duration": 600,
+          "errorRate": 0.1
+        }
+      },
+      {
+        "name": "Update Post",
+        "method": "PUT",
+        "path": "/posts/1",
+        "expectedStatus": 200,
+        "payload": {
+          "id": 1,
+          "title": "Updated Post",
+          "body": "Updated test post",
+          "userId": 1
+        },
+        "thresholds": {
+          "duration": 500,
+          "errorRate": 0.1
+        }
+      },
+      {
+        "name": "Delete Post",
+        "method": "DELETE",
+        "path": "/posts/1",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 400,
+          "errorRate": 0.1
+        }
+      }
+    ]
+  },
+  "staging": {
+    "baseUrl": "https://staging-api.example.com",
+    "endpoints": [
+      {
+        "name": "Get All Posts",
+        "method": "GET",
+        "path": "/api/v1/posts",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 800,
+          "errorRate": 0.05
+        }
+      },
+      {
+        "name": "Get Single Post",
+        "method": "GET",
+        "path": "/api/v1/posts/1",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 700,
+          "errorRate": 0.05
+        }
+      },
+      {
+        "name": "Create Post",
+        "method": "POST",
+        "path": "/api/v1/posts",
+        "expectedStatus": 201,
+        "payload": {
+          "title": "Test Post",
+          "body": "This is a test post",
+          "userId": 1
+        },
+        "thresholds": {
+          "duration": 1000,
+          "errorRate": 0.05
+        }
+      },
+      {
+        "name": "Get Comments",
+        "method": "GET",
+        "path": "/api/v1/comments",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 1000,
+          "errorRate": 0.05
+        }
+      }
+    ]
+  },
+  "production": {
+    "baseUrl": "https://api.example.com",
+    "endpoints": [
+      {
+        "name": "Get All Posts",
+        "method": "GET",
+        "path": "/api/posts",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 1000,
+          "errorRate": 0.01
+        }
+      },
+      {
+        "name": "Get Single Post",
+        "method": "GET",
+        "path": "/api/posts/1",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 800,
+          "errorRate": 0.01
+        }
+      },
+      {
+        "name": "Get Comments",
+        "method": "GET",
+        "path": "/api/comments",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 1200,
+          "errorRate": 0.01
+        }
+      },
+      {
+        "name": "Get Users",
+        "method": "GET",
+        "path": "/api/users",
+        "expectedStatus": 200,
+        "thresholds": {
+          "duration": 1500,
+          "errorRate": 0.01
+        }
+      }
+    ]
+  }
+}

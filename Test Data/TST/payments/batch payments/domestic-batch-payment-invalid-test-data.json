@@ -1,0 +1,21 @@
+{
+  "debitAccount": "1300307803582",
+  "currency": "ZAR",
+  "paymentType": "TPT",
+  "companyId": "1805",
+  "userId": "8865",
+  "channel": "WEB",
+  "singleDebit": "false",
+  "allowDuplicate": "false",
+  "transactions": [
+    {
+      "creditAccountId": "INVALID_BENEFICIARY_ID",
+      "creditAccountScheme": "BENEID",
+      "amount": 50.0,
+      "remittanceInfo": "Invalid beneficiary validation test",
+      "endToEndId": "TPT-INVALID-PERF-1",
+      "notify": "Y",
+      "email": "test@example.com"
+    }
+  ]
+}

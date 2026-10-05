@@ -1,0 +1,7 @@
+{
+    "domesticPaymentsTemplate": {
+        "endpoint": "/api/v1/domestic-payments/template",
+        "method": "POST",
+        "status": 200
+    }
+}

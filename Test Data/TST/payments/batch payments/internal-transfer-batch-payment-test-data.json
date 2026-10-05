@@ -1,0 +1,21 @@
+{
+    "debitAccount": "1300307803580",
+    "currency": "ZAR",
+    "paymentType": "INT",
+    "companyId": "1805",
+    "userId": "8865",
+    "channel": "WEB",
+    "singleDebit": "false",
+    "allowDuplicate": "false",
+    "internalTransfer": {
+        "localInstrument": "INT",
+        "debitAccount": "1300307803580",
+        "creditAccountScheme": "ACCT",
+        "creditMemberId": "250655",
+        "creditAccounts": [
+            "1300307803582",
+            "1300307803583"
+            
+        ]
+    }
+}

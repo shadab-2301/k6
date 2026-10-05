@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Accounts list response",
+  "type": "object",
+  "required": ["meta", "data"],
+  "properties": {
+    "meta": {
+      "type": ["object", "null"],
+      "properties": {
+        "resultCount": { "type": "number" },
+        "totalCount": { "type": "number" },
+        "totalPages": { "type": "number" },
+        "currentPage": { "type": "number" },
+        "currentPageSize": { "type": "number" }
+      }
+    },
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["AccountId", "AccountNumber", "AccountType", "CurrencyCode"],
+        "properties": {
+          "AccountId": { "type": "string" },
+          "AccountName": { "type": "string" },
+          "CurrencyCode": { "type": "string" },
+          "AccountNumber": { "type": "string" },
+          "AccountType": { "type": "string" },
+          "AvailableBalance": { "type": "number" },
+          "Balance": { "type": "number" },
+          "NickName": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "success": {},
+    "filter": { "type": "array" },
+    "Download": {}
+  }
+}

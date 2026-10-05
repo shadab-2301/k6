@@ -1,0 +1,42 @@
+{
+  "debitAccount": "1300307803582",
+  "currency": "ZAR",
+  "paymentType": "PRLSD",
+  "companyId": "1805",
+  "userId": "8865",
+  "channel": "WEB",
+  "singleDebit": "false",
+  "allowDuplicate": "false",
+  "transactions": [
+    {
+      "beneficiaryId": "1261772",
+      "creditAccountId": "1261772",
+      "creditAccountNumber": "270684417",
+      "creditAccountScheme": "ACCT",
+      "branchCode": "051001",
+      "beneficiaryName": "Donald iFvHfNc Multiple Automation",
+      "beneficiaryType": "Payroll",
+      "bankName": "STANDARD BANK",
+      "amount": 50.0,
+      "remittanceInfo": "Payroll payment 1261772",
+      "endToEndId": "PRLSD-PAYROLL-1261772",
+      "notify": "Y",
+      "email": "icib2@testing.co.za"
+    },
+    {
+      "beneficiaryId": "1261771",
+      "creditAccountId": "1261771",
+      "creditAccountNumber": "62498013607",
+      "creditAccountScheme": "ACCT",
+      "branchCode": "250655",
+      "beneficiaryName": "ExecPayee1",
+      "beneficiaryType": "Payroll",
+      "bankName": "FIRST NATIONAL BANK",
+      "amount": 50.0,
+      "remittanceInfo": "Payroll payment 1261771",
+      "endToEndId": "PRLSD-PAYROLL-1261771",
+      "notify": "Y",
+      "email": "icib12@testing.co.za"
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "entries": [
+    {
+      "paymentType": "TPT",
+      "railType": "RTGS",
+      "range": "1-100",
+      "paymentCount": 1,
+      "timeTaken": "75.92s",
+      "durationMs": 75924.7461,
+      "status": "FAILED",
+      "updatedAt": "2026-09-04T04:39:08.169Z"
+    },
+    {
+      "paymentType": "INT",
+      "railType": "INT",
+      "range": "500-1000",
+      "paymentCount": 1000,
+      "timeTaken": "282.75s",
+      "durationMs": 282750.2445,
+      "status": "FAILED",
+      "updatedAt": "2026-09-11T12:00:56.468Z"
+    },
+    {
+      "paymentType": "PRLSD",
+      "railType": "EFT",
+      "range": "500-1000",
+      "paymentCount": 1000,
+      "timeTaken": "241.58s",
+      "durationMs": 241580.7112,
+      "status": "FAILED",
+      "updatedAt": "2026-09-11T12:30:57.628Z"
+    },
+    {
+      "paymentType": "TPT",
+      "railType": "EFT",
+      "range": "1-100",
+      "paymentCount": 1,
+      "timeTaken": "30.97s",
+      "durationMs": 30966.7934,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T06:15:29.770Z"
+    },
+    {
+      "paymentType": "PRLSD",
+      "railType": "EFT",
+      "range": "1-100",
+      "paymentCount": 1,
+      "timeTaken": "31.19s",
+      "durationMs": 31193.9915,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T07:21:07.229Z"
+    },
+    {
+      "paymentType": "INT",
+      "railType": "INT",
+      "range": "100-500",
+      "paymentCount": 500,
+      "timeTaken": "55.92s",
+      "durationMs": 55923.0017,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T07:32:38.812Z"
+    },
+    {
+      "paymentType": "TPT",
+      "railType": "EFT",
+      "range": "100-500",
+      "paymentCount": 500,
+      "timeTaken": "265.28s",
+      "durationMs": 265282.4516,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T07:39:45.882Z"
+    },
+    {
+      "paymentType": "TPT",
+      "railType": "EFT",
+      "range": "500-1000",
+      "paymentCount": 1000,
+      "timeTaken": "270.39s",
+      "durationMs": 270385.0061,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T08:11:18.170Z"
+    },
+    {
+      "paymentType": "TPT",
+      "railType": "EFT",
+      "range": "1000-5000",
+      "paymentCount": 3000,
+      "timeTaken": "339.66s",
+      "durationMs": 339657.5727,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T08:25:16.279Z"
+    },
+    {
+      "paymentType": "TPT",
+      "railType": "EFT",
+      "range": "5000-10000",
+      "paymentCount": 10000,
+      "timeTaken": "2.40s",
+      "durationMs": 2403.8827,
+      "status": "FAILED",
+      "updatedAt": "2026-09-14T08:28:36.937Z"
+    },
+    {
+      "paymentType": "INT",
+      "railType": "INT",
+      "range": "1-100",
+      "paymentCount": 1,
+      "timeTaken": "16.17s",
+      "durationMs": 16167.4788,
+      "status": "FAILED",
+      "updatedAt": "2026-10-05T05:40:06.815Z"
+    }
+  ]
+}
