@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Reference/example only.
+
+  This is a PLACEHOLDER batch payment file schema, used until a real sample
+  file is provided. Element names, casing and structure will very likely need
+  to change to match the actual file format the application accepts.
+
+  At runtime, tests do not read this static file directly - BatchFileHelper
+  (apps/helper/batch-file-helper.ts) generates a fresh file with the same
+  shape (randomised amounts/references, valid future payment date) for each
+  scenario run, so tests don't rely on stale/expired data. This file exists so
+  the expected shape is easy to see/update in one place, and can be swapped
+  for the real sample once available.
+-->
+<BatchPayment>
+  <BatchReference>BATCH-AUTOMATION-0001</BatchReference>
+  <DebitAccount>10201234567</DebitAccount>
+  <Payments>
+    <Payment>
+      <BeneficiaryName>Automation Beneficiary 1</BeneficiaryName>
+      <BeneficiaryAccountNumber>2039481051</BeneficiaryAccountNumber>
+      <BankName>Investec</BankName>
+      <BranchCode>580105</BranchCode>
+      <PaymentMethod>EFT</PaymentMethod>
+      <Amount>1500.00</Amount>
+      <PaymentReference>AutoBenRef001</PaymentReference>
+      <DebitAccountReference>AutoDebRef001</DebitAccountReference>
+      <PaymentDate>2026-07-14</PaymentDate>
+    </Payment>
+    <Payment>
+      <BeneficiaryName>Automation Beneficiary 2</BeneficiaryName>
+      <BeneficiaryAccountNumber>2039481052</BeneficiaryAccountNumber>
+      <BankName>Investec</BankName>
+      <BranchCode>580105</BranchCode>
+      <PaymentMethod>EFT</PaymentMethod>
+      <Amount>2500.50</Amount>
+      <PaymentReference>AutoBenRef002</PaymentReference>
+      <DebitAccountReference>AutoDebRef002</DebitAccountReference>
+      <PaymentDate>2026-07-14</PaymentDate>
+    </Payment>
+    <Payment>
+      <BeneficiaryName>Automation Beneficiary 3</BeneficiaryName>
+      <BeneficiaryAccountNumber>2039481053</BeneficiaryAccountNumber>
+      <BankName>Investec</BankName>
+      <BranchCode>580105</BranchCode>
+      <PaymentMethod>EFT</PaymentMethod>
+      <Amount>750.25</Amount>
+      <PaymentReference>AutoBenRef003</PaymentReference>
+      <DebitAccountReference>AutoDebRef003</DebitAccountReference>
+      <PaymentDate>2026-07-14</PaymentDate>
+    </Payment>
+  </Payments>
+</BatchPayment>

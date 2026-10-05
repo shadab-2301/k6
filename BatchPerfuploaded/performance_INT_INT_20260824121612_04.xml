@@ -1,0 +1,2836 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>K6-1787553972396-33580</MsgId>
+      <CreDtTm>2026-08-24T06:46:12</CreDtTm>
+      <NbOfTxs>100</NbOfTxs>
+      <CtrlSum>5720.26</CtrlSum>
+      <InitgPty>
+        <Id>
+          <OrgId>
+            <Othr><Id>1805</Id><SchmeNm><Prtry>COMPANYID</Prtry></SchmeNm></Othr>
+            <Othr><Id>8865</Id><SchmeNm><Prtry>USERID</Prtry></SchmeNm></Othr>
+            <Othr><Id>WEB</Id><SchmeNm><Prtry>CHANNEL</Prtry></SchmeNm></Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+      <SplmtryData>
+        <PlcAndNm>FileMetadata</PlcAndNm>
+        <Envlp>
+          <FileType>CSV</FileType>
+          <TemplateVersion>V2</TemplateVersion>
+          <FileName>Batch Perf INT INT 2026-08-24_1787553972396-33580</FileName>
+          <FileDesc>Automated batch payment test</FileDesc>
+          <OrigFileName>batch_test_1787553972396-33580.csv</OrigFileName>
+          <SingleDebit>false</SingleDebit>
+          <Encrypted>false</Encrypted>
+          <AutoInitiate>false</AutoInitiate>
+          <HashCode>VFnGhitfoe/daIsc7BhwhQ==</HashCode>
+          <FileSizeBytes>114527</FileSizeBytes>
+          <AllowDuplicate>false</AllowDuplicate>
+        </Envlp>
+      </SplmtryData>
+    </GrpHdr>
+    
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>80.72</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-1</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972396-8-0-1</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">80.72</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 1</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-2</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>71.98</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-2</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972396-8-0-2</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">71.98</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 2</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-3</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>84.98</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-3</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972396-8-0-3</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">84.98</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 3</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-4</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>80.09</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-4</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972396-8-0-4</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">80.09</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 4</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-5</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>35.00</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-5</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972396-8-0-5</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">35.00</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 5</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-6</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>58.92</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-6</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-6</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">58.92</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 6</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-7</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>17.02</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-7</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-7</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">17.02</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 7</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-8</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>69.07</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-8</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-8</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">69.07</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 8</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-9</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>62.26</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-9</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-9</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">62.26</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 9</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-10</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>56.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-10</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-10</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">56.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 10</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-11</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>51.58</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-11</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-11</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">51.58</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 11</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-12</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>93.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-12</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-12</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">93.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 12</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-13</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>65.46</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-13</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-13</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">65.46</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 13</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-14</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>93.08</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-14</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-14</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">93.08</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 14</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-15</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>47.92</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-15</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-15</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">47.92</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 15</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-16</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>16.41</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-16</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-16</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">16.41</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 16</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-17</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>77.85</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-17</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-17</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">77.85</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 17</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-18</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>90.60</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-18</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-18</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">90.60</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 18</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-19</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>57.51</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-19</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-19</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">57.51</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 19</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-20</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>41.50</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-20</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-20</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">41.50</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 20</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-21</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>95.73</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-21</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-21</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">95.73</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 21</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-22</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>64.52</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-22</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-22</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">64.52</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 22</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-23</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>63.26</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-23</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-23</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">63.26</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 23</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-24</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>13.91</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-24</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-24</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">13.91</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 24</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-25</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.66</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-25</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-25</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.66</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 25</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-26</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>90.32</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-26</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-26</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">90.32</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 26</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-27</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>58.19</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-27</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-27</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">58.19</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 27</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-28</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>67.53</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-28</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-28</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">67.53</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 28</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-29</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>55.99</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-29</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-29</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">55.99</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 29</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-30</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>82.71</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-30</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-30</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">82.71</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 30</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-31</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>51.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-31</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972397-8-0-31</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">51.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 31</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-32</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>16.25</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-32</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-32</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">16.25</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 32</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-33</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>86.93</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-33</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-33</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">86.93</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 33</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-34</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>52.67</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-34</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-34</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">52.67</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 34</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-35</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>68.12</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-35</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-35</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">68.12</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 35</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-36</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>64.93</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-36</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-36</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">64.93</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 36</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-37</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>88.07</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-37</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-37</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">88.07</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 37</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-38</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>16.19</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-38</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-38</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">16.19</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 38</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-39</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>15.85</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-39</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-39</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">15.85</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 39</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-40</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>19.93</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-40</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-40</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">19.93</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 40</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-41</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>14.81</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-41</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972399-8-0-41</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">14.81</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 41</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-42</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>84.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-42</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972400-8-0-42</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">84.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 42</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-43</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>31.24</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-43</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972400-8-0-43</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">31.24</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 43</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-44</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>15.01</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-44</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-44</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">15.01</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 44</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-45</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>14.36</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-45</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-45</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">14.36</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 45</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-46</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>87.51</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-46</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-46</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">87.51</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 46</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-47</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>27.02</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-47</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-47</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">27.02</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 47</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-48</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>98.58</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-48</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-48</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">98.58</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 48</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-49</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>38.22</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-49</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-49</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">38.22</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 49</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-50</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>10.03</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-50</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-50</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">10.03</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 50</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-51</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>41.49</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-51</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-51</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">41.49</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 51</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-52</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>96.11</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-52</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-52</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">96.11</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 52</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-53</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>53.26</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-53</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-53</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">53.26</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 53</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-54</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.04</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-54</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-54</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.04</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 54</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-55</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>13.10</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-55</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-55</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">13.10</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 55</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-56</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.03</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-56</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-56</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.03</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 56</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-57</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>99.36</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-57</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-57</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">99.36</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 57</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-58</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>52.33</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-58</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-58</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">52.33</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 58</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-59</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>24.93</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-59</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-59</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">24.93</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 59</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-60</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>95.96</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-60</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-60</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">95.96</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 60</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-61</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>62.92</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-61</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-61</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">62.92</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 61</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-62</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>35.41</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-62</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-62</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">35.41</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 62</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-63</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.41</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-63</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-63</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.41</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 63</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-64</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>90.64</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-64</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-64</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">90.64</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 64</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-65</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>31.13</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-65</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-65</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">31.13</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 65</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-66</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>44.12</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-66</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-66</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">44.12</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 66</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-67</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>43.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-67</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-67</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">43.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 67</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-68</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>22.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-68</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-68</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">22.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 68</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-69</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>54.90</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-69</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-69</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">54.90</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 69</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-70</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>78.52</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-70</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-70</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">78.52</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 70</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-71</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>26.29</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-71</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-71</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">26.29</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 71</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-72</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>47.28</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-72</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-72</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">47.28</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 72</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-73</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>40.69</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-73</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-73</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">40.69</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 73</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-74</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>84.54</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-74</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-74</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">84.54</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 74</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-75</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>23.77</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-75</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-75</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">23.77</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 75</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-76</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>65.77</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-76</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-76</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">65.77</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 76</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-77</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>49.93</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-77</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-77</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">49.93</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 77</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-78</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>51.87</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-78</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-78</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">51.87</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 78</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-79</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>62.46</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-79</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-79</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">62.46</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 79</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-80</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>41.26</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-80</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-80</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">41.26</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 80</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-81</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>60.46</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-81</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-81</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">60.46</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 81</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-82</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>59.07</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-82</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-82</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">59.07</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 82</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-83</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>94.99</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-83</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-83</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">94.99</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 83</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-84</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>87.13</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-84</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-84</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">87.13</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 84</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-85</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>42.02</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-85</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-85</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">42.02</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 85</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-86</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>51.29</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-86</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-86</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">51.29</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 86</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-87</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>50.54</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-87</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-87</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">50.54</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 87</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-88</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>80.38</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-88</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-88</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">80.38</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 88</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-89</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>30.46</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-89</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-89</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">30.46</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 89</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-90</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>35.32</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-90</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-90</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">35.32</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 90</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-91</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.28</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-91</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-91</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.28</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 91</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-92</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>52.86</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-92</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-92</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">52.86</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 92</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-93</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>15.89</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-93</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-93</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">15.89</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 93</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-94</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>90.27</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-94</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-94</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">90.27</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 94</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-95</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>59.32</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-95</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-95</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">59.32</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 95</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-96</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>86.50</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-96</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-96</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">86.50</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 96</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-97</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>58.36</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-97</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-97</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">58.36</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 97</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-98</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>93.35</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-98</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-98</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">93.35</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 98</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-99</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>62.72</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-99</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-99</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">62.72</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 99</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787553972396-33580-100</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>61.96</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-24</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787553972396-33580-100</InstrId>
+          <EndToEndId>E2E-INT-INT-1787553972401-8-0-100</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">61.96</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>INT INT performance payment 100</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

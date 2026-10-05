@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>K6-1787045956176-97458</MsgId>
+      <CreDtTm>2026-08-18T09:39:16</CreDtTm>
+      <NbOfTxs>10</NbOfTxs>
+      <CtrlSum>632.82</CtrlSum>
+      <InitgPty>
+        <Id>
+          <OrgId>
+            <Othr><Id>1805</Id><SchmeNm><Prtry>COMPANYID</Prtry></SchmeNm></Othr>
+            <Othr><Id>8865</Id><SchmeNm><Prtry>USERID</Prtry></SchmeNm></Othr>
+            <Othr><Id>WEB</Id><SchmeNm><Prtry>CHANNEL</Prtry></SchmeNm></Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+      <SplmtryData>
+        <PlcAndNm>FileMetadata</PlcAndNm>
+        <Envlp>
+          <FileType>CSV</FileType>
+          <TemplateVersion>V2</TemplateVersion>
+          <FileName>Batch Perf Internal 2026-08-18_1787045956176-97458</FileName>
+          <FileDesc>Automated batch payment test</FileDesc>
+          <OrigFileName>batch_test_1787045956176-97458.csv</OrigFileName>
+          <SingleDebit>false</SingleDebit>
+          <Encrypted>false</Encrypted>
+          <AutoInitiate>false</AutoInitiate>
+          <HashCode>k6-placeholder</HashCode>
+          <FileSizeBytes>0</FileSizeBytes>
+          <AllowDuplicate>false</AllowDuplicate>
+        </Envlp>
+      </SplmtryData>
+    </GrpHdr>
+    
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>91.45</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-1</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-1</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">91.45</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 1</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-2</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>87.32</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-2</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-2</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">87.32</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 2</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-3</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>20.21</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-3</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-3</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">20.21</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 3</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-4</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>43.20</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-4</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-4</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">43.20</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 4</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-5</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>82.50</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-5</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-5</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">82.50</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 5</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-6</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>12.39</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-6</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-6</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">12.39</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 6</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-7</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>86.21</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-7</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-7</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">86.21</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 7</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-8</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>78.29</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-8</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-8</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">78.29</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 8</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-9</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>56.29</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-9</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-9</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">56.29</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803582</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 9</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1787045956176-97458-10</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>74.96</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>INT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-08-18</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803580</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1787045956176-97458-10</InstrId>
+          <EndToEndId>E2E-INT-1787045956176-1-0-10</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">74.96</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>1300307803583</Id>
+              <SchmeNm><Prtry>ACCT</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        <CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>250655</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>
+        <RmtInf><Ustrd>Auto-generated payment 10</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

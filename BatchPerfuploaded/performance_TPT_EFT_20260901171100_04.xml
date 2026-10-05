@@ -1,0 +1,2836 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>K6-1788262860409-32192</MsgId>
+      <CreDtTm>2026-09-01T11:41:00</CreDtTm>
+      <NbOfTxs>100</NbOfTxs>
+      <CtrlSum>7770.36</CtrlSum>
+      <InitgPty>
+        <Id>
+          <OrgId>
+            <Othr><Id>1805</Id><SchmeNm><Prtry>COMPANYID</Prtry></SchmeNm></Othr>
+            <Othr><Id>8865</Id><SchmeNm><Prtry>USERID</Prtry></SchmeNm></Othr>
+            <Othr><Id>WEB</Id><SchmeNm><Prtry>CHANNEL</Prtry></SchmeNm></Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+      <SplmtryData>
+        <PlcAndNm>FileMetadata</PlcAndNm>
+        <Envlp>
+          <FileType>CSV</FileType>
+          <TemplateVersion>V2</TemplateVersion>
+          <FileName>Batch Perf TPT EFT 2026-09-01_1788262860409-32192</FileName>
+          <FileDesc>Automated batch payment test</FileDesc>
+          <OrigFileName>batch_test_1788262860409-32192.csv</OrigFileName>
+          <SingleDebit>false</SingleDebit>
+          <Encrypted>false</Encrypted>
+          <AutoInitiate>false</AutoInitiate>
+          <HashCode>YpjTes3G7hLRcRV+KZsK/A==</HashCode>
+          <FileSizeBytes>104891</FileSizeBytes>
+          <AllowDuplicate>false</AllowDuplicate>
+        </Envlp>
+      </SplmtryData>
+    </GrpHdr>
+    
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-1</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>83.79</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-1</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-1</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">83.79</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 1</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-2</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>114.53</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-2</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-2</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">114.53</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 2</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-3</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>40.94</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-3</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-3</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">40.94</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 3</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-4</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>69.28</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-4</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-4</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">69.28</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 4</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-5</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>75.94</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-5</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-5</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">75.94</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 5</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-6</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>132.55</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-6</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-6</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">132.55</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 6</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-7</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>33.10</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-7</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-7</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">33.10</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 7</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-8</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>59.63</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-8</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-8</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">59.63</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 8</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-9</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>37.60</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-9</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-9</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">37.60</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 9</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-10</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>135.77</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-10</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-10</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">135.77</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 10</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-11</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>55.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-11</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-11</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">55.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 11</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-12</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>127.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-12</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-12</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">127.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 12</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-13</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>129.49</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-13</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-13</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">129.49</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 13</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-14</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>117.29</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-14</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-14</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">117.29</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 14</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-15</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>115.64</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-15</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-15</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">115.64</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 15</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-16</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>137.04</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-16</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-16</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">137.04</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 16</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-17</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>45.95</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-17</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-17</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">45.95</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 17</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-18</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>132.41</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-18</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-18</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">132.41</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 18</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-19</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>41.01</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-19</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-19</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">41.01</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 19</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-20</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>66.81</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-20</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-20</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">66.81</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 20</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-21</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>116.24</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-21</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-21</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">116.24</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 21</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-22</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>110.59</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-22</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-22</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">110.59</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 22</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-23</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>41.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-23</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-23</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">41.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 23</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-24</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>62.54</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-24</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-24</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">62.54</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 24</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-25</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>83.96</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-25</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-25</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">83.96</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 25</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-26</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>56.80</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-26</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-26</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">56.80</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 26</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-27</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>95.84</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-27</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-27</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">95.84</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 27</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-28</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>98.12</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-28</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-28</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">98.12</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 28</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-29</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>144.26</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-29</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-29</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">144.26</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 29</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-30</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>52.97</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-30</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-30</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">52.97</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 30</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-31</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>107.04</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-31</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-31</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">107.04</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 31</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-32</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>146.18</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-32</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-32</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">146.18</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 32</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-33</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>120.12</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-33</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-33</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">120.12</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 33</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-34</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>75.35</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-34</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-34</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">75.35</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 34</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-35</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>44.16</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-35</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-35</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">44.16</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 35</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-36</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>98.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-36</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-36</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">98.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 36</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-37</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.40</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-37</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-37</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.40</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 37</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-38</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>33.79</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-38</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-38</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">33.79</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 38</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-39</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>30.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-39</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-39</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">30.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 39</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-40</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>55.80</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-40</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-40</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">55.80</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 40</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-41</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>137.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-41</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-41</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">137.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 41</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-42</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>114.36</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-42</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-42</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">114.36</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 42</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-43</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>69.63</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-43</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-43</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">69.63</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 43</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-44</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>141.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-44</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-44</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">141.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 44</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-45</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>66.09</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-45</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-45</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">66.09</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 45</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-46</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>27.53</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-46</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860410-7-0-46</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">27.53</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 46</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-47</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>105.10</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-47</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860411-7-0-47</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">105.10</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 47</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-48</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>57.09</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-48</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860411-7-0-48</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">57.09</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 48</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-49</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>24.71</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-49</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860411-7-0-49</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">24.71</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 49</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-50</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>128.50</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-50</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860411-7-0-50</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">128.50</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 50</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-51</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>60.76</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-51</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860413-7-0-51</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">60.76</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 51</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-52</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>23.34</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-52</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860413-7-0-52</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">23.34</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 52</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-53</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>128.01</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-53</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860413-7-0-53</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">128.01</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 53</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-54</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>115.37</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-54</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-54</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">115.37</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 54</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-55</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>18.46</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-55</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-55</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">18.46</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 55</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-56</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>85.18</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-56</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-56</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">85.18</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 56</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-57</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>66.18</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-57</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-57</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">66.18</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 57</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-58</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>134.82</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-58</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-58</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">134.82</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 58</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-59</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>40.18</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-59</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-59</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">40.18</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 59</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-60</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>99.19</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-60</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-60</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">99.19</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 60</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-61</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>12.50</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-61</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-61</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">12.50</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 61</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-62</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>32.21</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-62</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-62</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">32.21</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 62</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-63</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>113.32</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-63</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-63</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">113.32</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 63</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-64</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>37.24</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-64</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-64</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">37.24</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 64</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-65</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>100.63</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-65</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-65</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">100.63</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 65</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-66</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>81.60</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-66</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-66</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">81.60</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 66</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-67</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>74.30</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-67</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-67</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">74.30</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 67</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-68</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>69.31</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-68</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-68</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">69.31</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 68</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-69</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>22.20</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-69</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-69</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">22.20</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 69</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-70</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>23.77</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-70</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-70</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">23.77</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 70</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-71</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>148.84</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-71</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-71</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">148.84</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 71</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-72</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>93.36</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-72</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-72</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">93.36</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 72</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-73</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>72.61</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-73</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-73</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">72.61</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 73</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-74</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>29.83</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-74</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-74</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">29.83</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 74</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-75</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>76.95</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-75</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-75</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">76.95</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 75</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-76</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>144.34</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-76</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-76</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">144.34</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 76</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-77</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>78.83</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-77</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-77</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">78.83</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 77</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-78</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>73.82</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-78</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-78</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">73.82</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 78</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-79</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>26.97</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-79</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-79</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">26.97</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 79</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-80</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>59.71</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-80</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-80</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">59.71</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 80</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-81</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>135.47</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-81</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-81</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">135.47</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 81</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-82</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>32.78</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-82</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-82</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">32.78</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 82</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-83</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>92.84</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-83</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-83</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">92.84</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 83</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-84</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>28.23</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-84</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-84</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">28.23</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 84</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-85</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>28.11</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-85</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-85</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">28.11</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 85</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-86</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>144.61</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-86</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-86</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">144.61</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 86</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-87</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>11.09</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-87</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-87</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">11.09</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 87</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-88</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>45.89</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-88</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-88</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">45.89</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 88</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-89</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>92.66</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-89</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860414-7-0-89</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">92.66</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 89</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-90</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>22.75</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-90</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-90</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">22.75</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 90</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-91</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>32.21</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-91</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-91</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">32.21</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 91</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-92</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>27.75</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-92</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-92</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">27.75</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 92</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-93</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>32.07</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-93</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-93</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">32.07</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 93</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-94</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>132.62</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-94</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-94</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">132.62</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 94</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-95</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>24.41</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-95</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-95</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">24.41</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 95</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-96</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>149.37</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-96</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-96</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">149.37</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 96</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-97</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>40.60</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-97</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-97</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">40.60</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 97</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-98</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>47.33</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-98</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-98</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">47.33</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 98</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-99</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>90.48</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-99</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-99</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">90.48</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 99</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>Y</Ntfy><Email>test@example.com</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+
+    <PmtInf>
+      <PmtInfId>Pmt-1788262860409-32192-100</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>143.06</CtrlSum>
+      <PmtTpInf><LclInstrm><Prtry>EFT</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>2026-09-01</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>1300307803582</Id></Othr></Id><Ccy>ZAR</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-1788262860409-32192-100</InstrId>
+          <EndToEndId>E2E-TPT-EFT-1788262860415-7-0-100</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="ZAR">143.06</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>101355</Id>
+              <SchmeNm><Prtry>BENEID</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        
+        <RmtInf><Ustrd>TPT EFT performance payment 100</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>N</Ntfy><Email></Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>
+  </CstmrCdtTrfInitn>
+</Document>

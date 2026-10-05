@@ -1,0 +1,1 @@
+const endpoint = "https://palm-api-dev.ik3.investec.corp/api/v1/Application/CreateApplication"

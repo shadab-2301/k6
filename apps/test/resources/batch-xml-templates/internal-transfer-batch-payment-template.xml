@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>{{msgId}}</MsgId>
+      <CreDtTm>{{creationDateTime}}</CreDtTm>
+      <NbOfTxs>{{nbOfTxs}}</NbOfTxs>
+      <CtrlSum>{{ctrlSum}}</CtrlSum>
+      <InitgPty>
+        <Id>
+          <OrgId>
+            <Othr><Id>{{companyId}}</Id><SchmeNm><Prtry>COMPANYID</Prtry></SchmeNm></Othr>
+            <Othr><Id>{{userId}}</Id><SchmeNm><Prtry>USERID</Prtry></SchmeNm></Othr>
+            <Othr><Id>{{channel}}</Id><SchmeNm><Prtry>CHANNEL</Prtry></SchmeNm></Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+      <SplmtryData>
+        <PlcAndNm>FileMetadata</PlcAndNm>
+        <Envlp>
+          <FileType>CSV</FileType>
+          <TemplateVersion>V2</TemplateVersion>
+          <FileName>{{fileName}}</FileName>
+          <FileDesc>{{fileDesc}}</FileDesc>
+          <OrigFileName>{{origFileName}}</OrigFileName>
+          <SingleDebit>{{singleDebit}}</SingleDebit>
+          <Encrypted>false</Encrypted>
+          <AutoInitiate>false</AutoInitiate>
+          <HashCode>{{hashCode}}</HashCode>
+          <FileSizeBytes>{{fileSizeBytes}}</FileSizeBytes>
+          <AllowDuplicate>{{allowDuplicate}}</AllowDuplicate>
+        </Envlp>
+      </SplmtryData>
+    </GrpHdr>
+
+    {{pmtInfBlocks}}
+  </CstmrCdtTrfInitn>
+</Document>

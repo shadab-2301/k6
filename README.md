@@ -1,0 +1,336 @@
+# K6 Performance Testing Suite
+
+A comprehensive performance testing framework using k6 for testing both APIs and UIs.
+
+## Overview
+
+This project includes:
+- **API Performance Tests** (`tests/api.js`) - Load testing REST APIs with custom metrics
+- **UI Performance Tests** (`tests/ui.js`) - Browser-based performance testing using k6's experimental browser module
+
+## Command
+-` npm run perf:batch:k6 -- --payment-type TPT --rail EFT --amount-min 10 --amount-max 150 --payments 3000 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 300s`
+
+### Environment-driven batch flow
+
+Only `SIT` and `UAT` are supported. Set the selected environment explicitly and
+provide its credentials through the process environment or secrets store:
+
+```text
+UAT_LOGIN_USERNAME=...
+UAT_LOGIN_PASSWORD=...
+UAT_COMPANY=...
+UAT_BUSINESS_USERNAME=...
+UAT_GCN=...
+UAT_OTP=...
+```
+
+The first request is `POST https://apistg.secure.investec.com/auth` with
+`{ "Username": UAT_LOGIN_USERNAME, "Password": UAT_LOGIN_PASSWORD }`, followed
+by `POST /auth/otp`. `UAT_LOGIN_USERNAME` is the authentication Login ID; it is
+separate from `UAT_BUSINESS_USERNAME`, which is used by the SAS and batch APIs.
+Keep the password in the process environment or secrets store, never in this
+repository.
+
+Run it with the existing wrapper, for example:
+
+```text
+npm run perf:batch:k6 -- --env UAT --payment-type INT --rail INT --payments 1 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 300s
+```
+
+PowerShell also supports selecting the environment with `$env:ENV = "SIT"` or `$env:ENV = "UAT"`; the wrapper additionally accepts `-e ENV=SIT` and `-e ENV=UAT`. The checked-in UAT data is separated by payment type; add future EFT, RTGS, and payroll fixtures as separate files rather than changing the Internal fixture.
+
+The script obtains SAS metadata from the selected environment's CAPI endpoint, passes every returned `uploadHeaders` value to the File
+Manager `PUT`, and sends the CSV file bytes as the request body. The upload
+requires HTTP `201`; it is not wrapped in JSON or multipart form data because
+the SAS Blob endpoint expects the file body directly. Each SAS request uses a
+single 36-character UUID `idempotency-key` reused for the logical SAS retry. XML is not uploaded. Every environment
+must provide a CSV fixture; UAT Internal automatically uses the checked-in
+`internal-transfer-batch-payment-v2.csv` fixture, while other environment and
+payment-type combinations must provide `--batch-file` or an environment fixture.
+
+//command to test invalid file
+-`npm run perf:batch:k6 -- --payment-type TPT --rail EFT --amount-min 10 --amount-max 150 --payments 1 --iterations 1 --vus 1 --poll-timeout-ms 30000 --max-duration 90s --test-data invalid`
+
+## Prerequisites
+
+### Option 1: Local Installation
+- [k6](https://k6.io/docs/getting-started/installation/) (v0.43.0 or higher)
+- Node.js (optional, for script management)
+
+### Option 2: Docker
+- Docker and Docker Compose installed
+
+## Installation
+
+### Local Setup
+
+1. Install k6:
+   - **Windows (Chocolatey):** `choco install k6`
+   - **macOS (Homebrew):** `brew install k6`
+   - **Linux:** Follow [official docs](https://k6.io/docs/getting-started/installation/)
+
+2. Verify installation:
+   ```bash
+   k6 version
+   ```
+
+3. Copy environment configuration:
+   ```bash
+   cp config/.env.example config/.env
+   ```
+   Edit `config/.env` with your target URLs and parameters.
+
+## Running Tests
+
+### API Performance Test
+
+```bash
+# Basic run
+k6 run tests/api.js
+
+# With custom API URL
+k6 run -e API_URL=https://your-api.com tests/api.js
+
+# With custom load parameters
+k6 run -e API_URL=https://your-api.com -e VIRTUAL_USERS=50 -e DURATION=60s tests/api.js
+
+# Upload results to k6 Cloud
+k6 cloud tests/api.js
+```
+
+### UI Performance Test
+
+```bash
+# Basic run (requires k6 with browser module)
+k6 run tests/ui.js
+
+# With custom UI URL
+k6 run -e UI_URL=https://your-app.com tests/ui.js
+
+# With headless browser
+k6 run --headless=true tests/ui.js
+```
+
+### Run Both Tests
+
+```bash
+# Sequential execution
+npm run test:all
+
+# Or manually
+k6 run tests/api.js && k6 run tests/ui.js
+```
+
+### Using Docker
+
+```bash
+# Run API test
+docker-compose run k6-api
+
+# Run UI test
+docker-compose run k6-ui
+
+# Run both
+docker-compose up
+```
+
+## Test Configuration
+
+### API Test (tests/api.js)
+
+**Default Configuration:**
+- Virtual Users: 10
+- Ramp-up Time: 10s
+- Duration: 30s
+- Ramp-down: 5s
+
+**Performance Thresholds:**
+- 95th percentile response time < 500ms
+- 99th percentile response time < 1000ms
+- Error rate < 10%
+- Success rate > 95%
+
+**Tests Included:**
+- GET /posts - Fetch all posts
+- GET /posts/{id} - Fetch specific post
+- POST /posts - Create new post
+
+**Custom Metrics:**
+- `api_duration` - Response time trend
+- `api_errors` - Error counter
+- `api_success` - Success rate
+
+### UI Test (tests/ui.js)
+
+**Default Configuration:**
+- Virtual Users: 5
+- Duration: 30s
+
+**Performance Checks:**
+- Page loads successfully
+- Page title exists
+- Web Vitals (CLS, FID, LCP)
+- Element interactions
+- Form inputs
+
+**Custom Metrics:**
+- `page_load_time` - Time to load page
+- `interaction_time` - Time for user interactions
+
+## Environment Variables
+
+Create a `.env` file in the `config/` directory or set directly:
+
+```bash
+# API Testing
+API_URL=https://api.example.com
+VIRTUAL_USERS=10
+DURATION=30s
+RAMP_UP=10s
+
+# UI Testing
+UI_URL=https://example.com
+
+# K6 Cloud (optional)
+K6_CLOUD_TOKEN=your_token_here
+```
+
+## Customization
+
+### Modifying API Tests
+
+Edit `tests/api.js` to:
+1. Change the `BASE_URL` default
+2. Add/remove API endpoints in the test functions
+3. Adjust performance thresholds in the `options.thresholds` object
+4. Customize load stages in `options.stages`
+
+Example - Add custom endpoint:
+```javascript
+group('GET /users', () => {
+  const response = http.get(`${BASE_URL}/users`);
+  
+  check(response, {
+    'status is 200': (r) => r.status === 200
+  });
+});
+```
+
+### Modifying UI Tests
+
+Edit `tests/ui.js` to:
+1. Change the `BASE_URL` default
+2. Customize selectors for your UI elements
+3. Add more interaction groups
+4. Adjust Web Vitals thresholds
+
+Example - Add custom element click:
+```javascript
+group('Click login button', () => {
+  page.click('button[id="login"]');
+  check(page, {
+    'login page loaded': () => page.url().includes('/dashboard')
+  });
+});
+```
+
+## Results
+
+Test results are saved in the `results/` directory:
+- `api-summary.json` - API test results
+- `ui-summary.json` - UI test results
+
+### Viewing Results
+
+```bash
+# Pretty print API results
+cat results/api-summary.json | jq
+```
+
+### K6 Cloud
+
+For cloud-based result storage and analysis:
+
+1. Get your cloud token from [app.k6.io](https://app.k6.io)
+2. Set environment variable: `K6_CLOUD_TOKEN=your_token`
+3. Run: `k6 cloud tests/api.js`
+
+## Common Issues
+
+### k6: command not found
+- Ensure k6 is installed and in your PATH
+- Reinstall using your package manager
+
+### Browser module not available
+- Update k6: `k6 version --check`
+- Browser module requires k6 v0.43.0+
+
+### Permission denied (Docker)
+- Run docker commands with appropriate permissions or add your user to docker group
+
+### Timeout errors
+- Increase timeout in test configuration
+- Check network connectivity to target URLs
+
+## Performance Tuning
+
+### For Better Results
+
+1. **Increase Virtual Users Gradually:**
+   ```bash
+   k6 run -e VIRTUAL_USERS=100 tests/api.js
+   ```
+
+2. **Longer Test Duration:**
+   ```bash
+   k6 run -e DURATION=5m tests/api.js
+   ```
+
+3. **Multiple Stages (Spike Test):**
+   Edit `options.stages` in the test file
+
+4. **Add Think Time:**
+   Adjust `sleep()` calls between requests
+
+## Monitoring
+
+### Real-time Monitoring
+
+```bash
+# View live metrics in terminal
+k6 run tests/api.js
+```
+
+### With Grafana & InfluxDB (Advanced)
+
+See k6 documentation for integration setup.
+
+## Best Practices
+
+1. **Start Small:** Test with low user counts first
+2. **Baseline First:** Establish baseline metrics before optimization
+3. **Realistic Scenarios:** Create tests that mirror actual user behavior
+4. **Monitor Infrastructure:** Watch server resources during tests
+5. **Iterate:** Make small changes and measure impact
+6. **Use Thresholds:** Define acceptable performance metrics
+7. **Regular Testing:** Schedule periodic performance tests
+
+## Resources
+
+- [K6 Official Documentation](https://k6.io/docs/)
+- [K6 API Reference](https://k6.io/docs/javascript-api/)
+- [K6 Best Practices](https://k6.io/docs/testing-guides/load-testing/)
+- [K6 Community](https://k6.io/community/)
+
+## Support
+
+For issues or questions:
+1. Check the [K6 Documentation](https://k6.io/docs/)
+2. Review test output and error messages
+3. Check your target endpoints are accessible
+4. Verify environment variables are correctly set
+
+## License
+
+This performance testing suite is provided as-is for testing purposes.

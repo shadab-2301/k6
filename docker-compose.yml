@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  k6-api:
+    image: grafana/k6:latest
+    container_name: k6-api-test
+    working_dir: /src
+    volumes:
+      - ./tests:/src/tests
+      - ./results:/src/results
+    environment:
+      - API_URL=https://jsonplaceholder.typicode.com
+      - VIRTUAL_USERS=10
+      - DURATION=30s
+      - RAMP_UP=10s
+    command: run tests/api.js
+
+  k6-ui:
+    image: grafana/k6:latest
+    container_name: k6-ui-test
+    working_dir: /src
+    volumes:
+      - ./tests:/src/tests
+      - ./results:/src/results
+    environment:
+      - UI_URL=https://example.com
+      - VIRTUAL_USERS=5
+    command: run --headless=false tests/ui.js

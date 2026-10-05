@@ -1,0 +1,2064 @@
+import http from "k6/http";
+import { check, sleep } from "k6";
+import { Counter, Rate, Trend } from "k6/metrics";
+import { md5 } from "k6/crypto";
+import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.4/index.js";
+
+const ADO_TOKEN_CLIENT = JSON.parse(open("../../../../ApiRegistry/adoTokenClient.json"));
+const TOKENS = JSON.parse(open("../../../../ApiRegistry/Tokens.json"));
+const PLATFORM_ENV = parseEnvFile(open("../../../../.env.platform"));
+
+const TST_INT_DATA = JSON.parse(
+    open("../../../../Test Data/TST/payments/batch payments/internal-transfer-batch-payment-test-data.json")
+);
+const STG_INT_DATA = JSON.parse(
+    open("../../../../Test Data/STG/payments/batch payments/internal-transfer-batch-payment-test-data.json")
+);
+const TST_TPT_DATA = JSON.parse(
+    open("../../../../Test Data/TST/payments/batch payments/domestic-batch-payment-test-data.json")
+);
+const TST_TPT_INVALID_DATA = JSON.parse(
+    open("../../../../Test Data/TST/payments/batch payments/domestic-batch-payment-invalid-test-data.json")
+);
+const STG_TPT_DATA = JSON.parse(
+    open("../../../../Test Data/STG/payments/batch payments/domestic-batch-payment-test-data.json")
+);
+const TST_PRLSD_DATA = JSON.parse(
+    open("../../../../Test Data/TST/payments/batch payments/payroll-batch-payment-test-data.json")
+);
+const UAT_INT_DATA = JSON.parse(
+    open("../../../../Test Data/UAT/payments/batch payments/internal-transfer-batch-payment-test-data.json")
+);
+const UAT_INT_BATCH_FILE = open(
+    "../../../../Test Data/UAT/payments/batch payments/internal-transfer-batch-payment-v2.csv",
+    "b"
+);
+
+const uploadDuration = new Trend("batch_upload_duration", true);
+const uploadToPendinitDuration = new Trend("batch_upload_to_pendinit_duration", true);
+const pendinitDuration = new Trend("batch_pendinit_duration", true);
+const initiationDuration = new Trend("batch_initiation_duration", true);
+const sentDuration = new Trend("batch_sent_duration", true);
+const flowFailureRate = new Rate("batch_flow_failure_rate");
+const authenticateDuration = new Trend("batch_authenticate_duration", true);
+const otpDuration = new Trend("batch_otp_duration", true);
+const sasDuration = new Trend("batch_sas_url_duration", true);
+const initialOtpDuration = new Trend("batch_initial_otp_duration", true);
+const challengeOtpDuration = new Trend("batch_challenge_otp_duration", true);
+const totalFlowDuration = new Trend("batch_total_flow_duration", true);
+
+const externalBatchFile = __ENV.K6_BATCH_FILE_PATH ? open(__ENV.K6_BATCH_FILE_PATH, "b") : null;
+const externalTestDataFile = __ENV.K6_TEST_DATA_FILE ? open(__ENV.K6_TEST_DATA_FILE) : null;
+
+function envNumber(keys, fallback) {
+    for (const key of keys) {
+        const raw = __ENV[key];
+        if (raw !== undefined && raw !== null && String(raw).trim() !== "") {
+            const parsed = Number(raw);
+            if (Number.isFinite(parsed)) {
+                return parsed;
+            }
+        }
+    }
+    return fallback;
+}
+
+function envText(keys) {
+    for (const key of keys) {
+        const raw = __ENV[key];
+        if (raw !== undefined && raw !== null) {
+            const text = String(raw).trim();
+            if (text) {
+                return text;
+            }
+        }
+    }
+    return "";
+}
+
+function envFileText(keys) {
+    for (const key of keys) {
+        const value = PLATFORM_ENV[key];
+        if (value !== undefined && value !== null) {
+            const text = String(value).trim();
+            if (text) {
+                return text;
+            }
+        }
+    }
+    return "";
+}
+
+function parseEnvFile(text) {
+    const values = {};
+    String(text || "")
+        .split(/\r?\n/)
+        .forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith("#")) {
+                return;
+            }
+
+            const index = trimmed.indexOf("=");
+            if (index === -1) {
+                return;
+            }
+
+            const key = trimmed.slice(0, index).trim();
+            let value = trimmed.slice(index + 1).trim();
+            if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+                value = value.slice(1, -1);
+            }
+            values[key] = value;
+        });
+    return values;
+}
+
+function envBool(keys, fallback) {
+    const text = envText(keys).toLowerCase();
+    if (!text) return fallback;
+    return text === "true" || text === "1" || text === "yes";
+}
+
+const vus = envNumber(["PERF_VUS"], 10);
+const iterations = envNumber(["PERF_ITERATIONS"], 10);
+const configuredNumPayments = envNumber(["K6_NUM_PAYMENTS", "NUM_PAYMENTS"], 5000);
+const configuredAmountMin = envNumber(["K6_AMOUNT_MIN", "AMOUNT_MIN"], 10);
+const configuredAmountMax = envNumber(["K6_AMOUNT_MAX", "AMOUNT_MAX"], 100);
+const strictLoadConfig = envBool(["K6_REQUIRE_EXPLICIT_LOAD_CONFIG"], false);
+const singleBulkFile = envBool(["K6_SINGLE_BULK_FILE"], false);
+const configuredPaymentType = sanitizeFileToken(envText(["K6_PAYMENT_TYPE"]) || "INT", "INT").toUpperCase();
+const requestedRail = sanitizeFileToken(envText(["K6_RAIL"]) || configuredPaymentType, configuredPaymentType).toUpperCase();
+const tptRailThreshold = 5000000;
+const configuredRail = configuredPaymentType === "TPT"
+    ? configuredAmountMax <= tptRailThreshold
+        ? "EFT"
+        : "RTGS"
+    : requestedRail;
+const testDataVariant = envText(["K6_TEST_DATA"]).toUpperCase() || "VALID";
+const pollingIntervalMs = envNumber(["K6_POLLING_INTERVAL_MS", "K6_POLL_INTERVAL_MS"], 2000);
+const maxDurationMs = envNumber(["K6_MAX_DURATION_MS", "K6_POLL_TIMEOUT_MS"], 120000);
+const scenarioMaxDuration = envText(["K6_MAX_DURATION"]) || `${Math.ceil((maxDurationMs * 2 + 30000) / 1000)}s`;
+
+export const options = {
+    scenarios: {
+        bulk_batch_flow: {
+            executor: "per-vu-iterations",
+            vus,
+            iterations,
+            maxDuration: scenarioMaxDuration,
+        },
+    },
+    thresholds: {
+        batch_flow_failure_rate: ["rate<0.05"],
+    },
+};
+
+function metricValues(data, metricName) {
+    const values = data?.metrics?.[metricName]?.values;
+    return values && typeof values === "object" ? values : {};
+}
+
+function buildSummary(data) {
+    const startedAt = new Date(Date.now() - Number(data?.state?.testRunDurationMs || 0));
+    const endedAt = new Date();
+
+    return {
+        startedAt: startedAt.toISOString(),
+        endedAt: endedAt.toISOString(),
+        durationMs: Number(data?.state?.testRunDurationMs || 0),
+        env: {
+            selectedEnv,
+            vus,
+            iterations,
+            numPayments: configuredNumPayments,
+            paymentType: configuredPaymentType,
+            railType: configuredRail,
+            singleBulkFile,
+        },
+        metrics: {
+            uploadDuration: metricValues(data, "batch_upload_duration"),
+            uploadToPendinitDuration: metricValues(data, "batch_upload_to_pendinit_duration"),
+            pendinitDuration: metricValues(data, "batch_pendinit_duration"),
+            initiationDuration: metricValues(data, "batch_initiation_duration"),
+            sentDuration: metricValues(data, "batch_sent_duration"),
+            flowFailureRate: metricValues(data, "batch_flow_failure_rate"),
+            checks: metricValues(data, "checks"),
+            httpReqDuration: metricValues(data, "http_req_duration"),
+        },
+        thresholds: data?.metrics
+            ? Object.entries(data.metrics)
+                .filter(([, metric]) => metric?.thresholds && typeof metric.thresholds === "object")
+                .map(([name, metric]) => ({
+                    metric: name,
+                    thresholds: metric.thresholds,
+                }))
+            : [],
+    };
+}
+
+export function handleSummary(data) {
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    const summary = buildSummary(data);
+    const outFile = `reports/performance/bulk-payments-k6-summary-${ts}.json`;
+
+    return {
+        stdout: textSummary(data, { indent: " ", enableColors: true }),
+        [outFile]: JSON.stringify(summary, null, 2),
+    };
+}
+
+function validatePreflight() {
+    const missing = [];
+    const paymentProfile = getPaymentProfile();
+    if (!environmentConfig.authBaseUrl) missing.push(`${selectedEnv}_AUTH_URL`);
+    if (!environmentConfig.batchBaseUrl) missing.push(`${selectedEnv}_CAPI_URL`);
+    if (!environmentConfig.paymentsBaseUrl) missing.push(`${selectedEnv}_BAPI_URL`);
+    if (!environmentConfig.username) missing.push(`${selectedEnv}_LOGIN_USERNAME`);
+    if (!environmentConfig.password) missing.push(`${selectedEnv}_LOGIN_PASSWORD`);
+    if (!environmentConfig.company) missing.push(`${selectedEnv}_COMPANY`);
+    if (!environmentConfig.businessUsername) missing.push(`${selectedEnv}_BUSINESS_USERNAME`);
+    if (!environmentConfig.gcn) missing.push(`${selectedEnv}_GCN`);
+    if (!environmentConfig.initialOtp) missing.push(`${selectedEnv}_OTP`);
+    if (!getEnvironmentBatchFile()) missing.push(`${selectedEnv} batch CSV for ${configuredPaymentType}/${configuredRail}`);
+
+    if (strictLoadConfig) {
+        if (!envText(["PERF_VUS"])) missing.push("PERF_VUS");
+        if (!envText(["PERF_ITERATIONS"])) missing.push("PERF_ITERATIONS");
+        if (!envText(["K6_NUM_PAYMENTS", "NUM_PAYMENTS"])) missing.push("K6_NUM_PAYMENTS (or NUM_PAYMENTS)");
+        if (!envText(["K6_AMOUNT_MIN", "AMOUNT_MIN"])) missing.push("K6_AMOUNT_MIN (or AMOUNT_MIN)");
+        if (!envText(["K6_AMOUNT_MAX", "AMOUNT_MAX"])) missing.push("K6_AMOUNT_MAX (or AMOUNT_MAX)");
+    }
+
+    if (configuredNumPayments <= 0) {
+        missing.push("K6_NUM_PAYMENTS must be > 0");
+    }
+
+    if (configuredAmountMin <= 0 || configuredAmountMax <= 0 || configuredAmountMin > configuredAmountMax) {
+        missing.push("K6_AMOUNT_MIN and K6_AMOUNT_MAX must be > 0 and min <= max");
+    }
+
+    if (configuredPaymentType === "TPT" && configuredAmountMin <= tptRailThreshold && configuredAmountMax > tptRailThreshold) {
+        missing.push("TPT amount range cannot cross R5,000,000 because a batch file supports one rail; run EFT and RTGS ranges separately");
+    }
+
+    if (!paymentProfile) {
+            missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, and PRLSD/EFT`);
+    }
+
+    if (paymentProfile?.minimumAmount && configuredAmountMin < paymentProfile.minimumAmount) {
+        missing.push(`K6_AMOUNT_MIN must be at least ${paymentProfile.minimumAmount} for ${configuredPaymentType}/${configuredRail}`);
+    }
+
+    if (iterations <= 0) {
+        missing.push("PERF_ITERATIONS must be > 0 for per-vu-iterations executor");
+    }
+
+    if (missing.length > 0) {
+        throw new Error(
+            `[k6][preflight] Invalid or missing configuration:\n- ${missing.join("\n- ")}\n` +
+            `Set K6_REQUIRE_EXPLICIT_LOAD_CONFIG=true to enforce explicit load vars every run.`
+        );
+    }
+}
+
+function getAdoConfigValue(key) {
+    return String(__ENV[key] || ADO_TOKEN_CLIENT[key] || "").trim();
+}
+
+function getAppBearerTokenFromEnv() {
+    const token = String(__ENV.K6_APP_TOKEN || "").trim();
+    return token || "";
+}
+
+function getEnvData() {
+    if (selectedEnv === "UAT") {
+        if (configuredPaymentType === "INT" && configuredRail === "INT" && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON) {
+            return UAT_INT_DATA;
+        }
+        try {
+            return JSON.parse(String(externalTestDataFile || __ENV.K6_TEST_DATA_JSON || ""));
+        } catch {
+            throw new Error("UAT test data is missing or invalid JSON; refusing to use SIT data.");
+        }
+    }
+    if (configuredPaymentType === "PRLSD") {
+        if (selectedEnv !== "SIT") throw new Error("PRLSD test data is not configured for UAT.");
+        return TST_PRLSD_DATA;
+    }
+
+    if (configuredPaymentType === "TPT") {
+        if (testDataVariant === "INVALID" && selectedEnv === "SIT") {
+            return TST_TPT_INVALID_DATA;
+        }
+        return selectedEnv === "UAT" ? STG_TPT_DATA : TST_TPT_DATA;
+    }
+
+    return selectedEnv === "UAT" ? UAT_INT_DATA : TST_INT_DATA;
+}
+
+function getEnvironmentBatchFile() {
+    if (externalBatchFile) return externalBatchFile;
+    if (selectedEnv === "UAT" && configuredPaymentType === "INT" && configuredRail === "INT") return UAT_INT_BATCH_FILE;
+    return null;
+}
+
+function getPaymentProfile() {
+    const profiles = {
+        "INT/INT": {
+            paymentType: "INT",
+            rail: "INT",
+            source: "internal-transfer",
+            creditAccountScheme: "ACCT",
+            includeCreditorAgent: true,
+            minimumAmount: 0,
+        },
+        "TPT/EFT": {
+            paymentType: "TPT",
+            rail: "EFT",
+            source: "beneficiary",
+            creditAccountScheme: "BENEID",
+            includeCreditorAgent: true,
+            minimumAmount: 0,
+        },
+        "TPT/RTGS": {
+            paymentType: "TPT",
+            rail: "RTGS",
+            source: "beneficiary",
+            creditAccountScheme: "BENEID",
+            includeCreditorAgent: true,
+            minimumAmount: 5000000.01,
+        },
+        "PRLSD/EFT": {
+            paymentType: "PRLSD",
+            rail: "EFT",
+            source: "payroll",
+            creditAccountScheme: "ACCT",
+            includeCreditorAgent: true,
+            minimumAmount: 0,
+        },
+    };
+
+    return profiles[`${configuredPaymentType}/${configuredRail}`] || null;
+}
+
+function parseBool(value, fallback) {
+    if (value === undefined || value === null || value === "") return fallback;
+    return String(value).toLowerCase() === "true";
+}
+
+function makeRequestId() {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+        return crypto.randomUUID();
+    }
+
+    const bytes = [];
+    for (let i = 0; i < 16; i++) {
+        bytes.push(Math.floor(Math.random() * 256));
+    }
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    const hex = bytes.map((b) => b.toString(16).padStart(2, "0")).join("");
+    return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+}
+
+function makeIdempotencyKey() {
+    // API requires idempotency-key length between 0 and 35, so hyphens are stripped from the UUID.
+    const key = makeRequestId().replace(/-/g, "");
+    if (!/^[0-9a-f]{32}$/i.test(key) || key.length > 35) {
+        throw new Error("Generated idempotency key is not a valid UUID of 35 characters or fewer.");
+    }
+    return key;
+}
+
+function makeUniqueBatchFileName() {
+    const timestamp = String(Date.now());
+    const vu = String(__VU || 0);
+    const iteration = String(__ITER || 0);
+    const random = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
+    return `BulkPaymentV2${timestamp}${vu}${iteration}${random}`;
+}
+
+function sanitizeBatchName(input, fallback = "Batch") {
+    const candidate = String(input || fallback)
+        .replace(/[^A-Za-z0-9]/g, "")
+        .slice(0, 35);
+
+    return candidate || fallback;
+}
+
+function safeBodySnippet(body) {
+    const text = typeof body === "string" ? body : String(body || "");
+    return text.replace(/\s+/g, " ").trim().slice(0, 500);
+}
+
+function safeSasErrorSnippet(body) {
+    return safeBodySnippet(body)
+        .replace(/(password|token|secret|authorization|cookie|sas|sig|signature)\s*[:=]\s*[^,}\s]+/gi, "$1=<redacted>")
+        .replace(/https?:\/\/[^\s"']+/gi, "<url-redacted>");
+}
+
+function sanitizeFileToken(value, fallback) {
+    const normalized = String(value || fallback || "").trim().replace(/[^A-Za-z0-9]+/g, "");
+    return normalized || fallback;
+}
+
+function normalizeDateOnly(dateText) {
+    const text = String(dateText || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+        return text;
+    }
+
+    const parsed = new Date(text);
+    if (Number.isNaN(parsed.getTime())) {
+        return "";
+    }
+
+    const yyyy = String(parsed.getFullYear());
+    const mm = String(parsed.getMonth() + 1).padStart(2, "0");
+    const dd = String(parsed.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+function expectedInitiateStatus(paymentDate) {
+    const authMode = String(envText(["K6_AUTH_MODE", "K6_APPROVAL_MODE", "K6_PAYMENT_TYPE_NAME"]) || "SingleAuth").trim().toUpperCase();
+    if (authMode !== "SINGLEAUTH" && authMode !== "SINGLE_AUTH") {
+        return "";
+    }
+
+    const paymentDateOnly = normalizeDateOnly(paymentDate);
+    const todayDateOnly = normalizeDateOnly(new Date().toISOString().slice(0, 10));
+    if (!paymentDateOnly || !todayDateOnly) {
+        return "INPROGRESS";
+    }
+
+    return paymentDateOnly > todayDateOnly ? "SCHEDULED" : "INPROGRESS";
+}
+
+function canonicalInitiateStatus(statusCode) {
+    const normalized = String(statusCode || "").trim().toUpperCase();
+    if (!normalized) return "";
+
+    const aliases = {
+        SCHED: "SCHEDULED",
+        SCHEDULED: "SCHEDULED",
+        IN_PROGRESS: "INPROGRESS",
+        INPROGRESS: "INPROGRESS",
+    };
+
+    return aliases[normalized] || normalized;
+}
+
+/**
+ * Extracts the BK-prefixed batch reference (BKREF) from a get-file-batches row.
+ * This is a distinct field from transactionId (used to initiate) - the same
+ * naming pattern as records' own transactionId/refId (FT-prefixed) pair.
+ */
+function extractBkRefId(row) {
+    const candidates = [row?.bkReference, row?.refId, row?.bkRefId, row?.bkRef, row?.batchReference, row?.reference];
+
+    for (const candidate of candidates) {
+        const value = String(candidate || "").trim();
+        if (value && value.toUpperCase().startsWith("BK")) {
+            return value;
+        }
+    }
+
+    for (const candidate of candidates) {
+        const value = String(candidate || "").trim();
+        if (value) return value;
+    }
+
+    return "";
+}
+
+/**
+ * Classifies a batch payment record status code into one of the tracked
+ * outcome buckets: PASSED, FAILED, REJECTED, IN_PROGRESS, UNKNOWN.
+ */
+function classifyRecordStatus(statusCode) {
+    const normalized = String(statusCode || "").trim().toUpperCase();
+    if (!normalized) return "UNKNOWN";
+
+    const passedStatuses = ["SENT", "PROCESSED", "SUCCESS", "COMPLETED", "COMPLETE"];
+    const failedStatuses = ["FAILED", "FAIL", "ERROR", "TIMEOUT", "EXPIRED"];
+    const rejectedStatuses = ["REJECTED", "REJECT", "DECLINED", "CANCELLED", "CANCELED"];
+    const inProgressStatuses = [
+        "PENDINIT",
+        "VAL_IN_PROG",
+        "INITIATING",
+        "INPROGRESS",
+        "IN_PROGRESS",
+        "PENDING",
+        "SUBMITTED",
+        "QUEUED",
+        "NEW",
+        "PROCESSING",
+    ];
+
+    if (passedStatuses.includes(normalized)) return "PASSED";
+    if (failedStatuses.includes(normalized)) return "FAILED";
+    if (rejectedStatuses.includes(normalized)) return "REJECTED";
+    if (inProgressStatuses.includes(normalized)) return "IN_PROGRESS";
+    return "PASSED";
+}
+
+/**
+ * Pages through GET /batch-payments/:BKREF/records until all pages are
+ * retrieved, returning the combined record list and the last page's meta.
+ */
+function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
+    const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
+    const records = [];
+    const requests = [];
+    let page = 1;
+    let totalPages = 1;
+    let lastMeta = null;
+
+    do {
+        const url = `${baseUrl}/payments-manager/api/v1/batch-payments/${bkref}/records?page=${page}&size=${size}`;
+        requests.push({ bkref, page, size, url });
+        const res = http.get(url, {
+            jar,
+            headers: authHeaders,
+            timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+            tags: { stage: "get_records" },
+        });
+
+        if (res.status !== 200) {
+            logHttpFailure("get_records", {
+                status: res.status,
+                timings: res.timings,
+                url,
+                body: res.body,
+                txId: bkref,
+            });
+            break;
+        }
+
+        const payload = res.json() || {};
+        const rows = Array.isArray(payload.data) ? payload.data : [];
+        records.push(...rows);
+        lastMeta = payload.meta || null;
+        totalPages = Number(lastMeta?.totalPages || 1);
+
+        if (rows.length === 0 && page === 1) {
+            console.warn(
+                `[k6][RECORDS][DIAGNOSTIC] bkref=${bkref} url=${url} httpStatus=${res.status} meta=${JSON.stringify(lastMeta)} bodySnippet=${safeBodySnippet(res.body) || "<empty>"}`
+            );
+        }
+
+        page += 1;
+    } while (page <= totalPages);
+
+    return { records, meta: lastMeta, requests };
+}
+
+/**
+ * Fetches records for every parent/batch transaction ID (BKREF) returned by
+ * get file batches, merging the pages from each into one record list.
+ */
+function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar) {
+    const records = [];
+    const requests = [];
+    let lastMeta = null;
+
+    for (const bkref of bkrefs) {
+        const result = fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar);
+        records.push(...result.records);
+        requests.push(...result.requests);
+        lastMeta = result.meta || lastMeta;
+    }
+
+    return { records, meta: lastMeta, requests };
+}
+
+/**
+ * Buckets fetched batch records by outcome. Validation against the expected
+ * payment count happens separately because /batches only returns the batch
+ * container's transactionId (used to initiate), not the per-payment IDs that
+ * show up in /records - those two ID spaces never match by design.
+ */
+function validateBatchRecords(records, expectedCount) {
+    const buckets = { PASSED: [], FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] };
+
+    for (const record of records) {
+        const transactionId = String(record?.transactionId || "");
+        const ftId = String(record?.refId || "");
+        const statusCode = String(record?.status?.code || "");
+        const statusDescription = String(record?.status?.description || "");
+        const bucket = classifyRecordStatus(statusCode);
+
+        buckets[bucket].push({
+            transactionId,
+            ftId,
+            statusCode,
+            statusDescription,
+            amount: record?.amount,
+            toAccountReference: record?.toAccountReference || "",
+            fromAccountReference: record?.fromAccountReference || "",
+        });
+    }
+
+    const shortfall = Math.max(0, Number(expectedCount || 0) - records.length);
+
+    return { buckets, shortfall, totalValidated: records.length };
+}
+
+/**
+ * Posts the FT ID validation results to the local Node collector (started by
+ * scripts/run-performance-k6.js) so they can be aggregated into the HTML report.
+ */
+function emitRecordsCapture(payload) {
+    const collectorUrl = envText(["K6_RECORDS_COLLECTOR_URL"]);
+    if (!collectorUrl) {
+        return;
+    }
+
+    const response = http.post(collectorUrl, JSON.stringify(payload), {
+        headers: { "Content-Type": "application/json" },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "records_capture" },
+    });
+
+    if (response.status >= 300) {
+        console.error(
+            `[k6][WARN][records-capture] status=${response.status} url=${collectorUrl} body=${safeBodySnippet(response.body) || "<empty>"}`
+        );
+    }
+}
+
+function emitExecutionCapture(execution) {
+    const collectorUrl = envText(["K6_EXECUTION_COLLECTOR_URL"]);
+    if (!collectorUrl) return;
+
+    const response = http.post(collectorUrl, JSON.stringify(execution), {
+        headers: { "Content-Type": "application/json" },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "execution_capture" },
+    });
+
+    if (response.status >= 300) {
+        console.error(`[k6][WARN][execution-capture] status=${response.status} body=${safeBodySnippet(response.body) || "<empty>"}`);
+    }
+}
+
+function emitExecutionSnapshot(execution) {
+    emitExecutionCapture({
+        ...execution,
+        timings: { ...execution.timings },
+        timestamps: { ...execution.timestamps },
+        statuses: { ...execution.statuses },
+        timeouts: { ...execution.timeouts },
+        requestDetails: {
+            ...execution.requestDetails,
+            ftIds: [...execution.requestDetails.ftIds],
+        },
+        parentTransactionIds: [...execution.parentTransactionIds],
+        bkRefIds: [...execution.bkRefIds],
+        payments: [...execution.payments],
+        failure: execution.failure ? { ...execution.failure } : null,
+    });
+}
+
+function uniqueStatusText(values, fallback) {
+    const statuses = [...new Set((values || []).map((value) => String(value || "").trim()).filter(Boolean))];
+    return statuses.length > 0 ? statuses.join(",") : fallback;
+}
+
+function validationStatusText(validation) {
+    const records = [
+        ...validation.buckets.PASSED,
+        ...validation.buckets.FAILED,
+        ...validation.buckets.REJECTED,
+        ...validation.buckets.IN_PROGRESS,
+        ...validation.buckets.UNKNOWN,
+    ];
+    return uniqueStatusText(records.map((record) => record.statusCode), validation.shortfall > 0 ? "RECORDS_MISSING" : "UNKNOWN");
+}
+
+function setExecutionFailure(execution, failure) {
+    execution.status = "FAILED";
+    execution.failure = {
+        stage: failure.stage,
+        expectedStatus: failure.expectedStatus || "",
+        lastStatus: failure.lastStatus || "",
+        httpStatus: failure.httpStatus ?? "",
+        apiError: failure.apiError || "",
+        timeoutMs: failure.timeoutMs ?? "",
+        elapsedMs: failure.elapsedMs ?? "",
+        overrunMs: failure.overrunMs ?? "",
+        message: failure.message || "",
+    };
+}
+
+/**
+ * Repeatedly fetches batch records until every expected payment has a record
+ * and each record has moved out of an in-progress status, or until the polling
+ * timeout is reached.
+ */
+function fetchAndValidateBatchRecordsWithRetry(baseUrl, authHeaders, bkrefs, expectedCount, pageSize, timeoutMs, intervalMs, jar) {
+    const startedAt = Date.now();
+    let attempt = 0;
+    let timedOut = false;
+    let lastRecords = [];
+    let lastMeta = null;
+    let lastRequests = [];
+    let lastValidation = { buckets: { PASSED: [], FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] }, shortfall: expectedCount, totalValidated: 0 };
+
+    while (attempt === 0 || Date.now() - startedAt < timeoutMs) {
+        attempt += 1;
+        const { records, meta, requests } = fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar);
+        lastRecords = records;
+        lastMeta = meta;
+        lastRequests = requests;
+        lastValidation = validateBatchRecords(records, expectedCount);
+
+        if (lastValidation.shortfall === 0 && lastValidation.buckets.IN_PROGRESS.length === 0) {
+            break;
+        }
+
+        const elapsedMs = Date.now() - startedAt;
+        if (elapsedMs >= timeoutMs) {
+            timedOut = true;
+            console.error(
+                `[k6][SENT][TIMEOUT] bkrefs=${bkrefs.join(",")} expected=${expectedCount} actual=${lastValidation.totalValidated} ` +
+                `inProgress=${lastValidation.buckets.IN_PROGRESS.length} elapsedMs=${elapsedMs} maxDurationMs=${timeoutMs}`
+            );
+            break;
+        }
+
+        const remainingMs = timeoutMs - elapsedMs;
+        sleep(Math.max(0.2, Math.min(intervalMs, remainingMs) / 1000));
+    }
+
+    const elapsedMs = Date.now() - startedAt;
+    return {
+        records: lastRecords,
+        meta: lastMeta,
+        validation: lastValidation,
+        attempts: attempt,
+        elapsedMs,
+        timedOut,
+        requests: lastRequests,
+    };
+}
+
+function logHttpFailure(stage, context) {
+    const status = context?.status ?? "n/a";
+    const durationMs = context?.timings?.duration ?? 0;
+    const url = context?.url || "n/a";
+    const txId = context?.txId || "n/a";
+    const body = safeBodySnippet(context?.body || "");
+
+    console.error(
+        `[k6][FAIL][${stage}] status=${status} durationMs=${Number(durationMs).toFixed(0)} url=${url} txId=${txId} body=${body || "<empty>"}`
+    );
+}
+
+function logFileValidationFailure(baseUrl, authHeaders, fileId, fileStatus, fileRecord, jar) {
+    const detailUrl = `${baseUrl}/payments-manager/api/v1/files/${fileId}`;
+    const detailResponse = http.get(detailUrl, {
+        jar,
+        headers: authHeaders,
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "get_file_detail_on_failure" },
+    });
+    const detail = safeBodySnippet(detailResponse.body);
+    const record = safeBodySnippet(JSON.stringify(fileRecord || {}));
+
+    console.error(
+        `[k6][FAIL][file-validation] fileId=${fileId} status=${fileStatus} detailStatus=${detailResponse.status} ` +
+        `listRecord=${record || "<empty>"} detail=${detail || "<empty>"}`
+    );
+}
+
+function isPendingBatchStatus(statusCode) {
+    const normalized = String(statusCode || "").trim().toUpperCase();
+    if (!normalized) return true;
+
+    return [
+        "PENDINIT",
+        "VAL_IN_PROG",
+        "INITIATING",
+        "INPROGRESS",
+        "PENDING",
+        "SUBMITTED",
+        "QUEUED",
+        "NEW",
+    ].includes(normalized);
+}
+
+function extractStatusCodeFromPayload(payload) {
+    if (!payload) return "";
+
+    if (typeof payload === "string") {
+        try {
+            const parsed = JSON.parse(payload);
+            return extractStatusCodeFromPayload(parsed);
+        } catch {
+            const match = payload.match(/"status"\s*:\s*"?([A-Z_]+)"?/i);
+            if (match && match[1]) return match[1];
+            return "";
+        }
+    }
+
+    const candidates = [
+        payload?.data?.status?.code,
+        payload?.data?.status,
+        payload?.status?.code,
+        payload?.status,
+        payload?.data?.result?.status?.code,
+        payload?.data?.result?.status,
+        payload?.result?.status?.code,
+        payload?.result?.status,
+    ];
+
+    for (const item of candidates) {
+        const value = String(item || "").trim();
+        if (value) return value;
+    }
+
+    return "";
+}
+
+function pollBatchInitiationCompletion(baseUrl, authHeaders, fileId, timeoutMs, intervalMs, jar) {
+    const startedAt = Date.now();
+    let lastStatus = "UNKNOWN";
+    let completed = false;
+    let finalStatus = "UNKNOWN";
+    let finalResponseBody = "";
+
+    while (Date.now() - startedAt <= timeoutMs) {
+        const res = http.get(
+            `${baseUrl}/payments-manager/api/v1/files/${fileId}`,
+            {
+                jar,
+                headers: authHeaders,
+                timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+                tags: { stage: "poll_file_status" },
+            }
+        );
+
+        const payload = res.json() || {};
+        const detail = payload?.data || payload;
+        const statusCode = String(detail?.status?.code || detail?.status || "").trim();
+        lastStatus = statusCode || lastStatus;
+        finalStatus = statusCode || finalStatus;
+        finalResponseBody = safeBodySnippet(JSON.stringify(payload));
+
+        if (res.status === 200 && statusCode && !isPendingBatchStatus(statusCode)) {
+            completed = true;
+            break;
+        }
+
+        if (res.status !== 200) {
+            console.error(
+                `[k6][POLL][status] fileId=${fileId} status=${statusCode || "n/a"} httpStatus=${res.status} elapsedMs=${Date.now() - startedAt} body=${safeBodySnippet(res.body) || "<empty>"}`
+            );
+        } else if (statusCode) {
+            console.info(
+                `[k6][POLL][waiting] fileId=${fileId} status=${statusCode} elapsedMs=${Date.now() - startedAt} timeoutMs=${timeoutMs}`
+            );
+        }
+
+        sleep(Math.max(0.2, intervalMs / 1000));
+    }
+
+    return {
+        completed,
+        elapsedMs: Date.now() - startedAt,
+        lastStatus,
+        finalStatus,
+        responseBody: finalResponseBody,
+    };
+}
+
+function nextWorkingDate(daysAhead) {
+    const d = new Date();
+    d.setDate(d.getDate() + daysAhead);
+    while (d.getDay() === 0 || d.getDay() === 6) {
+        d.setDate(d.getDate() + 1);
+    }
+    return d.toISOString().slice(0, 10);
+}
+
+function buildPaymentTransactions(n, data, amountMin, amountMax, paymentProfile) {
+    const txs = [];
+    const seedTransactions = Array.isArray(data?.transactions) ? data.transactions : [];
+    const creditAccounts = paymentProfile.source === "internal-transfer"
+        ? data?.internalTransfer?.creditAccounts || []
+        : seedTransactions.map((transaction) => transaction.creditAccountNumber || transaction.creditAccountId).filter(Boolean);
+    for (let i = 0; i < n; i++) {
+        const amount = randomAmount(amountMin, amountMax);
+        const idSeed = `${Date.now()}-${__VU}-${__ITER}-${i + 1}`;
+        const sourceTransaction = seedTransactions[i % Math.max(1, seedTransactions.length)] || {};
+        const creditorMemberId = paymentProfile.includeCreditorAgent
+            ? String(
+                sourceTransaction.branchCode ||
+                (paymentProfile.source === "internal-transfer"
+                    ? data?.internalTransfer?.creditMemberId || "250655"
+                    : TPT_BRANCH_CODES[i % TPT_BRANCH_CODES.length])
+            )
+            : "";
+        txs.push({
+            kind: paymentProfile.paymentType,
+            creditAccountId: String(creditAccounts[i % Math.max(1, creditAccounts.length)] || "101355"),
+            creditAccountScheme: sourceTransaction.creditAccountScheme || paymentProfile.creditAccountScheme,
+            creditorMemberId,
+            amount,
+            remittanceInfo: `${paymentProfile.paymentType} ${paymentProfile.rail} performance payment ${i + 1}`,
+            endToEndId: `E2E-${paymentProfile.paymentType}-${paymentProfile.rail}-${idSeed}`,
+            notify: i % 2 === 0 ? "Y" : "N",
+            email: i % 2 === 0 ? "test@example.com" : "",
+        });
+    }
+
+    return txs;
+}
+
+function buildPmtInf(tx, index, settings) {
+    const amount = Number(tx.amount).toFixed(2);
+    const creditorAgent = tx.creditorMemberId
+        ? `<CdtrAgt><FinInstnId><ClrSysMmbId><MmbId>${xmlEscape(tx.creditorMemberId)}</MmbId></ClrSysMmbId></FinInstnId></CdtrAgt>`
+        : "";
+
+    return `
+    <PmtInf>
+      <PmtInfId>Pmt-${settings.runId}-${index + 1}</PmtInfId>
+      <PmtMtd>TRF</PmtMtd>
+      <NbOfTxs>1</NbOfTxs>
+      <CtrlSum>${amount}</CtrlSum>
+    <PmtTpInf><InstrPrty>NORM</InstrPrty><LclInstrm><Prtry>${xmlEscape(settings.localInstrument)}</Prtry></LclInstrm></PmtTpInf>
+      <ReqdExctnDt><Dt>${settings.paymentDate}</Dt></ReqdExctnDt>
+      <DbtrAcct><Id><Othr><Id>${xmlEscape(settings.debitAccount)}</Id></Othr></Id><Ccy>${xmlEscape(settings.currency)}</Ccy></DbtrAcct>
+      <CdtTrfTxInf>
+        <PmtId>
+          <InstrId>INS-${settings.runId}-${index + 1}</InstrId>
+          <EndToEndId>${xmlEscape(tx.endToEndId)}</EndToEndId>
+        </PmtId>
+        <Amt><InstdAmt Ccy="${xmlEscape(settings.currency)}">${amount}</InstdAmt></Amt>
+        <CdtrAcct>
+          <Id>
+            <Othr>
+              <Id>${xmlEscape(tx.creditAccountId)}</Id>
+              <SchmeNm><Prtry>${xmlEscape(tx.creditAccountScheme)}</Prtry></SchmeNm>
+            </Othr>
+          </Id>
+        </CdtrAcct>
+        ${creditorAgent}
+        <RmtInf><Ustrd>${xmlEscape(tx.remittanceInfo)}</Ustrd></RmtInf>
+        <SplmtryData><PlcAndNm>BeneficiaryNotification</PlcAndNm><Envlp><Ntfy>${xmlEscape(tx.notify)}</Ntfy><Email>${xmlEscape(tx.email)}</Email></Envlp></SplmtryData>
+      </CdtTrfTxInf>
+    </PmtInf>`;
+}
+
+function buildPaymentBatchXml(data, numPayments) {
+    const paymentProfile = getPaymentProfile();
+    if (!paymentProfile) {
+        throw new Error(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}`);
+    }
+
+    const runId = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+    const currency = String(data?.currency || "ZAR");
+    const channel = String(data?.channel || "WEB");
+    const companyId = String(data?.companyId || "1805");
+    const userId = String(data?.userId || "8865");
+    const debitAccount = String(data?.internalTransfer?.debitAccount || data?.debitAccount || "1300307803580");
+    const localInstrument = localInstructionForRail(paymentProfile.rail);
+    const singleDebit = parseBool(data?.singleDebit, false) ? "true" : "false";
+    const allowDuplicate = parseBool(data?.allowDuplicate, true) ? "true" : "false";
+    const amountMin = configuredAmountMin;
+    const amountMax = configuredAmountMax;
+
+    const transactions = buildPaymentTransactions(numPayments, data, amountMin, amountMax, paymentProfile);
+    const ctrlSum = transactions.reduce((sum, tx) => sum + Number(tx.amount), 0).toFixed(2);
+    const paymentDate = String(__ENV.K6_PAYMENT_DATE || new Date().toISOString().slice(0, 10));
+    const generatedAt = new Date();
+    const generatedTimestamp = timestampForFileName(generatedAt);
+    const creationDateTime = nowIsoNoMs();
+    const fileDisplayName = `Batch Perf ${paymentProfile.paymentType} ${paymentProfile.rail} ${generatedAt.toISOString().slice(0, 10)}_${runId}`;
+    const paymentType = configuredPaymentType;
+    const railType = configuredRail;
+
+    const txBlocks = transactions.map((tx, idx) =>
+        buildPmtInf(tx, idx, {
+            runId,
+            localInstrument,
+            paymentDate,
+            debitAccount,
+            currency,
+        })
+    );
+
+    const xml = `<?xml version="1.0" encoding="utf-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.09">
+  <CstmrCdtTrfInitn>
+    <GrpHdr>
+      <MsgId>K6-${runId}</MsgId>
+      <CreDtTm>${creationDateTime}</CreDtTm>
+      <NbOfTxs>${transactions.length}</NbOfTxs>
+      <CtrlSum>${ctrlSum}</CtrlSum>
+      <InitgPty>
+        <Id>
+          <OrgId>
+            <Othr><Id>${companyId}</Id><SchmeNm><Prtry>COMPANYID</Prtry></SchmeNm></Othr>
+            <Othr><Id>${userId}</Id><SchmeNm><Prtry>USERID</Prtry></SchmeNm></Othr>
+            <Othr><Id>${channel}</Id><SchmeNm><Prtry>CHANNEL</Prtry></SchmeNm></Othr>
+          </OrgId>
+        </Id>
+      </InitgPty>
+      <SplmtryData>
+        <PlcAndNm>FileMetadata</PlcAndNm>
+        <Envlp>
+          <FileType>CSV</FileType>
+          <TemplateVersion>${paymentProfile.paymentType === "INT" ? "Investec_csv1" : "Investec_csv2"}</TemplateVersion>
+          <TemplateType>Investec</TemplateType>
+          <FileName>${xmlEscape(fileDisplayName)}</FileName>
+          <FileDesc>Automated batch payment test</FileDesc>
+          <OrigFileName>batch_test_${runId}.csv</OrigFileName>
+          <SingleDebit>${singleDebit}</SingleDebit>
+          <Encrypted>false</Encrypted>
+          <AutoInitiate>false</AutoInitiate>
+          <HashCode>k6-placeholder</HashCode>
+          <FileSizeBytes>0</FileSizeBytes>
+          <AllowDuplicate>${allowDuplicate}</AllowDuplicate>
+          <InsufficientFundsCheck>false</InsufficientFundsCheck>
+        </Envlp>
+      </SplmtryData>
+    </GrpHdr>
+    ${txBlocks.join("\n")}
+  </CstmrCdtTrfInitn>
+</Document>`;
+
+    const hashCode = md5(xml, "base64");
+    const fileSizeBytes = String(xml.length);
+    const finalXml = xml
+        .replace("k6-placeholder", hashCode)
+        .replace("<FileSizeBytes>0</FileSizeBytes>", `<FileSizeBytes>${fileSizeBytes}</FileSizeBytes>`);
+
+    return {
+        xml: finalXml,
+        fileDisplayName,
+        channel,
+        rail: localInstrument,
+        railType,
+        paymentType,
+        generatedTimestamp,
+        paymentDate,
+        singleDebit: singleDebit === "true",
+        numPayments: transactions.length,
+    };
+}
+
+function buildInitiateRequestBody(batch, fileId, transactionId) {
+    const common = {
+        requestId: makeRequestId(),
+        channel: batch.channel,
+        paymentDate: batch.paymentDate,
+        fileId,
+        transactionId,
+        batchName: sanitizeBatchName(batch.fileDisplayName, "Batch"),
+        singleDebit: batch.singleDebit,
+    };
+
+    if (batch.paymentType === "INT" && batch.railType === "INT") {
+        return { ...common, rail: "INT" };
+    }
+
+    if (batch.paymentType === "TPT" && (batch.railType === "EFT" || batch.railType === "RTGS")) {
+        return { ...common, rail: batch.railType };
+    }
+
+    if (batch.paymentType === "PRLSD" && batch.railType === "EFT") {
+        return { ...common, rail: "EFT" };
+    }
+
+    throw new Error(`No initiate request body is defined for ${batch.paymentType}/${batch.railType}`);
+}
+
+function getTokenProfile() {
+    const profile = TOKENS[selectedEnv]?.getToken_SingleAuth;
+    if (!profile?.GCN || !profile?.company || !profile?.username) {
+        throw new Error(`[k6][SINGLE AUTH] Missing getToken_SingleAuth profile for ${selectedEnv} in ApiRegistry/Tokens.json.`);
+    }
+    return {
+        GCN: String(profile.GCN),
+        company: String(profile.company),
+        username: String(profile.username),
+    };
+}
+
+function parseJsonResponse(response) {
+    try { return response.json() || {}; } catch { return {}; }
+}
+
+function responseType(payload) {
+    if (payload === null) return "null";
+    if (Array.isArray(payload)) return "array";
+    return typeof payload;
+}
+
+function extractOtpChallenge(payload) {
+    const requiredFields = ["Destination", "TimeToLive", "Method", "OTP", "Retry"];
+    const visit = (value, depth) => {
+        if (!value || typeof value !== "object" || depth > 3) return null;
+        if (requiredFields.every((field) => value[field] !== undefined)) return value;
+        for (const key of ["data", "result", "Result", "response", "payload"]) {
+            const found = visit(value[key], depth + 1);
+            if (found) return found;
+        }
+        return null;
+    };
+    return visit(payload, 0);
+}
+
+function isOtpChallenge(payload) {
+    return Boolean(extractOtpChallenge(payload));
+}
+
+function isSasResponse(payload) {
+    return Boolean(
+        payload &&
+        typeof payload === "object" &&
+        !Array.isArray(payload) &&
+        payload.sasUrl &&
+        payload.uploadHeaders &&
+        payload.fileId
+    );
+}
+
+function extractCookieNames(rawSetCookie) {
+    const headers = Array.isArray(rawSetCookie) ? rawSetCookie : [rawSetCookie];
+    const names = [];
+    for (const header of headers) {
+        const chunk = String(header || "").split(",");
+        for (const part of chunk) {
+            const cookiePart = part.split(";")[0].trim();
+            const eq = cookiePart.indexOf("=");
+            if (eq > 0) names.push(cookiePart.slice(0, eq).trim());
+        }
+    }
+    return names;
+}
+
+function parseCookies(rawSetCookie) {
+    const headers = Array.isArray(rawSetCookie) ? rawSetCookie : [rawSetCookie];
+    const cookies = [];
+    for (const header of headers) {
+        const chunk = String(header || "").split(",");
+        for (const part of chunk) {
+            const cookiePart = part.split(";")[0].trim();
+            const eq = cookiePart.indexOf("=");
+            if (eq > 0) cookies.push({ name: cookiePart.slice(0, eq).trim(), value: cookiePart.slice(eq + 1).trim() });
+        }
+    }
+    return cookies;
+}
+
+function flattenCookies(cookies) {
+    return cookies.map((c) => `${c.name}=${c.value}`).join("; ");
+}
+
+function extractSsoStagingCookie(response, stageName) {
+    const rawSetCookie = response?.headers?.["Set-Cookie"] || response?.headers?.["set-cookie"] || "";
+    const cookieNames = extractCookieNames(rawSetCookie);
+    const parsed = parseCookies(rawSetCookie);
+    const sso = parsed.find((c) => c.name === "SSO_STAGING");
+    console.info(`[k6][debug][cookies] stage=${stageName} direction=response setCookieHeaderCount=${(Array.isArray(rawSetCookie) ? rawSetCookie : [rawSetCookie]).filter((h) => h).length} cookieNames=${JSON.stringify(cookieNames)}`);
+    if (!sso) throw new Error(`[k6][FAIL][${stageName}] SSO_STAGING missing from Set-Cookie response`);
+    const value = String(sso.value).trim();
+    return {
+        name: "SSO_STAGING",
+        value,
+        header: flattenCookies(parsed),
+        fingerprint: md5(value, "hex").slice(0, 12),
+        cookies: parsed,
+    };
+}
+
+function applySetCookie(jar, response, stageName) {
+    if (typeof jar !== "object" || jar === null) throw new Error(`[k6][FAIL][${stageName}] Cookie jar is not an object`);
+    const rawSetCookie = response?.headers?.["Set-Cookie"] || response?.headers?.["set-cookie"] || "";
+    const parsed = parseCookies(rawSetCookie);
+    if (parsed.length === 0) {
+        console.info(`[k6][debug][cookies] stage=${stageName} direction=response applied=0 jar=${JSON.stringify(Object.keys(jar))} (no Set-Cookie)`);
+        return jar;
+    }
+    for (const cookie of parsed) {
+        if (!cookie.name) continue;
+        jar[cookie.name] = cookie.value;
+    }
+    console.info(`[k6][debug][cookies] stage=${stageName} direction=response applied=${parsed.length} jar=${JSON.stringify(Object.keys(jar))}`);
+    return jar;
+}
+
+function jarHeader(jar) {
+    return Object.entries(jar || {})
+        .filter(([name]) => name)
+        .map(([name, value]) => `${name}=${value}`)
+        .join("; ");
+}
+
+function sasRetryIdempotencyMode() {
+    const mode = String(__ENV.SAS_RETRY_IDEMPOTENCY_MODE || "NEW").trim().toUpperCase();
+    if (mode !== "SAME" && mode !== "NEW") throw new Error("SAS_RETRY_IDEMPOTENCY_MODE must be SAME or NEW.");
+    return mode;
+}
+
+function sasOtpWaitSeconds() {
+    const raw = (__ENV.K6_SAS_OTP_WAIT_SECONDS || "").trim();
+    if (raw === "") return 3;
+    const value = Number(raw);
+    if (!Number.isFinite(value) || value < 0) throw new Error(`K6_SAS_OTP_WAIT_SECONDS must be a non-negative number, got "${raw}".`);
+    return value;
+}
+
+function buildSasEndpoint(ctx) {
+    return `${ctx.batchBaseUrl}/api/v1/files/batch/sas-url?username=${encodeURIComponent(ctx.singleAuthUser)}&company=${encodeURIComponent(ctx.singleAuthCompany)}`;
+}
+
+function submitOtp(authBaseUrl, otpValue, cookieHeader, durationMetric, stageName) {
+    if (!cookieHeader) throw new Error(`[k6][FAIL][${stageName}] Cookie header is missing`);
+    if (!/\bSSO_STAGING=[^;\s]+(?:;|$)/.test(cookieHeader)) throw new Error(`[k6][FAIL][${stageName}] Cookie header is invalid`);
+    console.info(`[k6][debug][cookies] stage=${stageName} direction=request cookieHeaderNames=${JSON.stringify(cookieHeader.split(";").map((c) => c.split("=")[0].trim()))}`);
+    const started = Date.now();
+    const response = http.post(`${authBaseUrl}/auth/otp`, JSON.stringify({ OTP: otpValue }), {
+        headers: { Cookie: cookieHeader, Accept: "application/vnd.investec.uxp.v2.0.0.0+json", "Content-Type": "application/json" },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: stageName },
+    });
+    logRuntimeExchange(stageName, "POST", `${authBaseUrl}/auth/otp`, { Cookie: cookieHeader, Accept: "<fixed>", "Content-Type": "application/json" }, { OTP: "<redacted>" }, response);
+    durationMetric.add(Date.now() - started);
+    return { response, payload: parseJsonResponse(response) };
+}
+
+function authenticate(config) {
+    const authBaseUrl = config.authBaseUrl;
+    const authStarted = Date.now();
+    const authResponse = http.post(`${authBaseUrl}/auth`, JSON.stringify({ Username: config.username, Password: config.password }), {
+        headers: { Accept: "application/vnd.investec.uxp.v2.0.0.0+json", "Content-Type": "application/json" },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "authenticate" },
+    });
+    logRuntimeExchange("authenticate", "POST", `${authBaseUrl}/auth`, { Accept: "<fixed>", "Content-Type": "application/json" }, { Username: "<redacted>", Password: "<redacted>" }, authResponse);
+    authenticateDuration.add(Date.now() - authStarted);
+    const authPayload = parseJsonResponse(authResponse);
+    if (authResponse.status !== 200 || authPayload?.LoggedIn !== true || authPayload?.Authenticated !== true) {
+        throw new Error(`[k6][FAIL][authenticate] status=${authResponse.status} LoggedIn=${authPayload?.LoggedIn} Authenticated=${authPayload?.Authenticated}`);
+    }
+    const cookie = extractSsoStagingCookie(authResponse, "authenticate");
+    console.info(`[k6][debug][cookie] stage=authenticate cookiePresent=true fingerprint=${cookie.fingerprint}`);
+    console.info("[k6][PASS][authenticate]");
+    return { response: authResponse, payload: authPayload, cookie };
+}
+
+function buildSasRequest(fileName, originalName) {
+    return { fileName, fileDescription: "", originalName, templateType: "Investec", templateVersion: "Investec_csv2", autoInitiate: false, singleDebit: true, encrypted: false, allowDuplicate: false };
+}
+
+function getSasUrl(ctx, sasPayload, sasIdempotencyKey, stageName, cookieHeader, idempotencyDiagnostics, confirmOtp) {
+    if (!cookieHeader) throw new Error(`[k6][FAIL][${stageName}] Cookie header is missing`);
+    if (!/\bSSO_STAGING=[^;\s]+(?:;|$)/.test(cookieHeader)) throw new Error(`[k6][FAIL][${stageName}] Cookie header is invalid`);
+    const body = confirmOtp ? { ...sasPayload, OTP: confirmOtp } : sasPayload;
+    console.info(`[k6][debug][cookies] stage=${stageName} direction=request cookieHeaderNames=${JSON.stringify(cookieHeader.split(";").map((c) => c.split("=")[0].trim()))}`);
+    console.info(`[k6][debug][sas-otp-body] stage=${stageName} confirmOtpPresent=${Boolean(confirmOtp)}`);
+    const started = Date.now();
+    const url = buildSasEndpoint(ctx);
+    const response = http.post(url, JSON.stringify(body), {
+        headers: {
+            Cookie: cookieHeader,
+            accept: "application/vnd.investec.uxp.v2.0.0.1+json",
+            "accept-language": "en-US,en;q=0.9",
+            "cache-control": "no-cache",
+            "content-type": "application/json",
+            "idempotency-key": sasIdempotencyKey,
+        },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: stageName },
+    });
+    logRuntimeExchange(stageName, "POST", url, { Cookie: cookieHeader, accept: "<fixed>", "accept-language": "en-US,en;q=0.9", "cache-control": "no-cache", "content-type": "application/json", "idempotency-key": "<redacted>" }, body, response);
+    sasDuration.add(Date.now() - started);
+    const payload = parseJsonResponse(response);
+    const data = payload && typeof payload === "object" && !Array.isArray(payload) ? payload?.data || payload : {};
+    const otpChallenge = isOtpChallenge(payload);
+    const challenge = otpChallenge ? extractOtpChallenge(payload) : null;
+    const sasResponsePresent = isSasResponse(data);
+    const type = responseType(payload);
+    const responseTypeLabel = type === "string" ? "json-string" : type;
+    const responseStage = stageName === "get_sas_url_retry" ? "retry" : "initial";
+    console.info(
+        `[k6][debug][sas-response] stage=${responseStage} status=${response.status} responseType=${responseTypeLabel} ` +
+        `otpChallenge=${otpChallenge} sasUrlPresent=${Boolean(data.sasUrl)} ` +
+        `uploadHeadersPresent=${Boolean(data.uploadHeaders)} fileIdPresent=${Boolean(data.fileId)}`
+    );
+    if (response.status < 200 || response.status >= 300) {
+        console.error(
+            `[k6][FAIL][get_sas_url] status=${response.status} durationMs=${Number(response.timings?.duration || 0).toFixed(0)} ` +
+            `correctEndpointPath=true cookieHeaderConfigured=${Boolean(cookieHeader)} ` +
+            `idempotencyMode=${idempotencyDiagnostics.mode} environment=${selectedEnv} response=${safeSasErrorSnippet(response.body) || "<empty>"}`
+        );
+        throw new Error(`Get SAS URL failed. status=${response.status}`);
+    }
+    if (challenge) return { kind: "otp-challenge", challenge, response };
+    if (!sasResponsePresent) {
+        console.error(`[k6][FAIL][get_sas_url] status=${response.status} contentType=${response.headers?.["Content-Type"] || response.headers?.["content-type"] || "<missing>"} responseType=${responseTypeLabel} responseSnippet=${safeSasErrorSnippet(response.body) || "<empty>"} cookieHeaderConfigured=${Boolean(cookieHeader)} idempotencyMode=${idempotencyDiagnostics.mode} sameIdempotencyKey=${idempotencyDiagnostics.sameIdempotencyKey}`);
+        throw new Error(`Get SAS URL response is missing sasUrl, uploadHeaders, or fileId. responseType=${type}`);
+    }
+    console.info(`[k6][PASS][get_sas_url] stage=${stageName}`);
+    return { kind: "sas", ...data, response };
+}
+
+function uploadFileToSasUrl(sasUrl, uploadHeaders, csvFileBody) {
+    if (!sasUrl || !csvFileBody) throw new Error("File Manager upload requires a SAS URL and CSV file body.");
+    if (!uploadHeaders || typeof uploadHeaders !== "object" || Object.keys(uploadHeaders).length === 0) {
+        throw new Error("File Manager upload requires the uploadHeaders returned by Get SAS URL.");
+    }
+
+    const response = http.put(sasUrl, csvFileBody, {
+        headers: { ...uploadHeaders },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "file_manager_upload" },
+    });
+    logRuntimeExchange("file_manager_upload", "PUT", "<redacted SAS URL>", uploadHeaders, "<CSV file bytes omitted>", response);
+    check(response, { "File Manager upload status is 201": (r) => r.status === 201 });
+    if (response.status !== 201) throw new Error(`File Manager upload failed. status=${response.status}`);
+    return response;
+}
+
+function getAdoToken() {
+    const missing = ["adoClient_id", "adoClient_secret", "adoScope"].filter((key) => !getAdoConfigValue(key));
+    if (missing.length > 0) {
+        throw new Error(`[k6][AUTH] Missing ADO token configuration: ${missing.join(", ")}.`);
+    }
+    const tenantId = __ENV.K6_AAD_TENANT_ID || "6d6a11bc-469a-48df-a548-d3f353ac1be8";
+    const url = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+
+    const payload = {
+        grant_type: getAdoConfigValue("adoGrant_type") || "client_credentials",
+        client_id: getAdoConfigValue("adoClient_id"),
+        client_secret: getAdoConfigValue("adoClient_secret"),
+        scope: getAdoConfigValue("adoScope"),
+    };
+
+    const res = http.post(url, payload, {
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "auth_ado" },
+    });
+    logRuntimeExchange("auth_ado", "POST", url, { "Content-Type": "application/x-www-form-urlencoded" }, payload, res);
+
+    check(res, { "ADO token status is 200": (r) => r.status === 200 });
+    const json = res.json() || {};
+    if (!json.access_token) {
+        throw new Error(`[k6][AUTH] Failed to obtain ADO token. status=${res.status}.`);
+    }
+    return json.access_token;
+}
+
+function getAppToken(baseUrl, tokenProfile, adoToken) {
+    const url = `${baseUrl}/tokens-service/api/v2/tokens?company=${encodeURIComponent(tokenProfile.company)}&username=${encodeURIComponent(tokenProfile.username)}`;
+    const res = http.get(url, {
+        headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            Accept: "application/json",
+            Authorization: `Bearer ${adoToken}`,
+            GCN: tokenProfile.gcn,
+        },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "auth_app" },
+    });
+    logRuntimeExchange("auth_app", "GET", url, { "Content-Type": "application/json; charset=utf-8", Accept: "application/json", Authorization: "<redacted>", GCN: tokenProfile.gcn }, "<empty>", res);
+
+    check(res, { "App token status is 200": (r) => r.status === 200 });
+    const json = res.json() || {};
+    if (!json.jwt) {
+        throw new Error(`[k6][AUTH] Failed to obtain SINGLE AUTH BAPI token. status=${res.status}.`);
+    }
+    return json.jwt;
+}
+
+function getBapiAuthHeaders(ctx) {
+    if (!ctx.singleAuthBapiToken) {
+        throw new Error("[k6][AUTH] SINGLE AUTH BAPI token is missing; downstream requests were not started.");
+    }
+    return {
+        Authorization: `Bearer ${ctx.singleAuthBapiToken}`,
+        GCN: ctx.singleAuthUserGCN,
+        Accept: "application/json",
+    };
+}
+
+export function setup() {
+    console.info(`[k6][config] env=${selectedEnv}`);
+    console.info(`[k6][config] authHost=${endpointHost(environmentConfig.authBaseUrl)} batchHost=${endpointHost(environmentConfig.batchBaseUrl)} paymentsHost=${endpointHost(environmentConfig.paymentsBaseUrl)}`);
+    validatePreflight();
+    const tokenProfile = getTokenProfile();
+    return {
+        selectedEnv,
+        environmentConfig,
+        batchBaseUrl: environmentConfig.batchBaseUrl.replace(/\/+$/, ""),
+        baseUrl: environmentConfig.paymentsBaseUrl.replace(/\/+$/, ""),
+        tokenProfile,
+        singleAuthCompany: tokenProfile.company,
+        singleAuthUser: tokenProfile.username,
+        singleAuthUserGCN: tokenProfile.GCN,
+        singleAuthLoginId: environmentConfig.username,
+        singleAuthPassword: environmentConfig.password,
+    };
+}
+
+export default function (ctx) {
+    const started = Date.now();
+    let flowOk = true;
+    let stage = "FILE_UPLOAD";
+    const execution = {
+        vu: __VU,
+        iteration: __ITER + 1,
+        paymentType: configuredPaymentType,
+        railType: configuredRail,
+        fileName: "",
+        fileId: "",
+        parentTransactionIds: [],
+        bkRefIds: [],
+        paymentCount: configuredNumPayments,
+        timings: { uploadMs: null, pendinitMs: null, initiationMs: null, sentMs: null },
+        timestamps: { uploadStartedAt: "", uploadEndedAt: "", pendinitStartedAt: "", pendinitEndedAt: "", initiationStartedAt: "", initiationEndedAt: "", sentStartedAt: "", sentEndedAt: "" },
+        statuses: { upload: "", pendinit: "", initiation: "", sent: "" },
+        timeouts: { upload: null, pendinit: null, initiation: null, sent: null },
+        requestDetails: { pendinit: "", ftIds: [] },
+        status: "INCOMPLETE",
+        failure: null,
+        payments: [],
+    };
+
+    try {
+        console.info("[SINGLE AUTH] Validate");
+        const auth = authenticate({
+            authBaseUrl: ctx.environmentConfig.authBaseUrl,
+            username: ctx.singleAuthLoginId,
+            password: ctx.singleAuthPassword,
+        });
+        let currentCookie = auth.cookie;
+        const jar = {};
+        for (const c of currentCookie.cookies || []) if (c && c.name) jar[c.name] = c.value;
+        console.info("[SINGLE AUTH] OTP");
+        const initialOtp = submitOtp(
+            ctx.environmentConfig.authBaseUrl,
+            ctx.environmentConfig.initialOtp,
+            jarHeader(jar),
+            initialOtpDuration,
+            "initial_otp"
+        );
+        if (initialOtp.response.status !== 200 || initialOtp.payload?.Status !== "Ok") {
+            throw new Error(`[k6][FAIL][initial_otp] status=${initialOtp.response.status} Status=${initialOtp.payload?.Status || "<missing>"}`);
+        }
+        if (initialOtp.payload?.Result !== false || String(initialOtp.payload?.Message || "") !== "Invalid token") {
+            console.warn(`[k6][WARN][initial_otp] Unexpected response Result=${initialOtp.payload?.Result} Message=${String(initialOtp.payload?.Message || "")}`);
+        } else {
+            console.warn("[k6][WARN][initial_otp] Result=false Message=Invalid token");
+        }
+        applySetCookie(jar, initialOtp.response, "initial_otp");
+        const sasOtpWait = sasOtpWaitSeconds();
+        console.info(`[k6][debug][wait] stage=initial_otp->get_sas_url seconds=${sasOtpWait}`);
+        sleep(sasOtpWait);
+        try {
+            currentCookie = extractSsoStagingCookie(initialOtp.response, "initial_otp");
+            console.info(`[k6][debug][cookie] stage=initial_otp cookiePresent=true fingerprint=${currentCookie.fingerprint}`);
+        } catch {
+            console.warn("[k6][WARN][initial_otp] No replacement SSO_STAGING cookie returned; continuing with authentication cookie");
+        }
+        const numPayments = configuredNumPayments;
+        const data = getEnvData();
+        const intBatch = buildPaymentBatchXml(data, numPayments);
+
+        console.info("[UPLOAD] Loading CSV");
+        const isUat = selectedEnv === "UAT";
+        const selectedBatchFile = getEnvironmentBatchFile();
+        if (!selectedBatchFile) {
+            throw new Error(`No CSV batch file is configured for ${selectedEnv}/${configuredPaymentType}/${configuredRail}. XML upload is not supported.`);
+        }
+        const sasFileName = sanitizeBatchName(
+            __ENV.K6_BATCH_FILE_NAME || (isUat ? makeUniqueBatchFileName() : intBatch.fileDisplayName),
+            "BulkPaymentV2"
+        );
+        const originalName = `${sasFileName}.csv`;
+        const uploadBody = selectedBatchFile;
+        intBatch.fileDisplayName = sasFileName;
+        execution.fileName = sasFileName;
+        emitExecutionSnapshot(execution);
+        const sasPayload = buildSasRequest(sasFileName, originalName);
+        const initialSasUrl = buildSasEndpoint(ctx);
+        const initialSasPayload = JSON.stringify(sasPayload);
+        const initialSasUsername = ctx.singleAuthUser;
+        const initialSasCompany = ctx.singleAuthCompany;
+        const initialSasIdempotencyKey = makeIdempotencyKey();
+        const retryIdempotencyMode = sasRetryIdempotencyMode();
+        console.info(`[k6][debug][cookie] stage=get_sas_url cookiePresent=${Boolean(currentCookie.header)} fingerprint=${currentCookie.fingerprint}`);
+        console.info(`[k6][debug][sas-idempotency] stage=initial mode=${retryIdempotencyMode} keyGenerated=true`);
+        const sasSessionCookie = jarHeader(jar);
+        let sasData = getSasUrl(ctx, sasPayload, initialSasIdempotencyKey, "get_sas_url", sasSessionCookie, {
+            mode: retryIdempotencyMode,
+            sameIdempotencyKey: true,
+        });
+        applySetCookie(jar, sasData.response, "get_sas_url");
+        if (sasData.kind === "otp-challenge") {
+            console.info("[k6][OTP_REQUIRED][get_sas_url]");
+            console.info(`[k6][debug][wait] stage=get_sas_url->challenge_otp seconds=${sasOtpWait}`);
+            sleep(sasOtpWait);
+            const retryOtp = submitOtp(
+                ctx.environmentConfig.authBaseUrl,
+                ctx.environmentConfig.initialOtp,
+                jarHeader(jar),
+                challengeOtpDuration,
+                "challenge_otp"
+            );
+            if (!(retryOtp.response.status === 200 && retryOtp.payload?.Status === "Ok" && retryOtp.payload?.Result === true)) {
+                throw new Error(`[k6][FAIL][challenge_otp] status=${retryOtp.response.status} Result=${retryOtp.payload?.Result} Message=${String(retryOtp.payload?.Message || "")}`);
+            }
+            const previousFingerprint = currentCookie.fingerprint;
+            currentCookie = extractSsoStagingCookie(retryOtp.response, "challenge_otp");
+            applySetCookie(jar, retryOtp.response, "challenge_otp");
+            console.info("[k6][PASS][challenge_otp]");
+            console.info(`[k6][debug][wait] stage=challenge_otp->get_sas_url_retry seconds=${sasOtpWait}`);
+            sleep(sasOtpWait);
+            const cookieUpdated = currentCookie.fingerprint !== previousFingerprint;
+            console.info(`[k6][debug][cookie] stage=challenge_otp cookiePresent=true cookieUpdated=${cookieUpdated} fingerprint=${currentCookie.fingerprint}`);
+            const retrySasIdempotencyKey = retryIdempotencyMode === "NEW" ? makeIdempotencyKey() : initialSasIdempotencyKey;
+            const sameIdempotencyKey = retrySasIdempotencyKey === initialSasIdempotencyKey;
+            const retrySasUrl = buildSasEndpoint(ctx);
+            const [initialSasBaseUrl, initialSasQuery = ""] = initialSasUrl.split("?", 2);
+            const [retrySasBaseUrl, retrySasQuery = ""] = retrySasUrl.split("?", 2);
+            console.info(`[k6][debug][sas-idempotency] stage=retry mode=${retryIdempotencyMode} sameIdempotencyKey=${sameIdempotencyKey} newKeyGenerated=${!sameIdempotencyKey}`);
+            console.info(`[k6][debug][sas-compare] sameUrl=${retrySasBaseUrl === initialSasBaseUrl} sameQuery=${retrySasQuery === initialSasQuery} samePayload=${JSON.stringify(sasPayload) === initialSasPayload} sameFilename=${sasPayload.fileName === sasFileName} sameOriginalName=${sasPayload.originalName === originalName} sameUsername=${ctx.singleAuthUser === initialSasUsername} sameCompany=${ctx.singleAuthCompany === initialSasCompany} cookieUpdated=${cookieUpdated} sameIdempotencyKey=${sameIdempotencyKey}`);
+            sasData = getSasUrl(ctx, sasPayload, retrySasIdempotencyKey, "get_sas_url_retry", jarHeader(jar), {
+                mode: retryIdempotencyMode,
+                sameIdempotencyKey,
+            });
+            applySetCookie(jar, sasData.response, "get_sas_url_retry");
+            if (sasData.kind === "otp-challenge") {
+                console.info("[k6][OTP_REQUIRED][get_sas_url_retry]");
+                console.error("[k6][FAIL][get_sas_url] reason=OTP_CHALLENGE_REPEATED sasUrlPresent=false uploadHeadersPresent=false fileIdPresent=false");
+                throw new Error("Get SAS URL failed. reason=OTP_CHALLENGE_REPEATED");
+            }
+        }
+
+        if (!isSasResponse(sasData)) {
+            throw new Error("Get SAS URL did not return sasUrl, uploadHeaders, and fileId; upload was not attempted.");
+        }
+
+        const uploadStart = Date.now();
+        execution.timestamps.uploadStartedAt = new Date(uploadStart).toISOString();
+        const uploadRes = uploadFileToSasUrl(sasData.sasUrl, sasData.uploadHeaders, uploadBody);
+        uploadDuration.add(Date.now() - uploadStart);
+        execution.timings.uploadMs = Date.now() - uploadStart;
+        execution.timestamps.uploadEndedAt = new Date().toISOString();
+        execution.statuses.upload = `HTTP ${uploadRes.status}`;
+        emitExecutionSnapshot(execution);
+
+        if (uploadRes.status !== 201) {
+            logHttpFailure("upload", {
+                status: uploadRes.status,
+                timings: uploadRes.timings,
+                url: "<redacted SAS URL>",
+                body: uploadRes.body,
+                txId: "upload",
+            });
+            throw new Error(`File Manager upload failed. status=${uploadRes.status}`);
+        }
+        console.info("[UPLOAD] CSV uploaded successfully");
+
+        ctx.jar = http.cookieJar();
+        console.info("[AUTH] Getting ADO token");
+        ctx.singleAuthAdoAccessToken = getAdoToken();
+        console.info("[AUTH] ADO token received");
+        console.info("[AUTH] Generating SINGLE AUTH BAPI token");
+        ctx.singleAuthBapiToken = getAppToken(ctx.baseUrl, ctx.tokenProfile, ctx.singleAuthAdoAccessToken);
+        console.info("[AUTH] SINGLE AUTH BAPI token received");
+        ctx.authHeaders = getBapiAuthHeaders(ctx);
+        console.info("[AUTH] SINGLE AUTH user context configured");
+        console.info("[FLOW] Continuing with existing Get File flow");
+
+        stage = "PENDINIT";
+        const filePollTimeoutMs = maxDurationMs;
+        const pollIntervalMs = pollingIntervalMs;
+        const pollStarted = Date.now();
+        execution.timestamps.pendinitStartedAt = new Date(pollStarted).toISOString();
+        let fileId = String(sasData.fileId || "");
+        let fileStatus = "";
+        let lastFileHttpStatus = "";
+        let latestFileRecord = null;
+
+        while (Date.now() - pollStarted <= filePollTimeoutMs) {
+            const requestUrl = fileId
+                ? `${ctx.baseUrl}/payments-manager/api/v1/files/${fileId}`
+                : `${ctx.baseUrl}/payments-manager/api/v1/files?page=1&size=20&search=${encodeURIComponent(intBatch.fileDisplayName)}`;
+            execution.requestDetails.pendinit = requestUrl;
+            const getFileRes = http.get(requestUrl, {
+                jar: ctx.jar,
+                headers: ctx.authHeaders,
+                timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+                tags: { stage: fileId ? "get_file_status" : "get_files" },
+            });
+            logRuntimeExchange(fileId ? "get_file_status" : "get_files", "GET", requestUrl, ctx.authHeaders, "<empty>", getFileRes);
+            lastFileHttpStatus = getFileRes.status;
+            check(getFileRes, { [fileId ? "get file status is 200" : "get files status is 200"]: (r) => r.status === 200 });
+
+            if (getFileRes.status !== 200) {
+                logHttpFailure(fileId ? "get_file_status" : "get_files", {
+                    status: getFileRes.status,
+                    timings: getFileRes.timings,
+                    url: requestUrl,
+                    body: getFileRes.body,
+                    txId: fileId || "getFiles",
+                });
+            }
+
+            if (getFileRes.status === 200) {
+                const payload = getFileRes.json() || {};
+                const detail = fileId ? payload.data || payload : null;
+                const match = fileId
+                    ? detail
+                    : (Array.isArray(payload.data) ? payload.data : []).find((x) => String(x.fileName || "") === intBatch.fileDisplayName);
+                if (match) {
+                    fileId = String(match.refId || fileId || "");
+                    execution.fileId = fileId;
+                    fileStatus = String((match.status && match.status.code) || match.status || "");
+                    execution.statuses.pendinit = fileStatus || "UNKNOWN";
+                    latestFileRecord = match;
+                    emitExecutionSnapshot(execution);
+                    if (fileStatus === "PENDINIT") {
+                        break;
+                    }
+                }
+            }
+
+            const elapsedMs = Date.now() - pollStarted;
+            const remainingMs = filePollTimeoutMs - elapsedMs;
+            if (remainingMs <= 0) {
+                break;
+            }
+            sleep(Math.max(0.2, Math.min(pollIntervalMs, remainingMs) / 1000));
+        }
+
+        execution.timestamps.pendinitEndedAt = new Date().toISOString();
+        execution.timings.pendinitMs = Date.now() - pollStarted;
+        if (!execution.statuses.pendinit) {
+            execution.statuses.pendinit = fileStatus || (lastFileHttpStatus ? `HTTP ${lastFileHttpStatus}` : "FILE_NOT_FOUND");
+        }
+
+        if (!fileId) {
+            execution.timeouts.pendinit = { timeoutMs: filePollTimeoutMs, elapsedMs: execution.timings.pendinitMs };
+            setExecutionFailure(execution, {
+                stage,
+                expectedStatus: "PENDINIT",
+                lastStatus: execution.statuses.pendinit,
+                httpStatus: lastFileHttpStatus,
+                timeoutMs: filePollTimeoutMs,
+                elapsedMs: execution.timings.pendinitMs,
+                message: `Uploaded file was not found within ${filePollTimeoutMs}ms. Last backend status: ${execution.statuses.pendinit}`,
+            });
+            console.error(
+                `[k6][FAIL][polling] fileName=${intBatch.fileDisplayName} fileId=<missing> lastStatus=${execution.statuses.pendinit} timeoutMs=${filePollTimeoutMs} elapsedMs=${execution.timings.pendinitMs}`
+            );
+            throw new Error(`Uploaded file not found in getFiles for ${intBatch.fileDisplayName}`);
+        }
+        if (fileStatus !== "PENDINIT") {
+            execution.timeouts.pendinit = { timeoutMs: filePollTimeoutMs, elapsedMs: execution.timings.pendinitMs };
+            setExecutionFailure(execution, {
+                stage,
+                expectedStatus: "PENDINIT",
+                lastStatus: execution.statuses.pendinit,
+                httpStatus: lastFileHttpStatus,
+                timeoutMs: filePollTimeoutMs,
+                elapsedMs: execution.timings.pendinitMs,
+                message: `File did not reach PENDINIT before the polling duration expired. Last backend status: ${execution.statuses.pendinit}`,
+            });
+            logFileValidationFailure(ctx.baseUrl, ctx.authHeaders, fileId, fileStatus, latestFileRecord, ctx.jar);
+            console.error(
+                `[k6][FAIL][polling] fileName=${intBatch.fileDisplayName} fileId=${fileId} expectedStatus=PENDINIT actualStatus=${execution.statuses.pendinit} timeoutMs=${filePollTimeoutMs} elapsedMs=${execution.timings.pendinitMs}`
+            );
+            throw new Error(`File did not reach PENDINIT. fileId=${fileId} lastStatus=${fileStatus}`);
+        }
+        pendinitDuration.add(Date.now() - pollStarted);
+        uploadToPendinitDuration.add(Date.now() - uploadStart);
+
+        const getBatchesStart = Date.now();
+        const getBatchesRes = http.get(
+            `${ctx.baseUrl}/payments-manager/api/v1/batch-payments/${fileId}/batches`,
+            {
+                jar: ctx.jar,
+                headers: ctx.authHeaders,
+                timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+                tags: { stage: "get_batches" },
+            }
+        );
+        logRuntimeExchange("get_file_batches", "GET", `${ctx.baseUrl}/payments-manager/api/v1/batch-payments/${fileId}/batches`, ctx.authHeaders, "<empty>", getBatchesRes);
+        check(getBatchesRes, { "get file batches status is 200": (r) => r.status === 200 });
+        if (getBatchesRes.status !== 200) {
+            logHttpFailure("get_batches", {
+                status: getBatchesRes.status,
+                timings: getBatchesRes.timings,
+                url: `${ctx.baseUrl}/payments-manager/api/v1/batch-payments/${fileId}/batches`,
+                body: getBatchesRes.body,
+                txId: fileId,
+            });
+            throw new Error(`get file batches failed. status=${getBatchesRes.status} body=${getBatchesRes.body}`);
+        }
+
+        const batchPayload = getBatchesRes.json() || {};
+        const batchRows = Array.isArray(batchPayload.data) ? batchPayload.data : [];
+        const returnedRails = [...new Set(batchRows.map((row) => String(row?.rail || "").trim().toUpperCase()).filter(Boolean))];
+        check(true, {
+            "get file batches rail matches selected rail": () => returnedRails.length > 0 && returnedRails.every((rail) => rail === configuredRail),
+        });
+        if (returnedRails.length === 0 || returnedRails.some((rail) => rail !== configuredRail)) {
+            throw new Error(
+                `Get file batches rail validation failed for fileId=${fileId}. expectedRail=${configuredRail} actualRails=${returnedRails.join(",") || "<missing>"}`
+            );
+        }
+        const transactionIds = batchRows
+            .map((r) => String(r.transactionId || ""))
+            .filter((id) => id.length > 0);
+
+        if (transactionIds.length === 0) {
+            console.error(`[k6][FAIL][batches] fileId=${fileId} no transactionIds returned from /batch-payments/${fileId}/batches response=${JSON.stringify(batchPayload).slice(0, 400)}`);
+            throw new Error(`No transactionIds returned for fileId=${fileId}`);
+        }
+
+        // The get file batches response returns both a transaction ID (used to initiate) and a
+        // separate BK-prefixed batch reference (BKREF) used to look up records for that batch.
+        const bkRefIds = batchRows.map((r) => extractBkRefId(r)).filter((id) => id.length > 0);
+        execution.parentTransactionIds = transactionIds;
+        execution.bkRefIds = bkRefIds;
+        emitExecutionSnapshot(execution);
+        if (bkRefIds.length === 0) {
+            console.warn(
+                `[k6][RECORDS][DIAGNOSTIC] no BK-prefixed reference found on batch rows, falling back to transactionId for BKREF. sampleRow=${safeBodySnippet(JSON.stringify(batchRows[0] || {}))}`
+            );
+        }
+
+        const initiateRequests = transactionIds.map((txId) => [
+            "POST",
+            `${ctx.baseUrl}/payments-manager/api/v1/batch-payments/${txId}/initiate?operation=CREATE`,
+            JSON.stringify(buildInitiateRequestBody(intBatch, fileId, txId)),
+            {
+                headers: {
+                    ...ctx.authHeaders,
+                    channel: intBatch.channel,
+                    "Content-Type": "application/json",
+                },
+                jar: ctx.jar,
+                timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+                tags: { stage: "initiate_parallel" },
+            },
+        ]);
+
+        stage = "FILE_INITIATION";
+        const initiateStarted = Date.now();
+        execution.timestamps.initiationStartedAt = new Date(initiateStarted).toISOString();
+        const initiateResponses = http.batch(initiateRequests);
+        const responseDurations = initiateResponses.map((r) => Number(r?.timings?.duration || 0));
+        const slowestDuration = responseDurations.length ? Math.max(...responseDurations) : 0;
+        const slowestIndex = responseDurations.indexOf(slowestDuration);
+        const slowestTxId = transactionIds[slowestIndex] || "unknown";
+        const slowestUrl = initiateRequests[slowestIndex]?.[1] || "n/a";
+        const slowestRequestBody = initiateRequests[slowestIndex]?.[2] || "";
+
+        let allInitiated = true;
+    const initiationStatuses = [];
+        const expectedStatusAfterInitiate = expectedInitiateStatus(intBatch.paymentDate);
+        for (let i = 0; i < initiateResponses.length; i++) {
+            const response = initiateResponses[i];
+            const durationMs = Number(response?.timings?.duration || 0);
+            const txId = transactionIds[i] || "unknown";
+            const requestUrl = initiateRequests[i]?.[1] || "n/a";
+            const requestBody = initiateRequests[i]?.[2] || "";
+            logRuntimeExchange("initiate_batch", "POST", requestUrl, initiateRequests[i]?.[3]?.headers || {}, requestBody, response);
+            const initiatePayload = (() => {
+                try {
+                    return JSON.parse(response.body || "{}");
+                } catch {
+                    return {};
+                }
+            })();
+            const apiStatus = extractStatusCodeFromPayload(initiatePayload);
+            const normalizedStatus = canonicalInitiateStatus(apiStatus);
+            initiationStatuses.push(normalizedStatus || apiStatus || `HTTP ${response.status}`);
+            const expectedCanonicalStatus = canonicalInitiateStatus(expectedStatusAfterInitiate);
+            const statusMatchesExpectation = !expectedCanonicalStatus || normalizedStatus === expectedCanonicalStatus;
+            const isInProgress = response.status === 200 && isPendingBatchStatus(apiStatus);
+            if (response.status !== 200) {
+                allInitiated = false;
+                logHttpFailure("initiate", {
+                    status: response.status,
+                    timings: response.timings,
+                    url: requestUrl,
+                    txId,
+                    body: response.body,
+                });
+            }
+
+            if (isInProgress) {
+                console.warn(
+                    `[k6][INITIATE][INPROGRESS] txId=${txId} status=${apiStatus || "UNKNOWN"} durationMs=${durationMs.toFixed(0)} url=${requestUrl} request=${safeBodySnippet(requestBody)}`
+                );
+            }
+
+            if (response.status === 200 && expectedStatusAfterInitiate) {
+                if (!statusMatchesExpectation) {
+                    allInitiated = false;
+                    console.error(
+                        `[k6][FAIL][initiate-status] txId=${txId} expectedStatus=${expectedCanonicalStatus || expectedStatusAfterInitiate} actualStatus=${normalizedStatus || "UNKNOWN"} paymentDate=${intBatch.paymentDate} url=${requestUrl} request=${safeBodySnippet(requestBody)} response=${safeBodySnippet(response.body) || "<empty>"}`
+                    );
+                } else {
+                    console.info(
+                        `[k6][INITIATE][STATUS] txId=${txId} expectedStatus=${expectedCanonicalStatus || expectedStatusAfterInitiate} actualStatus=${normalizedStatus || "UNKNOWN"} paymentDate=${intBatch.paymentDate}`
+                    );
+                }
+            }
+
+        }
+
+        check(initiateResponses, {
+            "all initiations are 200": () => allInitiated,
+        });
+
+        const totalInitiationMs = Date.now() - initiateStarted;
+        initiationDuration.add(totalInitiationMs);
+        execution.timings.initiationMs = totalInitiationMs;
+        execution.timestamps.initiationEndedAt = new Date().toISOString();
+        execution.statuses.initiation = uniqueStatusText(initiationStatuses, allInitiated ? "INITIATED" : "UNKNOWN");
+        emitExecutionSnapshot(execution);
+
+        if (!allInitiated) {
+            setExecutionFailure(execution, {
+                stage,
+                expectedStatus: expectedInitiateStatus(intBatch.paymentDate) || "200",
+                lastStatus: execution.statuses.initiation,
+                elapsedMs: execution.timings.initiationMs,
+                message: `File initiation failed before the expected status was reached. Last backend status: ${execution.statuses.initiation}`,
+            });
+            throw new Error(
+                `File initiation failed for fileId=${fileId}. ` +
+                `parentTransactionId=${slowestTxId} initiationMs=${totalInitiationMs.toFixed(0)} slowestUrl=${slowestUrl} ` +
+                `slowestRequest=${safeBodySnippet(slowestRequestBody)}`
+            );
+        }
+
+        stage = "SENT";
+        // /batches only returns the parent transaction ID for the whole batch file (used to
+        // initiate); the individual payments inside are never listed there. The per-payment FT
+        // IDs only appear once we call /records, so the number of payments we generated for this
+        // file (intBatch.numPayments) is the only expected count we can validate against.
+        const expectedRecordCount = Number(intBatch.numPayments || 0);
+
+        // BKREF (the BK-prefixed batch reference) is what /records expects, not transactionId;
+        // fall back to transactionIds only if no BK reference was found on the batch rows.
+        const recordsBkrefs = bkRefIds.length > 0 ? bkRefIds : transactionIds;
+
+        // Fetch FT IDs (refId) for every initiated payment and bucket them by outcome. Records
+        // can lag briefly behind initiation, so poll until the expected payment count shows up.
+        const recordsPageSize = envNumber(["K6_RECORDS_PAGE_SIZE"], Math.min(100, Math.max(10, expectedRecordCount)));
+        const recordsPollTimeoutMs = maxDurationMs;
+        const recordsPollIntervalMs = pollingIntervalMs;
+        const recordsStart = Date.now();
+        execution.timestamps.sentStartedAt = new Date(recordsStart).toISOString();
+        const {
+            validation,
+            attempts: recordsAttempts,
+            meta: recordsMeta,
+            requests: recordsRequests,
+            timedOut: sentTimedOut,
+        } = fetchAndValidateBatchRecordsWithRetry(
+            ctx.baseUrl,
+            ctx.authHeaders,
+            recordsBkrefs,
+            expectedRecordCount,
+            recordsPageSize,
+            recordsPollTimeoutMs,
+            recordsPollIntervalMs,
+            ctx.jar
+        );
+        sentDuration.add(Date.now() - recordsStart);
+        execution.timings.sentMs = Date.now() - recordsStart;
+        execution.timestamps.sentEndedAt = new Date().toISOString();
+
+
+        const finalValidation = validation;
+        execution.statuses.sent = validationStatusText(finalValidation);
+        execution.requestDetails.ftIds = recordsRequests;
+        execution.payments = Object.entries(finalValidation.buckets).flatMap(([resultGroup, payments]) =>
+            payments.map((payment) => ({ ...payment, resultGroup }))
+        );
+        emitExecutionSnapshot(execution);
+
+        check(true, {
+            "no failed payments after initiation": () => finalValidation.buckets.FAILED.length === 0,
+            "no rejected payments after initiation": () => finalValidation.buckets.REJECTED.length === 0,
+            "record count matches expected payment count": () => finalValidation.shortfall === 0,
+            "all payment records reached a final status": () => finalValidation.buckets.IN_PROGRESS.length === 0,
+            "SENT completed within maximum duration": () => !sentTimedOut,
+        });
+
+        if (finalValidation.shortfall > 0) {
+            console.error(
+                `[k6][RECORDS][MISSING] fileId=${fileId} attempts=${recordsAttempts} pollTimeoutMs=${recordsPollTimeoutMs} ` +
+                `expected=${expectedRecordCount} actual=${finalValidation.totalValidated} shortfall=${finalValidation.shortfall}`
+            );
+        }
+
+        if (finalValidation.buckets.IN_PROGRESS.length > 0) {
+            console.warn(
+                `[k6][RECORDS][INPROGRESS] fileId=${fileId} attempts=${recordsAttempts} pollTimeoutMs=${recordsPollTimeoutMs} ` +
+                `count=${finalValidation.buckets.IN_PROGRESS.length}`
+            );
+        }
+
+        if (finalValidation.buckets.IN_PROGRESS.length > 0 || finalValidation.buckets.FAILED.length > 0 || finalValidation.buckets.REJECTED.length > 0) {
+            console.warn(
+                `[k6][RECORDS][DETAILS] fileId=${fileId} record-level details saved to the run artifact and HTML report`
+            );
+        }
+
+        console.log(
+            `[k6][RECORDS] fileId=${fileId} expected=${expectedRecordCount} totalValidated=${finalValidation.totalValidated} passed=${finalValidation.buckets.PASSED.length} ` +
+            `failed=${finalValidation.buckets.FAILED.length} rejected=${finalValidation.buckets.REJECTED.length} inProgress=${finalValidation.buckets.IN_PROGRESS.length} ` +
+            `unknown=${finalValidation.buckets.UNKNOWN.length}`
+        );
+
+        emitRecordsCapture({
+            fileId,
+            paymentType: intBatch.paymentType,
+            railType: intBatch.railType,
+            parentTransactionIds: transactionIds,
+            bkRefIds,
+            meta: recordsMeta,
+            expectedTotal: expectedRecordCount,
+            shortfall: finalValidation.shortfall,
+            buckets: finalValidation.buckets,
+        });
+
+        if (finalValidation.shortfall > 0 || finalValidation.buckets.IN_PROGRESS.length > 0 || sentTimedOut) {
+            const lastStatuses = finalValidation.buckets.IN_PROGRESS
+                .map((record) => record.statusCode)
+                .filter(Boolean);
+            const lastStatus = uniqueStatusText(lastStatuses, execution.statuses.sent || "RECORDS_MISSING");
+            if (sentTimedOut) {
+                execution.timeouts.sent = { timeoutMs: recordsPollTimeoutMs, elapsedMs: execution.timings.sentMs };
+            }
+            setExecutionFailure(execution, {
+                stage,
+                expectedStatus: "SENT",
+                lastStatus,
+                timeoutMs: recordsPollTimeoutMs,
+                elapsedMs: execution.timings.sentMs,
+                message: `FT-ID records did not reach SENT before the polling duration expired. Last backend status: ${lastStatus}; expected=${expectedRecordCount} actual=${finalValidation.totalValidated} shortfall=${finalValidation.shortfall}`,
+            });
+            throw new Error(execution.failure.message);
+        }
+
+        execution.status = finalValidation.buckets.FAILED.length > 0 || finalValidation.buckets.REJECTED.length > 0
+                ? "FAILED"
+                : "PASSED";
+
+        console.log(
+            `[k6][PASS] file=${intBatch.fileDisplayName} fileId=${fileId} payments=${transactionIds.length} paymentType=${intBatch.paymentType} rail=${intBatch.railType}`
+        );
+    } catch (error) {
+        flowOk = false;
+        if (!execution.failure) {
+            setExecutionFailure(execution, {
+                stage,
+                elapsedMs: Date.now() - started,
+                message: String(error?.message || error),
+            });
+        }
+        emitExecutionSnapshot(execution);
+        console.error(`[k6][FAIL] ${error.message || String(error)}`);
+    } finally {
+        totalFlowDuration.add(Date.now() - started);
+        flowFailureRate.add(!flowOk);
+        emitExecutionSnapshot(execution);
+    }
+}
+
+function redactRuntimeValue(value, key = "") {
+    const sensitive = /password|secret|authorization|bearer|cookie|token|otp|signature|sasurl|sas_url|sso_staging|idempotency|biotoken|access_token|client_secret/i.test(key);
+    if (sensitive) return "<redacted>";
+    if (Array.isArray(value)) return value.map((item) => redactRuntimeValue(item, key));
+    if (value && typeof value === "object") {
+        const result = {};
+        Object.entries(value).forEach(([childKey, childValue]) => {
+            result[childKey] = redactRuntimeValue(childValue, childKey);
+        });
+        return result;
+    }
+    return value;
+}
+
+function safeRuntimeBody(body, key = "body") {
+    if (body === undefined || body === null || body === "") return "<empty>";
+    if (typeof body !== "string") return JSON.stringify(redactRuntimeValue(body, key));
+    try {
+        return JSON.stringify(redactRuntimeValue(JSON.parse(body), key));
+    } catch {
+        if (/csv|xml|password|token|cookie|otp|secret/i.test(key)) return `<${key} omitted>`;
+        return safeSasErrorSnippet(body);
+    }
+}
+
+function safeRuntimeHeaders(headers) {
+    const result = {};
+    Object.keys(headers || {}).forEach((key) => {
+        result[key] = /authorization|cookie|token|secret|otp|sso_staging|idempotency|biotoken/i.test(key) ? "<redacted>" : headers[key];
+    });
+    return result;
+}
+
+function logRuntimeExchange(step, method, url, requestHeaders, requestBody, response) {
+    const safeUrl = String(url || "").replace(/([?&](?:sig|se|sp|sv|sr|token|key)=[^&]*)/gi, "$1=<redacted>");
+    console.info(`[k6][trace][${step}] request=${JSON.stringify({ method, url: safeUrl, headers: safeRuntimeHeaders(requestHeaders), body: safeRuntimeBody(requestBody) })}`);
+    console.info(`[k6][trace][${step}] response=${JSON.stringify({ status: response?.status, headers: safeRuntimeHeaders(response?.headers), body: safeRuntimeBody(response?.body, "response") })}`);
+}
+
+function runtimeValue(key) {
+    return envText([key]) || envFileText([key]);
+}
+
+function endpointHost(value) {
+    return String(value || "").replace(/^[a-z]+:\/\//i, "").split("/")[0];
+}
+
+const selectedEnv = String(__ENV.ENV || "").trim().toUpperCase();
+if (selectedEnv !== "SIT" && selectedEnv !== "UAT") {
+    throw new Error("Unsupported environment. Use ENV=SIT or ENV=UAT.");
+}
+
+const ENVIRONMENTS = {
+    SIT: {
+        authBaseUrl: runtimeValue("SIT_AUTH_URL"),
+        batchBaseUrl: runtimeValue("SIT_CAPI_URL"),
+        paymentsBaseUrl: runtimeValue("SIT_BAPI_URL"),
+        username: runtimeValue("SIT_LOGIN_USERNAME"),
+        password: runtimeValue("SIT_LOGIN_PASSWORD"),
+        company: runtimeValue("SIT_COMPANY"),
+        businessUsername: runtimeValue("SIT_BUSINESS_USERNAME"),
+        gcn: runtimeValue("SIT_GCN"),
+        initialOtp: runtimeValue("SIT_OTP") || envText(["K6_OTP", "OTP"]),
+    },
+    UAT: {
+        authBaseUrl: runtimeValue("UAT_AUTH_URL"),
+        batchBaseUrl: runtimeValue("UAT_CAPI_URL"),
+        paymentsBaseUrl: runtimeValue("UAT_BAPI_URL"),
+        username: runtimeValue("UAT_LOGIN_USERNAME"),
+        password: runtimeValue("UAT_LOGIN_PASSWORD"),
+        company: runtimeValue("UAT_COMPANY"),
+        businessUsername: runtimeValue("UAT_BUSINESS_USERNAME"),
+        gcn: runtimeValue("UAT_GCN"),
+        initialOtp: runtimeValue("UAT_OTP") || envText(["K6_OTP", "OTP"]),
+    },
+};
+
+const environmentConfig = ENVIRONMENTS[selectedEnv];
