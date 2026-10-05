@@ -399,6 +399,33 @@ function makeUniqueBatchFileName() {
     return `BulkPaymentV2${timestamp}${vu}${iteration}${random}`;
 }
 
+function randomAmount(min, max) {
+    const minCents = Math.ceil(Number(min) * 100);
+    const maxCents = Math.floor(Number(max) * 100);
+    if (!Number.isFinite(minCents) || !Number.isFinite(maxCents) || minCents > maxCents) {
+        throw new Error(`[k6][FAIL][file_generation] Invalid amount range min=${min} max=${max}`);
+    }
+    return (minCents + Math.floor(Math.random() * (maxCents - minCents + 1))) / 100;
+}
+
+function xmlEscape(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+}
+
+function nowIsoNoMs() {
+    return new Date().toISOString().slice(0, 19);
+}
+
+function timestampForFileName(date) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+}
+
 function sanitizeBatchName(input, fallback = "Batch") {
     const candidate = String(input || fallback)
         .replace(/[^A-Za-z0-9]/g, "")
@@ -1545,11 +1572,11 @@ export default function (ctx) {
         const initialSasCompany = ctx.singleAuthCompany;
         const initialSasIdempotencyKey = makeIdempotencyKey();
         const retryIdempotencyMode = sasRetryIdempotencyMode();
-        console.info(`[k6][debug][cookie] stage=get_sas_url cookiePresent=${Boolean(currentCookie.header)} fingerprint=${currentCookie.fingerprint}`);
-        console.info(`[k6][debug][sas-idempotency] stage=initial mode=${retryIdempotencyMode} keyGenerated=true`);
         console.info("[SINGLE AUTH] Get SAS URL");
         const sasSessionCookie = jarHeader(jar);
         const sasCookieFingerprint = ssoStagingFingerprint(sasSessionCookie);
+        console.info(`[k6][debug][cookie] stage=get_sas_url cookiePresent=${Boolean(sasSessionCookie)} fingerprint=${sasCookieFingerprint}`);
+        console.info(`[k6][debug][sas-idempotency] stage=initial mode=${retryIdempotencyMode} keyGenerated=true`);
         if (otp2CookieFingerprint) {
             if (sasCookieFingerprint !== otp2CookieFingerprint) {
                 throw new Error(`[k6][FAIL][get_sas_url] Cookie propagation mismatch: OTP #2 response fingerprint=${otp2CookieFingerprint} Get SAS URL request fingerprint=${sasCookieFingerprint}`);
