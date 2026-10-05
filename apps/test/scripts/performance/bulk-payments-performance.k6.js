@@ -246,6 +246,10 @@ function validatePreflight() {
             missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, and PRLSD/EFT`);
     }
 
+    if (paymentProfile && !RAIL_LOCAL_INSTRUMENTS[paymentProfile.rail]) {
+        missing.push(`No local instrument is configured for rail ${paymentProfile.rail} (${configuredPaymentType}/${configuredRail})`);
+    }
+
     if (paymentProfile?.minimumAmount && configuredAmountMin < paymentProfile.minimumAmount) {
         missing.push(`K6_AMOUNT_MIN must be at least ${paymentProfile.minimumAmount} for ${configuredPaymentType}/${configuredRail}`);
     }
@@ -340,6 +344,21 @@ function getPaymentProfile() {
     };
 
     return profiles[`${configuredPaymentType}/${configuredRail}`] || null;
+}
+
+const RAIL_LOCAL_INSTRUMENTS = {
+    INT: "BKTR",
+    EFT: "NURG",
+    RTGS: "URGP",
+};
+
+function localInstructionForRail(rail) {
+    const railKey = String(rail || "").trim().toUpperCase();
+    const localInstrument = RAIL_LOCAL_INSTRUMENTS[railKey];
+    if (!localInstrument) {
+        throw new Error(`[k6][FAIL][file_generation] No local instrument is configured for rail=${railKey || "<missing>"} (${configuredPaymentType}/${configuredRail}); SAS URL was not requested.`);
+    }
+    return localInstrument;
 }
 
 function parseBool(value, fallback) {
@@ -1251,6 +1270,7 @@ function authenticate(config) {
     const cookie = extractSsoStagingCookie(authResponse, "authenticate");
     console.info(`[k6][debug][cookie] stage=authenticate cookiePresent=true fingerprint=${cookie.fingerprint}`);
     console.info("[k6][PASS][authenticate]");
+    console.info("[PASS] authenticate");
     return { response: authResponse, payload: authPayload, cookie };
 }
 
@@ -1443,7 +1463,7 @@ export default function (ctx) {
         let currentCookie = auth.cookie;
         const jar = {};
         for (const c of currentCookie.cookies || []) if (c && c.name) jar[c.name] = c.value;
-        console.info("[SINGLE AUTH] OTP");
+        console.info("[SINGLE AUTH] OTP Attempt #1");
         const initialOtp = submitOtp(
             ctx.environmentConfig.authBaseUrl,
             ctx.environmentConfig.initialOtp,
@@ -1452,23 +1472,50 @@ export default function (ctx) {
             "initial_otp"
         );
         if (initialOtp.response.status !== 200 || initialOtp.payload?.Status !== "Ok") {
-            throw new Error(`[k6][FAIL][initial_otp] status=${initialOtp.response.status} Status=${initialOtp.payload?.Status || "<missing>"}`);
+            throw new Error(`[k6][FAIL][initial_otp] OTP Attempt #1 transport failure status=${initialOtp.response.status} Status=${initialOtp.payload?.Status || "<missing>"}`);
         }
-        if (initialOtp.payload?.Result !== false || String(initialOtp.payload?.Message || "") !== "Invalid token") {
-            console.warn(`[k6][WARN][initial_otp] Unexpected response Result=${initialOtp.payload?.Result} Message=${String(initialOtp.payload?.Message || "")}`);
+        if (initialOtp.payload?.Result === false && String(initialOtp.payload?.Message || "") === "Invalid token") {
+            console.info("[EXPECTED] Result=false Message=Invalid token (OTP Attempt #1 primes the session; this is not a test failure)");
         } else {
-            console.warn("[k6][WARN][initial_otp] Result=false Message=Invalid token");
+            console.warn(`[k6][WARN][initial_otp] Unexpected OTP Attempt #1 response Result=${initialOtp.payload?.Result} Message=${String(initialOtp.payload?.Message || "")}; continuing to OTP Attempt #2`);
         }
         applySetCookie(jar, initialOtp.response, "initial_otp");
-        const sasOtpWait = sasOtpWaitSeconds();
-        console.info(`[k6][debug][wait] stage=initial_otp->get_sas_url seconds=${sasOtpWait}`);
-        sleep(sasOtpWait);
         try {
             currentCookie = extractSsoStagingCookie(initialOtp.response, "initial_otp");
             console.info(`[k6][debug][cookie] stage=initial_otp cookiePresent=true fingerprint=${currentCookie.fingerprint}`);
         } catch {
             console.warn("[k6][WARN][initial_otp] No replacement SSO_STAGING cookie returned; continuing with authentication cookie");
         }
+        const sasOtpWait = sasOtpWaitSeconds();
+        console.info(`[k6][debug][wait] stage=initial_otp->otp_attempt_2 seconds=${sasOtpWait}`);
+        sleep(sasOtpWait);
+
+        console.info("[SINGLE AUTH] OTP Attempt #2");
+        const secondOtp = submitOtp(
+            ctx.environmentConfig.authBaseUrl,
+            ctx.environmentConfig.initialOtp,
+            jarHeader(jar),
+            otpDuration,
+            "otp_attempt_2"
+        );
+        const secondOtpOk = secondOtp.response.status === 200 && secondOtp.payload?.Status === "Ok" && secondOtp.payload?.Result === true;
+        check(secondOtp.response, { "OTP Attempt #2 authentication successful": () => secondOtpOk });
+        if (!secondOtpOk) {
+            console.error(`[k6][FAIL][otp_attempt_2] status=${secondOtp.response.status} Status=${secondOtp.payload?.Status || "<missing>"} Result=${secondOtp.payload?.Result} Message=${String(secondOtp.payload?.Message || "")}`);
+            throw new Error(`[k6][FAIL][otp_attempt_2] OTP Attempt #2 did not authenticate; Get SAS URL was not requested. status=${secondOtp.response.status} Result=${secondOtp.payload?.Result} Message=${String(secondOtp.payload?.Message || "")}`);
+        }
+        applySetCookie(jar, secondOtp.response, "otp_attempt_2");
+        const preOtp2Fingerprint = currentCookie.fingerprint;
+        try {
+            currentCookie = extractSsoStagingCookie(secondOtp.response, "otp_attempt_2");
+            console.info(`[k6][debug][cookie] stage=otp_attempt_2 cookiePresent=true cookieUpdated=${currentCookie.fingerprint !== preOtp2Fingerprint} fingerprint=${currentCookie.fingerprint}`);
+        } catch {
+            console.warn("[k6][WARN][otp_attempt_2] No replacement SSO_STAGING cookie returned; continuing with OTP Attempt #1 session cookie");
+        }
+        console.info("[PASS] OTP authentication successful");
+        console.info(`[k6][debug][wait] stage=otp_attempt_2->get_sas_url seconds=${sasOtpWait}`);
+        sleep(sasOtpWait);
+
         const numPayments = configuredNumPayments;
         const data = getEnvData();
         const intBatch = buildPaymentBatchXml(data, numPayments);
@@ -1497,6 +1544,7 @@ export default function (ctx) {
         const retryIdempotencyMode = sasRetryIdempotencyMode();
         console.info(`[k6][debug][cookie] stage=get_sas_url cookiePresent=${Boolean(currentCookie.header)} fingerprint=${currentCookie.fingerprint}`);
         console.info(`[k6][debug][sas-idempotency] stage=initial mode=${retryIdempotencyMode} keyGenerated=true`);
+        console.info("[SINGLE AUTH] Get SAS URL");
         const sasSessionCookie = jarHeader(jar);
         let sasData = getSasUrl(ctx, sasPayload, initialSasIdempotencyKey, "get_sas_url", sasSessionCookie, {
             mode: retryIdempotencyMode,
@@ -1547,7 +1595,9 @@ export default function (ctx) {
         if (!isSasResponse(sasData)) {
             throw new Error("Get SAS URL did not return sasUrl, uploadHeaders, and fileId; upload was not attempted.");
         }
+        console.info("[PASS] SAS URL generated");
 
+        console.info("[SINGLE AUTH] Upload File");
         const uploadStart = Date.now();
         execution.timestamps.uploadStartedAt = new Date(uploadStart).toISOString();
         const uploadRes = uploadFileToSasUrl(sasData.sasUrl, sasData.uploadHeaders, uploadBody);
@@ -1568,6 +1618,7 @@ export default function (ctx) {
             throw new Error(`File Manager upload failed. status=${uploadRes.status}`);
         }
         console.info("[UPLOAD] CSV uploaded successfully");
+        console.info("[PASS] File uploaded");
 
         ctx.jar = http.cookieJar();
         console.info("[AUTH] Getting ADO token");
