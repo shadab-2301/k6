@@ -397,16 +397,19 @@ function reportHeaderImageDataUri() {
 
 function renderReportHeader(title, facts) {
   const image = reportHeaderImageDataUri();
-  const banner = image
-    ? `<img class="report-banner" src="${image}" alt="${escapeHtml(title)}">`
-    : `<div class="report-banner-text">${escapeHtml(title)}</div>`;
+  const banner = image ? `<img class="report-banner" src="${image}" alt="Performance Report branding">` : "";
   const factsHtml = facts
     .filter(([, value]) => value !== undefined && value !== null && value !== "")
     .map(([label, value]) => `<div class="report-fact"><span>${escapeHtml(label)}</span><strong>${value}</strong></div>`)
     .join("");
   return `<header class="report-header">
-    <h1 class="visually-hidden">${escapeHtml(title)}</h1>
-    ${banner}
+    <div class="report-masthead">
+      <div class="report-title">
+        <h1>${escapeHtml(title)}</h1>
+        <p>Generated on ${escapeHtml(new Date().toLocaleString())}</p>
+      </div>
+      ${banner}
+    </div>
     <div class="report-facts">${factsHtml}</div>
   </header>`;
 }
@@ -437,8 +440,11 @@ const REPORT_BASE_CSS = `
   .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .container { max-width:1280px; margin:0 auto; padding:24px 32px 40px; background:#ffffff; }
   .report-header { border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:24px; background:#ffffff; }
-  .report-banner { display:block; height:180px; width:auto; max-width:100%; object-fit:contain; object-position:left center; }
-  .report-banner-text { padding:32px; font-size:28px; font-weight:600; color:var(--ink); }
+  .report-masthead { display:flex; flex-wrap:wrap-reverse; align-items:center; justify-content:space-between; gap:16px; }
+  .report-title { padding:20px 24px; min-width:0; }
+  .report-title h1 { font-size:22px; font-weight:600; color:var(--ink); letter-spacing:-.01em; }
+  .report-title p { margin-top:4px; font-size:13px; color:var(--muted); }
+  .report-banner { display:block; height:180px; width:auto; max-width:100%; margin-left:auto; object-fit:contain; object-position:right center; }
   .report-facts { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); }
   .report-fact { flex:1 1 180px; padding:12px 20px; border-right:1px solid var(--line); }
   .report-fact:last-child { border-right:0; }
