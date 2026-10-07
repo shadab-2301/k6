@@ -381,6 +381,98 @@ function escapeHtml(value) {
     .replace(/"/g, "&quot;");
 }
 
+const reportHeaderImagePath = path.join(__dirname, "..", "config", "inages", "performance.png");
+let reportHeaderImageCache;
+
+function reportHeaderImageDataUri() {
+  if (reportHeaderImageCache !== undefined) return reportHeaderImageCache;
+  try {
+    reportHeaderImageCache = `data:image/png;base64,${fs.readFileSync(reportHeaderImagePath).toString("base64")}`;
+  } catch {
+    console.warn(`[k6][report][WARN] Header image not found at ${path.relative(rootDir, reportHeaderImagePath)}; using text header.`);
+    reportHeaderImageCache = null;
+  }
+  return reportHeaderImageCache;
+}
+
+function renderReportHeader(title, facts) {
+  const image = reportHeaderImageDataUri();
+  const banner = image
+    ? `<img class="report-banner" src="${image}" alt="${escapeHtml(title)}">`
+    : `<div class="report-banner-text">${escapeHtml(title)}</div>`;
+  const factsHtml = facts
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .map(([label, value]) => `<div class="report-fact"><span>${escapeHtml(label)}</span><strong>${value}</strong></div>`)
+    .join("");
+  return `<header class="report-header">
+    <h1 class="visually-hidden">${escapeHtml(title)}</h1>
+    ${banner}
+    <div class="report-facts">${factsHtml}</div>
+  </header>`;
+}
+
+function statusTone(value) {
+  const text = String(value || "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+  if (["PASSED", "PASS", "SUCCESS", "SENT", "SCHEDULED", "COMPLETED"].includes(text)) return "pass";
+  if (["FAILED", "FAIL", "REJECTED", "TIMED_OUT", "MISSING_RECORDS", "PAYMENT_FAILED", "PAYMENT_REJECTED", "ERROR"].includes(text)) return "fail";
+  if (["IN_PROGRESS", "INCOMPLETE", "PENDING", "UNKNOWN"].includes(text)) return "warn";
+  return "neutral";
+}
+
+function statusBadge(value) {
+  const text = String(value || "n/a");
+  return `<span class="badge badge-${statusTone(text)}">${escapeHtml(text.replace(/_/g, " "))}</span>`;
+}
+
+const REPORT_BASE_CSS = `
+  :root {
+    --ink:#111827; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --line-strong:#d1d5db; --surface:#f9fafb; --head:#f3f4f6;
+    --pass:#166534; --pass-bg:#f0fdf4; --pass-line:#bbf7d0;
+    --fail:#b91c1c; --fail-bg:#fef2f2; --fail-line:#fecaca;
+    --warn:#92400e; --warn-bg:#fffbeb; --warn-line:#fde68a;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { background:#ffffff; }
+  body { font-family:"Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif; color:var(--text); font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+  .container { max-width:1280px; margin:0 auto; padding:24px 32px 40px; background:#ffffff; }
+  .report-header { border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:24px; background:#ffffff; }
+  .report-banner { display:block; width:100%; height:auto; }
+  .report-banner-text { padding:32px; font-size:28px; font-weight:600; color:var(--ink); }
+  .report-facts { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); }
+  .report-fact { flex:1 1 180px; padding:12px 20px; border-right:1px solid var(--line); }
+  .report-fact:last-child { border-right:0; }
+  .report-fact > span { display:block; font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+  .report-fact > strong { display:block; margin-top:2px; font-size:14px; font-weight:600; color:var(--ink); }
+  .section { margin-top:32px; }
+  .section h2 { font-size:17px; font-weight:600; color:var(--ink); padding-bottom:10px; margin-bottom:16px; border-bottom:1px solid var(--line); }
+  .section h3 { font-size:14px; font-weight:600; color:var(--ink); margin:22px 0 8px; }
+  .table-scroll { width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:6px; background:#ffffff; }
+  .data-table { width:100%; border-collapse:separate; border-spacing:0; font-size:13px; font-variant-numeric:tabular-nums; }
+  .data-table th { position:sticky; top:0; z-index:1; background:var(--head); color:#374151; font-size:11.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; text-align:left; white-space:nowrap; padding:10px 12px; border-bottom:1px solid var(--line-strong); }
+  .data-table td { padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--text); }
+  .data-table tbody tr:last-child td { border-bottom:0; }
+  .data-table.striped tbody tr:nth-child(even) td { background:#fcfcfd; }
+  .data-table.striped tbody tr:hover td { background:var(--head); }
+  .data-table .num { text-align:right; white-space:nowrap; }
+  .data-table .id { font-family:Consolas, "SFMono-Regular", Menlo, monospace; font-size:12.5px; white-space:nowrap; }
+  .data-table .nowrap { white-space:nowrap; }
+  .table-note { margin-top:8px; color:var(--muted); font-size:12.5px; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px; border:1px solid var(--line-strong); background:var(--head); color:#374151; font-size:11.5px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; white-space:nowrap; }
+  .badge-pass { color:var(--pass); background:var(--pass-bg); border-color:var(--pass-line); }
+  .badge-fail { color:var(--fail); background:var(--fail-bg); border-color:var(--fail-line); }
+  .badge-warn { color:var(--warn); background:var(--warn-bg); border-color:var(--warn-line); }
+  .empty-state { padding:12px 14px; border:1px dashed var(--line-strong); border-radius:6px; background:var(--surface); color:var(--muted); }
+  .footer { margin-top:40px; padding-top:14px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--muted); font-size:12px; }
+  @media print {
+    .container { padding:0; max-width:none; }
+    .table-scroll { overflow:visible; border:0; }
+    .data-table th { position:static; }
+    thead { display:table-header-group; }
+    tr { page-break-inside:avoid; }
+  }
+`;
+
 function metricSummary(metrics, key, digits = 0) {
   const values = metrics?.[key] || {};
   const p95 = values["p(95)"];
@@ -591,15 +683,15 @@ function renderDualAuthExecutionTable(executions) {
     return `<tr class="batch-stage">
       <td>${escapeHtml(execution.paymentType || "n/a")}</td>
       <td>${escapeHtml(execution.railType || "n/a")}</td>
-      <td>${escapeHtml(execution.paymentCount ?? "n/a")}</td>
-      <td>${escapeHtml(formatDurationMs(validationMs))}</td>
-      <td>${escapeHtml(formatDurationMs(timings.initiationApiMs))}</td>
-      <td>${escapeHtml(formatDurationMs(timings.approvalApiMs))}</td>
-      <td>${escapeHtml(formatDurationMs(timings.pendingAuthToFinalMs))}</td>
-      <td>${escapeHtml(execution.fileId || "n/a")}</td>
+      <td class="num">${escapeHtml(execution.paymentCount ?? "n/a")}</td>
+      <td class="num">${escapeHtml(formatDurationMs(validationMs))}</td>
+      <td class="num">${escapeHtml(formatDurationMs(timings.initiationApiMs))}</td>
+      <td class="num">${escapeHtml(formatDurationMs(timings.approvalApiMs))}</td>
+      <td class="num">${escapeHtml(formatDurationMs(timings.pendingAuthToFinalMs))}</td>
+      <td class="id">${escapeHtml(execution.fileId || "n/a")}</td>
     </tr>
     <tr class="batch-start"><td colspan="8">
-      <div class="trace-batch-title">VU ${escapeHtml(execution.vu)} / Iteration ${escapeHtml(execution.iteration)} | ${escapeHtml(overallResult(execution))}</div>
+      <div class="trace-batch-title">VU ${escapeHtml(execution.vu)} / Iteration ${escapeHtml(execution.iteration)} ${statusBadge(overallResult(execution))}</div>
       <div class="trace-identifiers">
         <span><strong>File Name:</strong> ${escapeHtml(execution.fileName || "n/a")}</span>
         <span><strong>Parent Transaction ID:</strong> ${escapeHtml(uniqueJoined(execution.parentTransactionIds))}</span>
@@ -618,9 +710,9 @@ function renderDualAuthExecutionTable(executions) {
       </div>
     </td></tr>`;
   }).join("");
-  return `<div class="table-scroll"><table class="endpoint-table execution-table"><thead><tr>
-    <th>PaymentTYPE</th><th>RAIL Type</th><th>Records</th><th>File Validation time</th>
-    <th>Initiation (API TAT)</th><th>Approval (API TAT)</th><th>Time from Pend App-&gt; Sent/Sched</th><th>File ID</th>
+  return `<div class="table-scroll"><table class="data-table execution-table"><thead><tr>
+    <th>Payment Type</th><th>Rail Type</th><th class="num">Records</th><th class="num">File Validation Time</th>
+    <th class="num">Initiation (API TAT)</th><th class="num">Approval (API TAT)</th><th class="num">Pending Approval to Sent/Scheduled</th><th>File ID</th>
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -633,7 +725,7 @@ function executionTimingSummary(executions, timingKey) {
 
 function renderExecutionTraceTable(executions) {
   if (executions.length === 0) {
-    return `<div class="recommendation-item">No execution data was collected before the run ended.</div>`;
+    return `<div class="empty-state">No execution data was collected before the run ended.</div>`;
   }
 
   if (authMode === "DUAL_AUTH") return renderDualAuthExecutionTable(executions);
@@ -666,14 +758,14 @@ function renderExecutionTraceTable(executions) {
       `<tr class="batch-stage">
         <td>${escapeHtml(execution.paymentType || "n/a")}</td>
         <td>${escapeHtml(execution.railType || "n/a")}</td>
-        <td>${escapeHtml(execution.paymentCount ?? "n/a")}</td>
-        <td>${escapeHtml(formatDurationMs(elapsedBetween(execution.timestamps?.uploadStartedAt, execution.timestamps?.pendinitEndedAt)))}</td>
-        <td>${escapeHtml(formatDurationMs(execution.timings?.initiationApiMs))}</td>
-        <td>${escapeHtml(formatDurationMs(execution.timings?.pendingInitiToFinalMs))}</td>
-        <td>${escapeHtml(execution.fileId || "n/a")}</td>
+        <td class="num">${escapeHtml(execution.paymentCount ?? "n/a")}</td>
+        <td class="num">${escapeHtml(formatDurationMs(elapsedBetween(execution.timestamps?.uploadStartedAt, execution.timestamps?.pendinitEndedAt)))}</td>
+        <td class="num">${escapeHtml(formatDurationMs(execution.timings?.initiationApiMs))}</td>
+        <td class="num">${escapeHtml(formatDurationMs(execution.timings?.pendingInitiToFinalMs))}</td>
+        <td class="id">${escapeHtml(execution.fileId || "n/a")}</td>
       </tr>`,
       `<tr class="batch-start"><td colspan="7">
-        <div class="trace-batch-title">${escapeHtml(batchLabel)} | ${escapeHtml(result)}</div>
+        <div class="trace-batch-title">${escapeHtml(batchLabel)} ${statusBadge(result)}</div>
         <div class="trace-identifiers">
           <span><strong>File Name:</strong> ${escapeHtml(execution.fileName || "n/a")}</span>
           <span><strong>File ID:</strong> ${escapeHtml(execution.fileId || "n/a")}</span>
@@ -688,7 +780,7 @@ function renderExecutionTraceTable(executions) {
           <div class="trace-kv"><span>Execution Finished</span><strong>${escapeHtml(formatTimestamp(executionEnd))}</strong></div>
           <div class="trace-kv"><span>Total Duration</span><strong>${escapeHtml(formatDurationMs(totalDuration))}</strong></div>
           <div class="trace-kv"><span>Final Status</span><strong>${escapeHtml(execution.statuses?.sent || "n/a")}</strong></div>
-          <div class="trace-kv"><span>Result</span><strong>${escapeHtml(result.toUpperCase())}</strong></div>
+          <div class="trace-kv"><span>Result</span><strong>${statusBadge(result)}</strong></div>
           ${result !== "Passed" ? `<div class="trace-kv"><span>Failure Point</span><strong>${escapeHtml(failurePoint)}</strong></div>` : ""}
           ${result !== "Passed" ? `<div class="trace-kv"><span>Last Known Status</span><strong>${escapeHtml(lastKnownStatus)}</strong></div>` : ""}
         </div>
@@ -706,9 +798,9 @@ function renderExecutionTraceTable(executions) {
     ];
   }).join("");
 
-  return `<div class="table-scroll"><table class="endpoint-table execution-table"><thead><tr>
-    <th>PaymentTYPE</th><th>RAIL Type</th><th>Records</th><th>File Validation time</th>
-    <th>Initiation (API TAT)</th><th>Time from Pend Initi-&gt; Sent/Sched</th><th>File ID</th>
+  return `<div class="table-scroll"><table class="data-table execution-table"><thead><tr>
+    <th>Payment Type</th><th>Rail Type</th><th class="num">Records</th><th class="num">File Validation Time</th>
+    <th class="num">Initiation (API TAT)</th><th class="num">Pending Initiation to Sent/Scheduled</th><th>File ID</th>
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -720,7 +812,7 @@ function paymentOnlyBuckets(buckets) {
 
 function renderRecordsTable(rows, limit = 25) {
   if (rows.length === 0) {
-    return `<div class="recommendation-item">None</div>`;
+    return `<div class="empty-state">None</div>`;
   }
 
   const shown = rows.slice(0, limit);
@@ -728,25 +820,25 @@ function renderRecordsTable(rows, limit = 25) {
     .map(
       (row) => `
         <tr>
-          <td>${escapeHtml(row.ftId)}</td>
-          <td>${escapeHtml(row.transactionId)}</td>
-          <td>${escapeHtml(row.statusCode)}</td>
+          <td class="id">${escapeHtml(row.ftId)}</td>
+          <td class="id">${escapeHtml(row.transactionId)}</td>
+          <td class="nowrap">${escapeHtml(row.statusCode)}</td>
           <td>${escapeHtml(row.statusDescription)}</td>
-          <td>${escapeHtml(row.amount)}</td>
+          <td class="num">${escapeHtml(row.amount)}</td>
         </tr>`
     )
     .join("");
 
   const truncatedNote =
-    rows.length > limit ? `<p style="margin-top:8px;color:#6c757d;">Showing ${limit} of ${rows.length} records.</p>` : "";
+    rows.length > limit ? `<p class="table-note">Showing ${limit} of ${rows.length} records.</p>` : "";
 
   return `
-    <table class="endpoint-table">
+    <div class="table-scroll"><table class="data-table striped">
       <thead>
-        <tr><th>FT ID</th><th>Transaction ID</th><th>Status Code</th><th>Description</th><th>Amount</th></tr>
+        <tr><th>FT ID</th><th>Transaction ID</th><th>Status Code</th><th>Description</th><th class="num">Amount</th></tr>
       </thead>
       <tbody>${rowsHtml}</tbody>
-    </table>
+    </table></div>
     ${truncatedNote}`;
 }
 
@@ -775,7 +867,7 @@ function distinctPaymentRows(buckets) {
 
 function renderAllPaymentsTable(rows, pageSize = 25) {
   if (rows.length === 0) {
-    return `<div class="recommendation-item">No payment records were collected for this run.</div>`;
+    return `<div class="empty-state">No payment records were collected for this run.</div>`;
   }
 
   const rowsHtml = rows
@@ -783,17 +875,17 @@ function renderAllPaymentsTable(rows, pageSize = 25) {
       const page = Math.floor(index / pageSize) + 1;
       return `
         <tr class="payment-row" data-page="${page}">
-          <td>${index + 1}</td>
-          <td>${escapeHtml(row.ftId)}</td>
-          <td>${escapeHtml(row.paymentType || "n/a")}</td>
-          <td>${escapeHtml(row.railType || "n/a")}</td>
-          <td>${escapeHtml(row.transactionId)}</td>
-          <td>${escapeHtml(row.bucketName)}</td>
-          <td>${escapeHtml(row.statusCode)}</td>
+          <td class="num">${index + 1}</td>
+          <td class="id">${escapeHtml(row.ftId)}</td>
+          <td class="nowrap">${escapeHtml(row.paymentType || "n/a")}</td>
+          <td class="nowrap">${escapeHtml(row.railType || "n/a")}</td>
+          <td class="id">${escapeHtml(row.transactionId)}</td>
+          <td>${statusBadge(row.bucketName)}</td>
+          <td class="nowrap">${escapeHtml(row.statusCode)}</td>
           <td>${escapeHtml(row.statusDescription)}</td>
-          <td>${escapeHtml(row.amount)}</td>
-          <td>${escapeHtml(row.fromAccountReference)}</td>
-          <td>${escapeHtml(row.toAccountReference)}</td>
+          <td class="num">${escapeHtml(row.amount)}</td>
+          <td class="nowrap">${escapeHtml(row.fromAccountReference)}</td>
+          <td class="nowrap">${escapeHtml(row.toAccountReference)}</td>
         </tr>`;
     })
     .join("");
@@ -810,10 +902,10 @@ function renderAllPaymentsTable(rows, pageSize = 25) {
 
   return `
     ${controls}
-    <table class="endpoint-table payments-table">
+    <div class="table-scroll"><table class="data-table striped payments-table">
       <thead>
         <tr>
-          <th>#</th>
+          <th class="num">#</th>
           <th>FT ID</th>
           <th>Payment Type</th>
           <th>Rail</th>
@@ -821,13 +913,13 @@ function renderAllPaymentsTable(rows, pageSize = 25) {
           <th>Result Group</th>
           <th>Status Code</th>
           <th>Description</th>
-          <th>Amount</th>
+          <th class="num">Amount</th>
           <th>From Reference</th>
           <th>To Reference</th>
         </tr>
       </thead>
       <tbody>${rowsHtml}</tbody>
-    </table>`;
+    </table></div>`;
 }
 
 function paymentCountRange(count) {
@@ -876,9 +968,11 @@ function writeMatrixHtml(matrix) {
       const [paymentType, railType] = key.split("|");
       const cells = ranges.map((range) => {
         const entry = matrix.entries.find((item) => item.paymentType === paymentType && item.railType === railType && item.range === range);
-        return `<td>${entry ? `${escapeHtml(entry.timeTaken)}<br><small>${escapeHtml(entry.status)}</small>` : ""}</td>`;
+        return entry
+          ? `<td class="matrix-cell"><div class="matrix-time">${escapeHtml(entry.timeTaken)}</div>${statusBadge(entry.status)}<div class="matrix-meta">${escapeHtml(entry.paymentCount)} payment(s)</div><div class="matrix-meta">${escapeHtml(String(entry.updatedAt || "").replace("T", " ").slice(0, 16))} UTC</div></td>`
+          : `<td class="matrix-cell matrix-empty">Not run</td>`;
       }).join("");
-      return `<tr><td>${escapeHtml(paymentType)}</td><td>${escapeHtml(railType)}</td>${cells}</tr>`;
+      return `<tr><td class="nowrap"><strong>${escapeHtml(paymentType)}</strong></td><td class="nowrap">${escapeHtml(railType)}</td>${cells}</tr>`;
     })
     .join("");
 
@@ -886,23 +980,40 @@ function writeMatrixHtml(matrix) {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Performance Matrix</title>
 <style>
-  body { font-family: Segoe UI, Tahoma, sans-serif; background:#1f1f1f; color:#fff; padding:20px; }
-  table { border-collapse:collapse; width:100%; max-width:1200px; }
-  th, td { border:1px solid #666; padding:8px; text-align:left; vertical-align:top; }
-  th { background:#2d2d2d; }
-  small { color:#ccc; }
+${REPORT_BASE_CSS}
+  .matrix-table { min-width:900px; table-layout:fixed; }
+  .matrix-table th:nth-child(1) { width:110px; }
+  .matrix-table th:nth-child(2) { width:70px; }
+  .matrix-table th { white-space:normal; }
+  .matrix-time { font-size:14px; font-weight:600; color:var(--ink); margin-bottom:4px; font-variant-numeric:tabular-nums; }
+  .matrix-meta { margin-top:3px; font-size:11.5px; color:var(--muted); }
+  .matrix-empty { color:#9ca3af; }
 </style>
 </head>
 <body>
-<h1>Performance Matrix</h1>
-<table>
-  <thead>
-    <tr><th>Payment Type</th><th>Rail</th>${ranges.map((range) => `<th>${range}</th>`).join("")}</tr>
-  </thead>
-  <tbody>${rows || `<tr><td colspan="8">No runs recorded yet.</td></tr>`}</tbody>
-</table>
+<div class="container">
+  ${renderReportHeader("Performance Matrix", [
+    ["Report", "Performance Matrix"],
+    ["Payment Type / Rail Combinations", escapeHtml(new Set(matrix.entries.map((entry) => `${entry.paymentType}|${entry.railType}`)).size)],
+    ["Recorded Runs", escapeHtml(matrix.entries.length)],
+    ["Last Updated", escapeHtml(formatTimestamp(new Date().toISOString()))],
+  ])}
+  <section class="section">
+    <h2>Time Taken by Payment Volume</h2>
+    <div class="table-scroll">
+      <table class="data-table matrix-table">
+        <thead>
+          <tr><th>Payment Type</th><th>Rail</th>${ranges.map((range) => `<th>${range} Payments</th>`).join("")}</tr>
+        </thead>
+        <tbody>${rows || `<tr><td colspan="8"><div class="empty-state">No runs recorded yet.</div></td></tr>`}</tbody>
+      </table>
+    </div>
+  </section>
+  <footer class="footer"><span>Performance Matrix</span><span>Generated on ${escapeHtml(new Date().toLocaleString())}</span></footer>
+</div>
 </body>
 </html>`;
 
@@ -935,7 +1046,7 @@ function updatePerformanceMatrix(summary, buckets, totalShortfall, ftIdValidatio
 
 function renderShortfallTable(rows, limit = 25) {
   if (rows.length === 0) {
-    return `<div class="recommendation-item">None</div>`;
+    return `<div class="empty-state">None</div>`;
   }
 
   const shown = rows.slice(0, limit);
@@ -943,22 +1054,22 @@ function renderShortfallTable(rows, limit = 25) {
     .map(
       (row) => `
         <tr>
-          <td>${escapeHtml(row.fileId)}</td>
-          <td>${escapeHtml(row.shortfall)}</td>
+          <td class="id">${escapeHtml(row.fileId)}</td>
+          <td class="num">${escapeHtml(row.shortfall)}</td>
         </tr>`
     )
     .join("");
 
   const truncatedNote =
-    rows.length > limit ? `<p style="margin-top:8px;color:#6c757d;">Showing ${limit} of ${rows.length} files.</p>` : "";
+    rows.length > limit ? `<p class="table-note">Showing ${limit} of ${rows.length} files.</p>` : "";
 
   return `
-    <table class="endpoint-table">
+    <div class="table-scroll"><table class="data-table striped">
       <thead>
-        <tr><th>File ID</th><th>Missing Record Count</th></tr>
+        <tr><th>File ID</th><th class="num">Missing Record Count</th></tr>
       </thead>
       <tbody>${rowsHtml}</tbody>
-    </table>
+    </table></div>
     ${truncatedNote}`;
 }
 
@@ -1030,7 +1141,7 @@ function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
   }
 
   if (issues.length === 0) {
-    return `<div class="no-issues">✅ No performance issues detected! All validated payments passed.</div>`;
+    return `<div class="no-issues">No performance issues detected. All validated payments passed.</div>`;
   }
 
   return issues
@@ -1042,16 +1153,16 @@ function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
             <span class="priority-badge ${issue.priority}">${issue.priority}</span>
           </div>
           <div class="issue-section">
-            <div class="issue-section-title">📌 Observation</div>
+            <div class="issue-section-title">Observation</div>
             <div class="issue-section-content">${escapeHtml(issue.observation)}</div>
           </div>
           <div class="issue-section">
-            <div class="issue-section-title">💥 Impact</div>
+            <div class="issue-section-title">Impact</div>
             <div class="issue-section-content">${escapeHtml(issue.impact)}</div>
           </div>
           <div class="issue-section">
-            <div class="issue-section-title">✅ Recommended Solutions</div>
-            <div class="issue-section-content">${issue.recommendations.map((rec) => `<div class="recommendation-item">• ${escapeHtml(rec)}</div>`).join("")}</div>
+            <div class="issue-section-title">Recommended Actions</div>
+            <ul class="issue-recommendations">${issue.recommendations.map((rec) => `<li>${escapeHtml(rec)}</li>`).join("")}</ul>
           </div>
         </div>`
     )
@@ -1065,91 +1176,82 @@ function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expecte
   const allPayments = distinctPaymentRows(paymentBuckets);
   const generatedAt = new Date();
   const showRunWindow = summary?.env?.singleBulkFile === true;
-  const runWindowCards = showRunWindow ? `
-    <div class="metadata-item"><label>Test Start Time</label><value>${escapeHtml(formatTimestamp(summary?.startedAt || runStartedAt.toISOString()))}</value></div>
-    <div class="metadata-item"><label>Test End Time</label><value>${escapeHtml(formatTimestamp(summary?.endedAt))}</value></div>
-    <div class="metadata-item"><label>Total Test Duration</label><value>${((summary?.durationMs || 0) / 1000).toFixed(1)}s</value></div>` : "";
+  const overallStatus = runStatus(summary, ftIdValidationCompleted, totalShortfall, buckets);
+  const countValue = (count) => (ftIdValidationCompleted ? count : "N/A");
+  const countTone = (count, tone) => (ftIdValidationCompleted && count > 0 ? ` ${tone}` : "");
+  const headerFacts = [
+    ["Environment", escapeHtml(environment || "n/a")],
+    ["Payment Type / Rail", `${escapeHtml(summary?.env?.paymentType || "n/a")} / ${escapeHtml(summary?.env?.railType || "n/a")}`],
+    ["Payments Requested", escapeHtml(summary?.env?.numPayments ?? "n/a")],
+    ["VUs / Iterations per VU", `${escapeHtml(summary?.env?.vus ?? "n/a")} / ${escapeHtml(summary?.env?.iterations ?? "n/a")}`],
+    ...(showRunWindow ? [
+      ["Test Start", escapeHtml(formatTimestamp(summary?.startedAt || runStartedAt.toISOString()))],
+      ["Test End", escapeHtml(formatTimestamp(summary?.endedAt))],
+      ["Total Duration", `${((summary?.durationMs || 0) / 1000).toFixed(1)}s`],
+    ] : []),
+    ["Overall Status", statusBadge(overallStatus)],
+  ];
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Bulk Payments Performance Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bulk Payments Performance Report - ${escapeHtml(environment || "")}</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); padding:20px; }
-  .container { max-width:1200px; margin:0 auto; background:#fff; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,.3); overflow:hidden; }
-  .header { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; padding:40px; text-align:center; }
-  .header h1 { font-size:2.2em; margin-bottom:10px; }
-  .metadata { background:#f8f9fa; padding:20px 40px; border-bottom:1px solid #e9ecef; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
-  .metadata-item { padding:15px; background:#fff; border-radius:8px; border-left:4px solid #667eea; }
-  .metadata-item label { display:block; color:#6c757d; font-size:.85em; font-weight:600; text-transform:uppercase; margin-bottom:5px; }
-  .metadata-item value { display:block; color:#212529; font-size:1.2em; font-weight:500; }
-  .reference-strip { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-bottom:14px; padding:14px; background:#f8f9fa; border-left:4px solid #667eea; border-radius:8px; color:#212529; }
-  .content { padding:40px; }
-  .section { margin-bottom:40px; }
-  .section h2 { color:#667eea; font-size:1.6em; margin-bottom:20px; padding-bottom:10px; border-bottom:3px solid #667eea; }
-  .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; }
-  .metric-card { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; padding:20px; border-radius:10px; text-align:center; }
-  .metric-card.success { background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%); }
-  .metric-card.warning { background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%); }
-  .metric-card .label { font-size:.85em; opacity:.9; margin-bottom:8px; }
-  .metric-card .value { font-size:1.5em; font-weight:bold; }
-  .table-scroll { width:100%; overflow-x:auto; padding-bottom:6px; }
-  .endpoint-table { width:100%; border-collapse:collapse; margin-top:10px; }
-  .endpoint-table th,.endpoint-table td { padding:10px; text-align:left; border-bottom:1px solid #dee2e6; font-size:.9em; }
-  .endpoint-table th { background:#667eea; color:#fff; }
-  .execution-table th,.execution-table td { vertical-align:top; white-space:normal; word-break:break-word; }
-  .execution-table tbody tr.batch-start td { border-top:3px solid #667eea; font-weight:400; background:#f8f9ff; line-height:1.5; padding:16px; }
-  .execution-table tbody tr.batch-stage td { font-weight:600; }
-  .execution-table { min-width:1200px; }
-  .trace-batch-title { font-size:1.05em; font-weight:700; color:#212529; margin-bottom:10px; }
-  .trace-identifiers { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:6px 18px; margin-bottom:12px; }
-  .trace-subsection { margin-top:10px; padding-top:10px; border-top:1px solid #dee2e6; }
-  .trace-subtitle { color:#667eea; font-size:.85em; font-weight:700; text-transform:uppercase; margin-bottom:6px; }
-  .trace-kv { display:grid; grid-template-columns:minmax(150px,220px) 1fr; gap:10px; margin:3px 0; }
-  .trace-kv span { color:#6c757d; }
-  .trace-kv strong { color:#212529; }
-  .trace-failure { border-left:4px solid #f5576c; padding-left:12px; }
-  .trace-outcomes { display:flex; flex-wrap:wrap; gap:10px; }
-  .trace-outcomes span { background:#fff; border:1px solid #dee2e6; border-radius:6px; padding:6px 10px; }
-  .payments-table { table-layout:auto; }
-  .pagination-controls { display:flex; align-items:center; gap:12px; margin:12px 0; }
-  .pagination-controls button { background:#667eea; color:#fff; border:0; border-radius:6px; padding:8px 14px; cursor:pointer; font-weight:600; }
-  .pagination-controls button:disabled { background:#adb5bd; cursor:not-allowed; }
-  .issue-item { background:#f8f9fa; border-left:4px solid #f5576c; padding:20px; margin-bottom:20px; border-radius:8px; }
-  .issue-item.medium { border-left-color:#f093fb; }
-  .issue-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
-  .issue-title { font-size:1.2em; font-weight:600; }
-  .priority-badge { padding:6px 12px; border-radius:20px; font-size:.8em; font-weight:600; text-transform:uppercase; background:#f5576c; color:#fff; }
-  .priority-badge.medium { background:#f093fb; }
-  .issue-section { margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,0,0,.1); }
-  .issue-section-title { font-weight:600; color:#667eea; font-size:.9em; text-transform:uppercase; margin-bottom:6px; }
-  .recommendation-item { background:#e7f3ff; border-left:4px solid #2196F3; padding:10px; margin-bottom:8px; border-radius:4px; color:#1565c0; }
-  .no-issues { background:linear-gradient(135deg,#11998e 0%,#38ef7d 100%); color:#fff; padding:25px; text-align:center; border-radius:8px; }
-  .footer { background:#f8f9fa; padding:20px 40px; border-top:1px solid #dee2e6; text-align:center; color:#6c757d; font-size:.9em; }
+${REPORT_BASE_CSS}
+  .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+  .metric-card { border:1px solid var(--line); border-top:3px solid var(--ink); border-radius:6px; padding:14px 16px; background:#ffffff; }
+  .metric-card.success { border-top-color:var(--pass); }
+  .metric-card.warning { border-top-color:var(--fail); }
+  .metric-card.pending { border-top-color:#b45309; }
+  .metric-card .label { font-size:11.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
+  .metric-card .value { margin-top:6px; font-size:22px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .summary-note { margin-top:12px; color:var(--muted); font-size:13px; }
+  .execution-table { min-width:960px; }
+  .execution-table tbody tr.batch-stage td { font-weight:600; color:var(--ink); background:#ffffff; border-top:1px solid var(--line-strong); }
+  .execution-table tbody tr.batch-stage:first-child td { border-top:0; }
+  .execution-table tbody tr.batch-start td { background:var(--surface); padding:16px 18px 18px; white-space:normal; word-break:break-word; }
+  .trace-batch-title { display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; color:var(--ink); margin-bottom:10px; }
+  .trace-identifiers { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:6px 24px; margin-bottom:6px; font-size:13px; }
+  .trace-identifiers strong { color:var(--muted); font-weight:600; }
+  .trace-subsection { margin-top:12px; padding-top:12px; border-top:1px solid var(--line); }
+  .trace-subtitle { color:var(--ink); font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin-bottom:8px; }
+  .trace-kv { display:grid; grid-template-columns:minmax(170px,240px) 1fr; gap:12px; padding:3px 0; font-size:13px; }
+  .trace-kv span { color:var(--muted); }
+  .trace-kv strong { color:var(--ink); font-weight:500; }
+  .trace-failure { border-left:3px solid var(--fail); padding-left:12px; }
+  .trace-outcomes { display:flex; flex-wrap:wrap; gap:8px; }
+  .trace-outcomes span { background:#ffffff; border:1px solid var(--line); border-radius:4px; padding:5px 10px; font-size:13px; }
+  .pagination-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:0 0 10px; font-size:13px; color:var(--muted); }
+  .pagination-controls button { background:#ffffff; color:var(--ink); border:1px solid var(--line-strong); border-radius:4px; padding:6px 14px; cursor:pointer; font:inherit; font-weight:600; }
+  .pagination-controls button:hover:not(:disabled) { background:var(--head); }
+  .pagination-controls button:disabled { color:#9ca3af; cursor:not-allowed; }
+  .issue-item { border:1px solid var(--line); border-left:3px solid var(--fail); border-radius:6px; padding:16px 18px; margin-bottom:12px; background:#ffffff; }
+  .issue-item.medium { border-left-color:#b45309; }
+  .issue-header { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:10px; }
+  .issue-title { font-size:14.5px; font-weight:600; color:var(--ink); }
+  .priority-badge { padding:2px 8px; border-radius:4px; font-size:11.5px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; color:var(--fail); background:var(--fail-bg); border:1px solid var(--fail-line); }
+  .priority-badge.medium { color:var(--warn); background:var(--warn-bg); border-color:var(--warn-line); }
+  .issue-section { margin-top:10px; padding-top:10px; border-top:1px solid var(--line); }
+  .issue-section-title { font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+  .issue-section-content { font-size:13px; }
+  .issue-recommendations { margin:0; padding-left:18px; font-size:13px; }
+  .issue-recommendations li { margin:2px 0; }
+  .no-issues { padding:14px 16px; border:1px solid var(--pass-line); border-left:3px solid var(--pass); border-radius:6px; background:var(--pass-bg); color:var(--pass); font-weight:500; }
+  @media print { .pagination-controls { display:none; } .payment-row { display:table-row !important; } }
 </style>
 </head>
 <body>
 <div class="container">
-  <div class="header">
-    <h1>⚡ Bulk Payments Performance Report</h1>
-    <p>${escapeHtml(environment)} Environment</p>
-  </div>
-  <div class="metadata">
-    ${runWindowCards}
-    <div class="metadata-item"><label>VUs / Iterations Per VU</label><value>${escapeHtml(summary?.env?.vus)} / ${escapeHtml(summary?.env?.iterations)}</value></div>
-    <div class="metadata-item"><label>Payments Requested</label><value>${escapeHtml(summary?.env?.numPayments)}</value></div>
-    <div class="metadata-item"><label>Payment Type</label><value>${escapeHtml(summary?.env?.paymentType || "n/a")}</value></div>
-    <div class="metadata-item"><label>Rail Type</label><value>${escapeHtml(summary?.env?.railType || "n/a")}</value></div>
-  </div>
-  <div class="content">
-    <div class="section">
+  ${renderReportHeader("Bulk Payments Performance Report", headerFacts)}
+  <main>
+    <section class="section">
       <h2>Batch Execution Trace</h2>
       ${renderExecutionTraceTable(executions)}
-    </div>
-    <div class="section">
-      <h2>📊 Performance Metrics</h2>
+    </section>
+    <section class="section">
+      <h2>Performance Metrics</h2>
       <div class="metrics-grid">
         <div class="metric-card"><div class="label">Upload to PENDINIT</div><div class="value">${metricSummary(metrics, "uploadToPendinitDuration")}</div></div>
         <div class="metric-card"><div class="label">Upload</div><div class="value">${metricSummary(metrics, "uploadDuration")}</div></div>
@@ -1157,39 +1259,39 @@ function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expecte
         ${authMode === "DUAL_AUTH" ? `
         <div class="metric-card"><div class="label">Initiation (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "initiationApiMs")}</div></div>
         <div class="metric-card"><div class="label">Approval (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "approvalApiMs")}</div></div>
-        <div class="metric-card"><div class="label">Pend App to Sent/Sched (Average)</div><div class="value">${executionTimingSummary(executions, "pendingAuthToFinalMs")}</div></div>` : `
+        <div class="metric-card"><div class="label">Pending Approval to Sent/Scheduled (Average)</div><div class="value">${executionTimingSummary(executions, "pendingAuthToFinalMs")}</div></div>` : `
         <div class="metric-card"><div class="label">Initiation (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "initiationApiMs")}</div></div>
-        <div class="metric-card"><div class="label">Pend Initi to Sent/Sched (Average)</div><div class="value">${executionTimingSummary(executions, "pendingInitiToFinalMs")}</div></div>`}
+        <div class="metric-card"><div class="label">Pending Initiation to Sent/Scheduled (Average)</div><div class="value">${executionTimingSummary(executions, "pendingInitiToFinalMs")}</div></div>`}
       </div>
-    </div>
-    <div class="section">
-      <h2>✅ Payment Validation Summary (FT IDs)</h2>
+    </section>
+    <section class="section">
+      <h2>Payment Validation Summary (FT IDs)</h2>
       <div class="metrics-grid">
-        <div class="metric-card success"><div class="label">Passed</div><div class="value">${ftIdValidationCompleted ? paymentBuckets.PASSED.length : "N/A"}</div></div>
-        <div class="metric-card warning"><div class="label">Failed FT IDs</div><div class="value">${ftIdValidationCompleted ? paymentBuckets.FAILED.length : "N/A"}</div></div>
-        <div class="metric-card warning"><div class="label">Rejected FT IDs</div><div class="value">${ftIdValidationCompleted ? paymentBuckets.REJECTED.length : "N/A"}</div></div>
-        <div class="metric-card"><div class="label">Still In Progress</div><div class="value">${ftIdValidationCompleted ? paymentBuckets.IN_PROGRESS.length : "N/A"}</div></div>
-        <div class="metric-card warning"><div class="label">Unvalidated / Missing</div><div class="value">${ftIdValidationCompleted ? totalShortfall : "N/A"}</div></div>
+        <div class="metric-card${countTone(paymentBuckets.PASSED.length, "success")}"><div class="label">Passed</div><div class="value">${countValue(paymentBuckets.PASSED.length)}</div></div>
+        <div class="metric-card${countTone(paymentBuckets.FAILED.length, "warning")}"><div class="label">Failed FT IDs</div><div class="value">${countValue(paymentBuckets.FAILED.length)}</div></div>
+        <div class="metric-card${countTone(paymentBuckets.REJECTED.length, "warning")}"><div class="label">Rejected FT IDs</div><div class="value">${countValue(paymentBuckets.REJECTED.length)}</div></div>
+        <div class="metric-card${countTone(paymentBuckets.IN_PROGRESS.length, "pending")}"><div class="label">Still In Progress</div><div class="value">${countValue(paymentBuckets.IN_PROGRESS.length)}</div></div>
+        <div class="metric-card${countTone(totalShortfall, "warning")}"><div class="label">Unvalidated / Missing</div><div class="value">${countValue(totalShortfall)}</div></div>
       </div>
-      <p style="margin-top:15px;color:#6c757d;">${ftIdValidationCompleted ? `Total validated: ${total} of ${expectedTotal} expected` : `FT-ID validation did not complete. ${expectedTotal} payment(s) were requested; no FT-ID result was collected.`}</p>
+      <p class="summary-note">${ftIdValidationCompleted ? `Total validated: ${total} of ${expectedTotal} expected` : `FT-ID validation did not complete. ${expectedTotal} payment(s) were requested; no FT-ID result was collected.`}</p>
 
-      <h3 style="margin-top:20px;color:#212529;">Failed</h3>
+      <h3>Failed</h3>
       ${renderRecordsTable(paymentBuckets.FAILED)}
-      <h3 style="margin-top:20px;color:#212529;">Rejected</h3>
+      <h3>Rejected</h3>
       ${renderRecordsTable(paymentBuckets.REJECTED)}
-      <h3 style="margin-top:20px;color:#212529;">Unvalidated / Missing</h3>
+      <h3>Unvalidated / Missing</h3>
       ${renderShortfallTable(shortfalls)}
-    </div>
-    <div class="section">
-      <h2>📄 All FT IDs / Payment Records</h2>
+    </section>
+    <section class="section">
+      <h2>All FT IDs / Payment Records</h2>
       ${renderAllPaymentsTable(allPayments, 25)}
-    </div>
-    <div class="section">
-      <h2>🚨 Performance Issues</h2>
+    </section>
+    <section class="section">
+      <h2>Performance Issues</h2>
       ${buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted)}
-    </div>
-  </div>
-  <div class="footer"><p>Generated on ${generatedAt.toLocaleString()} | Performance Testing Framework</p></div>
+    </section>
+  </main>
+  <footer class="footer"><span>Bulk Payments Performance Report | ${escapeHtml(environment || "")}</span><span>Generated on ${escapeHtml(generatedAt.toLocaleString())}</span></footer>
 </div>
 <script>
 (function () {
