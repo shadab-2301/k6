@@ -607,13 +607,7 @@ function expectedInitiateStatus(paymentDate) {
         return "";
     }
 
-    const paymentDateOnly = normalizeDateOnly(paymentDate);
-    const todayDateOnly = normalizeDateOnly(new Date().toISOString().slice(0, 10));
-    if (!paymentDateOnly || !todayDateOnly) {
-        return "INPROGRESS";
-    }
-
-    return paymentDateOnly > todayDateOnly ? "SCHEDULED" : "INPROGRESS";
+    return expectedFinalChildStatus(paymentDate);
 }
 
 function canonicalInitiateStatus(statusCode) {
