@@ -437,7 +437,7 @@ const REPORT_BASE_CSS = `
   .visually-hidden { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
   .container { max-width:1280px; margin:0 auto; padding:24px 32px 40px; background:#ffffff; }
   .report-header { border:1px solid var(--line); border-radius:8px; overflow:hidden; margin-bottom:24px; background:#ffffff; }
-  .report-banner { display:block; width:100%; height:auto; }
+  .report-banner { display:block; height:180px; width:auto; max-width:100%; object-fit:contain; object-position:left center; }
   .report-banner-text { padding:32px; font-size:28px; font-weight:600; color:var(--ink); }
   .report-facts { display:flex; flex-wrap:wrap; border-top:1px solid var(--line); }
   .report-fact { flex:1 1 180px; padding:12px 20px; border-right:1px solid var(--line); }
@@ -837,38 +837,6 @@ function paymentOnlyBuckets(buckets) {
   );
 }
 
-function renderRecordsTable(rows, limit = 25) {
-  if (rows.length === 0) {
-    return `<div class="empty-state">None</div>`;
-  }
-
-  const shown = rows.slice(0, limit);
-  const rowsHtml = shown
-    .map(
-      (row) => `
-        <tr>
-          <td class="id">${escapeHtml(row.ftId)}</td>
-          <td class="id">${escapeHtml(row.transactionId)}</td>
-          <td class="nowrap">${escapeHtml(row.statusCode)}</td>
-          <td>${escapeHtml(row.statusDescription)}</td>
-          <td class="num">${escapeHtml(row.amount)}</td>
-        </tr>`
-    )
-    .join("");
-
-  const truncatedNote =
-    rows.length > limit ? `<p class="table-note">Showing ${limit} of ${rows.length} records.</p>` : "";
-
-  return `
-    <div class="table-scroll"><table class="data-table striped">
-      <thead>
-        <tr><th>FT ID</th><th>Transaction ID</th><th>Status Code</th><th>Description</th><th class="num">Amount</th></tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody>
-    </table></div>
-    ${truncatedNote}`;
-}
-
 function distinctPaymentRows(buckets) {
   const rows = [];
   const seen = new Set();
@@ -1071,36 +1039,7 @@ function updatePerformanceMatrix(summary, buckets, totalShortfall, ftIdValidatio
   console.log(`[k6][matrix] Updated ${path.relative(rootDir, matrixHtmlPath)}`);
 }
 
-function renderShortfallTable(rows, limit = 25) {
-  if (rows.length === 0) {
-    return `<div class="empty-state">None</div>`;
-  }
-
-  const shown = rows.slice(0, limit);
-  const rowsHtml = shown
-    .map(
-      (row) => `
-        <tr>
-          <td class="id">${escapeHtml(row.fileId)}</td>
-          <td class="num">${escapeHtml(row.shortfall)}</td>
-        </tr>`
-    )
-    .join("");
-
-  const truncatedNote =
-    rows.length > limit ? `<p class="table-note">Showing ${limit} of ${rows.length} files.</p>` : "";
-
-  return `
-    <div class="table-scroll"><table class="data-table striped">
-      <thead>
-        <tr><th>File ID</th><th class="num">Missing Record Count</th></tr>
-      </thead>
-      <tbody>${rowsHtml}</tbody>
-    </table></div>
-    ${truncatedNote}`;
-}
-
-function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
+function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted, shortfalls = []) {
   const issues = [];
   const failedFtIds = buckets.FAILED.filter((row) => !row.batchLevel);
   const rejectedFtIds = buckets.REJECTED.filter((row) => !row.batchLevel);
@@ -1120,9 +1059,9 @@ function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
     issues.push({
       title: `${totalShortfall} payment(s) could not be validated`,
       priority: "high",
-      observation: `${totalShortfall} fewer records were returned by the batch-payments records endpoint than the number of payments generated, within the poll window.`,
+      observation: `${totalShortfall} fewer records were returned by the batch-payments records endpoint than the number of payments generated, within the poll window. Affected file ID(s): ${shortfalls.map((row) => `${row.fileId} (${row.shortfall} missing)`).join(", ") || "n/a"}.`,
       impact: "These payments cannot be confirmed as passed, failed, or rejected, so the true outcome of the run is unknown.",
-      recommendations: ["Review the file IDs with a shortfall listed below", "Increase K6_RECORDS_POLL_TIMEOUT_MS if records are simply delayed", "Confirm the records endpoint indexes every payment for this file/BKREF"],
+      recommendations: ["Review the affected file IDs listed above", "Increase K6_RECORDS_POLL_TIMEOUT_MS if records are simply delayed", "Confirm the records endpoint indexes every payment for this file/BKREF"],
     });
   }
 
@@ -1143,7 +1082,7 @@ function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
       priority: "high",
       observation: `${failedFtIds.length} FT ID(s) returned a failed status when validated via the batch-payments records endpoint.`,
       impact: "Failed payments will not reach the beneficiary and require manual investigation or resubmission.",
-      recommendations: ["Review the failed FT IDs listed below", "Check downstream payment processing logs", "Re-run affected transactions once root cause is fixed"],
+      recommendations: ["Review the FAILED rows in the All FT IDs / Payment Records table", "Check downstream payment processing logs", "Re-run affected transactions once root cause is fixed"],
     });
   }
 
@@ -1153,7 +1092,7 @@ function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
       priority: "high",
       observation: `${rejectedFtIds.length} FT ID(s) returned a rejected/declined status when validated via the batch-payments records endpoint.`,
       impact: "Rejected payments indicate validation or business rule failures that block settlement.",
-      recommendations: ["Review the rejected FT IDs listed below", "Confirm beneficiary/account details used in test data", "Check rejection reason codes with the payments team"],
+      recommendations: ["Review the REJECTED rows in the All FT IDs / Payment Records table", "Confirm beneficiary/account details used in test data", "Check rejection reason codes with the payments team"],
     });
   }
 
@@ -1226,13 +1165,12 @@ function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expecte
 <title>Bulk Payments Performance Report - ${escapeHtml(environment || "")}</title>
 <style>
 ${REPORT_BASE_CSS}
-  .metrics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
-  .metric-card { border:1px solid var(--line); border-top:3px solid var(--ink); border-radius:6px; padding:14px 16px; background:#ffffff; }
-  .metric-card.success { border-top-color:var(--pass); }
-  .metric-card.warning { border-top-color:var(--fail); }
-  .metric-card.pending { border-top-color:#b45309; }
-  .metric-card .label { font-size:11.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); }
-  .metric-card .value { margin-top:6px; font-size:22px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+  .validation-table { table-layout:fixed; }
+  .data-table.validation-table th, .data-table.validation-table td { text-align:center; white-space:normal; }
+  .validation-table td { font-size:15px; font-weight:600; color:var(--ink); }
+  .validation-table td.count-pass { color:var(--pass); }
+  .validation-table td.count-fail { color:var(--fail); }
+  .validation-table td.count-warn { color:var(--warn); }
   .summary-note { margin-top:12px; color:var(--muted); font-size:13px; }
   .execution-table { min-width:960px; }
   .execution-table tbody tr.batch-stage td { font-weight:600; color:var(--ink); background:#ffffff; border-top:1px solid var(--line-strong); }
@@ -1282,21 +1220,17 @@ ${REPORT_BASE_CSS}
     </section>
     <section class="section">
       <h2>Payment Validation Summary (FT IDs)</h2>
-      <div class="metrics-grid">
-        <div class="metric-card${countTone(paymentBuckets.PASSED.length, "success")}"><div class="label">Passed</div><div class="value">${countValue(paymentBuckets.PASSED.length)}</div></div>
-        <div class="metric-card${countTone(paymentBuckets.FAILED.length, "warning")}"><div class="label">Failed FT IDs</div><div class="value">${countValue(paymentBuckets.FAILED.length)}</div></div>
-        <div class="metric-card${countTone(paymentBuckets.REJECTED.length, "warning")}"><div class="label">Rejected FT IDs</div><div class="value">${countValue(paymentBuckets.REJECTED.length)}</div></div>
-        <div class="metric-card${countTone(paymentBuckets.IN_PROGRESS.length, "pending")}"><div class="label">Still In Progress</div><div class="value">${countValue(paymentBuckets.IN_PROGRESS.length)}</div></div>
-        <div class="metric-card${countTone(totalShortfall, "warning")}"><div class="label">Unvalidated / Missing</div><div class="value">${countValue(totalShortfall)}</div></div>
-      </div>
-      <p class="summary-note">${ftIdValidationCompleted ? `Total validated: ${total} of ${expectedTotal} expected` : `FT-ID validation did not complete. ${expectedTotal} payment(s) were requested; no FT-ID result was collected.`}</p>
-
-      <h3>Failed</h3>
-      ${renderRecordsTable(paymentBuckets.FAILED)}
-      <h3>Rejected</h3>
-      ${renderRecordsTable(paymentBuckets.REJECTED)}
-      <h3>Unvalidated / Missing</h3>
-      ${renderShortfallTable(shortfalls)}
+      <div class="table-scroll"><table class="data-table validation-table"><thead><tr>
+        <th class="num">Passed</th><th class="num">Failed</th><th class="num">Rejected</th><th class="num">In Progress</th><th class="num">Unvalidated / Missing</th><th class="num">Validated / Expected</th>
+      </tr></thead><tbody><tr>
+        <td class="num${countTone(paymentBuckets.PASSED.length, "count-pass")}">${countValue(paymentBuckets.PASSED.length)}</td>
+        <td class="num${countTone(paymentBuckets.FAILED.length, "count-fail")}">${countValue(paymentBuckets.FAILED.length)}</td>
+        <td class="num${countTone(paymentBuckets.REJECTED.length, "count-fail")}">${countValue(paymentBuckets.REJECTED.length)}</td>
+        <td class="num${countTone(paymentBuckets.IN_PROGRESS.length, "count-warn")}">${countValue(paymentBuckets.IN_PROGRESS.length)}</td>
+        <td class="num${countTone(totalShortfall, "count-fail")}">${countValue(totalShortfall)}</td>
+        <td class="num">${ftIdValidationCompleted ? `${total} / ${expectedTotal}` : `N/A / ${expectedTotal}`}</td>
+      </tr></tbody></table></div>
+      ${ftIdValidationCompleted ? "" : `<p class="summary-note">FT-ID validation did not complete. ${expectedTotal} payment(s) were requested; no FT-ID result was collected.</p>`}
     </section>
     <section class="section">
       <h2>All FT IDs / Payment Records</h2>
@@ -1304,7 +1238,7 @@ ${REPORT_BASE_CSS}
     </section>
     <section class="section">
       <h2>Performance Issues</h2>
-      ${buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted)}
+      ${buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted, shortfalls)}
     </section>
   </main>
   <footer class="footer"><span>Bulk Payments Performance Report | ${escapeHtml(environment || "")}</span><span>Generated on ${escapeHtml(generatedAt.toLocaleString())}</span></footer>
