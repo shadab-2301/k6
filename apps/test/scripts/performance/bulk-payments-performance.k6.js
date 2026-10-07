@@ -663,7 +663,7 @@ function classifyRecordStatus(statusCode) {
 
     const passedStatuses = ["SENT", "PROCESSED", "SUCCESS", "COMPLETED", "COMPLETE"];
     const failedStatuses = ["FAILED", "FAIL", "ERROR", "TIMEOUT", "EXPIRED"];
-    const rejectedStatuses = ["REJECTED", "REJECT", "DECLINED", "CANCELLED", "CANCELED"];
+    const rejectedStatuses = ["REJECTED", "REJECT", "RJCT", "DECLINED", "CANCELLED", "CANCELED"];
     const inProgressStatuses = [
         "PENDINIT",
         "VAL_IN_PROG",
@@ -760,7 +760,19 @@ export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSiz
  * container's transactionId (used to initiate), not the per-payment IDs that
  * show up in /records - those two ID spaces never match by design.
  */
-function validateBatchRecords(records, expectedCount) {
+function expectedFinalChildStatus(paymentDate) {
+    const paymentDateOnly = normalizeDateOnly(paymentDate);
+    const todayDateOnly = normalizeDateOnly(new Date().toISOString().slice(0, 10));
+    return paymentDateOnly && todayDateOnly && paymentDateOnly > todayDateOnly ? "SCHEDULED" : "SENT";
+}
+
+function classifyAgainstExpectedStatus(statusCode, expectedFinalStatus) {
+    const bucket = classifyRecordStatus(statusCode);
+    if (!expectedFinalStatus || bucket === "FAILED" || bucket === "REJECTED" || bucket === "UNKNOWN") return bucket;
+    return canonicalInitiateStatus(statusCode) === expectedFinalStatus ? "PASSED" : "IN_PROGRESS";
+}
+
+function validateBatchRecords(records, expectedCount, expectedFinalStatus = "") {
     const buckets = { PASSED: [], FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] };
 
     for (const record of records) {
@@ -768,7 +780,7 @@ function validateBatchRecords(records, expectedCount) {
         const ftId = String(record?.refId || "");
         const statusCode = String(record?.status?.code || "");
         const statusDescription = String(record?.status?.description || "");
-        const bucket = classifyRecordStatus(statusCode);
+        const bucket = classifyAgainstExpectedStatus(statusCode, expectedFinalStatus);
 
         buckets[bucket].push({
             transactionId,
@@ -782,8 +794,60 @@ function validateBatchRecords(records, expectedCount) {
     }
 
     const shortfall = Math.max(0, Number(expectedCount || 0) - records.length);
+    const sentCount = records.filter((record) => String(record?.status?.code || "").trim().toUpperCase() === "SENT").length;
 
-    return { buckets, shortfall, totalValidated: records.length };
+    return { buckets, shortfall, totalValidated: records.length, sentCount };
+}
+
+function paymentsFromValidation(validation) {
+    return Object.entries(validation.buckets).flatMap(([resultGroup, payments]) =>
+        payments.map((payment) => ({ ...payment, resultGroup }))
+    );
+}
+
+function logChildPaymentCounts(fileId, expectedCount, validation, context) {
+    console.log(
+        `[k6][RECORDS] context=${context} fileId=${fileId} expected=${expectedCount} totalValidated=${validation.totalValidated} ` +
+        `passed=${validation.buckets.PASSED.length} sent=${validation.sentCount} failed=${validation.buckets.FAILED.length} ` +
+        `rejected=${validation.buckets.REJECTED.length} inProgress=${validation.buckets.IN_PROGRESS.length} ` +
+        `unknown=${validation.buckets.UNKNOWN.length} missing=${validation.shortfall}`
+    );
+}
+
+/**
+ * One-shot fetch of every child payment in the batch with its actual backend status,
+ * sent to the report collector. Used when the flow stops before the expected final
+ * status so the report still shows what each payment actually reached.
+ */
+function captureActualChildPayments({ ctx, execution, intBatch, fileId, transactionIds, bkRefIds, context }) {
+    const bkrefs = bkRefIds.length > 0 ? bkRefIds : transactionIds;
+    const expectedTotal = Number(intBatch.numPayments || 0);
+    if (bkrefs.length === 0) return null;
+    try {
+        const { records, meta, requests } = fetchBatchRecordsForBkrefs(ctx.baseUrl, ctx.authHeaders, bkrefs, 100, ctx.jar);
+        const validation = validateBatchRecords(records, expectedTotal, expectedFinalChildStatus(intBatch.paymentDate));
+        execution.payments = paymentsFromValidation(validation);
+        execution.requestDetails.ftIds = requests;
+        execution.statuses.sent = validationStatusText(validation);
+        logChildPaymentCounts(fileId, expectedTotal, validation, context);
+        emitRecordsCapture({
+            fileId,
+            paymentType: intBatch.paymentType,
+            railType: intBatch.railType,
+            parentTransactionIds: transactionIds,
+            bkRefIds,
+            meta,
+            expectedTotal,
+            shortfall: validation.shortfall,
+            sentCount: validation.sentCount,
+            buckets: validation.buckets,
+        });
+        emitExecutionSnapshot(execution);
+        return validation;
+    } catch (error) {
+        console.warn(`[k6][RECORDS][WARN] context=${context} fileId=${fileId} could not capture child payments: ${String(error?.message || error)}`);
+        return null;
+    }
 }
 
 /**
@@ -898,14 +962,14 @@ function setExecutionFailure(execution, failure) {
  * and each record has moved out of an in-progress status, or until the polling
  * timeout is reached.
  */
-function fetchAndValidateBatchRecordsWithRetry(baseUrl, authHeaders, bkrefs, expectedCount, pageSize, timeoutMs, intervalMs, jar) {
+function fetchAndValidateBatchRecordsWithRetry(baseUrl, authHeaders, bkrefs, expectedCount, pageSize, timeoutMs, intervalMs, jar, expectedFinalStatus = "") {
     const startedAt = Date.now();
     let attempt = 0;
     let timedOut = false;
     let lastRecords = [];
     let lastMeta = null;
     let lastRequests = [];
-    let lastValidation = { buckets: { PASSED: [], FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] }, shortfall: expectedCount, totalValidated: 0 };
+    let lastValidation = { buckets: { PASSED: [], FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] }, shortfall: expectedCount, totalValidated: 0, sentCount: 0 };
 
     while (attempt === 0 || Date.now() - startedAt < timeoutMs) {
         attempt += 1;
@@ -913,7 +977,7 @@ function fetchAndValidateBatchRecordsWithRetry(baseUrl, authHeaders, bkrefs, exp
         lastRecords = records;
         lastMeta = meta;
         lastRequests = requests;
-        lastValidation = validateBatchRecords(records, expectedCount);
+        lastValidation = validateBatchRecords(records, expectedCount, expectedFinalStatus);
 
         if (lastValidation.shortfall === 0 && lastValidation.buckets.IN_PROGRESS.length === 0) {
             break;
@@ -2108,6 +2172,7 @@ export function runBulkFlow(ctx, afterInitiate) {
         emitExecutionSnapshot(execution);
 
         if (!allInitiated) {
+            captureActualChildPayments({ ctx, execution, intBatch, fileId, transactionIds, bkRefIds, context: "initiation_failed" });
             setExecutionFailure(execution, {
                 stage,
                 expectedStatus: expectedInitiateStatus(intBatch.paymentDate) || "200",
@@ -2126,7 +2191,10 @@ export function runBulkFlow(ctx, afterInitiate) {
             stage = "DUAL_AUTH_APPROVAL";
             const recordsStart = Date.now();
             execution.timestamps.sentStartedAt = new Date(recordsStart).toISOString();
-            const result = afterInitiate({
+            const dualExpectedStatus = expectedFinalChildStatus(intBatch.paymentDate);
+            let result;
+            try {
+                result = afterInitiate({
                 adoToken: ctx.singleAuthAdoAccessToken,
                 baseUrl: ctx.baseUrl,
                 parentTransactionIds: transactionIds,
@@ -2142,7 +2210,22 @@ export function runBulkFlow(ctx, afterInitiate) {
                     execution.statuses.approval = `HTTP ${status}`;
                     emitExecutionSnapshot(execution);
                 },
-            });
+                });
+            } catch (error) {
+                execution.timings.sentMs = Date.now() - recordsStart;
+                execution.timestamps.sentEndedAt = new Date().toISOString();
+                const validation = captureActualChildPayments({ ctx, execution, intBatch, fileId, transactionIds, bkRefIds, context: "dual_auth_expected_status_not_reached" });
+                setExecutionFailure(execution, {
+                    stage,
+                    expectedStatus: dualExpectedStatus,
+                    lastStatus: execution.statuses.sent || execution.statuses.approval || "",
+                    elapsedMs: execution.timings.sentMs,
+                    message: validation
+                        ? `Child payments did not all reach ${dualExpectedStatus} after approval. passed=${validation.buckets.PASSED.length} sent=${validation.sentCount} failed=${validation.buckets.FAILED.length} rejected=${validation.buckets.REJECTED.length} inProgress=${validation.buckets.IN_PROGRESS.length} missing=${validation.shortfall}. ${String(error?.message || error)}`
+                        : String(error?.message || error),
+                });
+                throw error;
+            }
             execution.timings.sentMs = Date.now() - recordsStart;
             sentDuration.add(execution.timings.sentMs);
             execution.timestamps.sentEndedAt = new Date().toISOString();
@@ -2150,9 +2233,13 @@ export function runBulkFlow(ctx, afterInitiate) {
             execution.timestamps.pendingAuthStartedAt = execution.timestamps.initiationEndedAt;
             execution.timestamps.finalStatusObservedAt = result.finalStatusObservedAt;
             execution.statuses.sent = result.expectedStatus;
-            execution.payments = result.payments;
             execution.requestDetails.ftIds = result.requests;
+            const dualValidation = Array.isArray(result.records)
+                ? validateBatchRecords(result.records, Number(intBatch.numPayments), dualExpectedStatus)
+                : { buckets: { PASSED: result.payments, FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] }, shortfall: 0, totalValidated: result.payments.length, sentCount: result.payments.filter((payment) => payment.statusCode === "SENT").length };
+            execution.payments = paymentsFromValidation(dualValidation);
             execution.status = "PASSED";
+            logChildPaymentCounts(fileId, Number(intBatch.numPayments), dualValidation, "dual_auth_final");
             emitRecordsCapture({
                 fileId,
                 paymentType: intBatch.paymentType,
@@ -2161,8 +2248,9 @@ export function runBulkFlow(ctx, afterInitiate) {
                 bkRefIds,
                 meta: result.meta,
                 expectedTotal: Number(intBatch.numPayments),
-                shortfall: 0,
-                buckets: { PASSED: result.payments, FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] },
+                shortfall: dualValidation.shortfall,
+                sentCount: dualValidation.sentCount,
+                buckets: dualValidation.buckets,
             });
             return;
         }
@@ -2184,6 +2272,7 @@ export function runBulkFlow(ctx, afterInitiate) {
         const recordsPollTimeoutMs = maxDurationMs;
         const recordsPollIntervalMs = pollingIntervalMs;
         const recordsStart = Date.now();
+        const expectedFinalStatus = expectedFinalChildStatus(intBatch.paymentDate);
         execution.timestamps.sentStartedAt = new Date(recordsStart).toISOString();
         const {
             validation,
@@ -2199,7 +2288,8 @@ export function runBulkFlow(ctx, afterInitiate) {
             recordsPageSize,
             recordsPollTimeoutMs,
             recordsPollIntervalMs,
-            ctx.jar
+            ctx.jar,
+            expectedFinalStatus
         );
         sentDuration.add(Date.now() - recordsStart);
         execution.timings.sentMs = Date.now() - recordsStart;
@@ -2209,10 +2299,7 @@ export function runBulkFlow(ctx, afterInitiate) {
         const finalValidation = validation;
         execution.statuses.sent = validationStatusText(finalValidation);
         execution.requestDetails.ftIds = recordsRequests;
-        execution.payments = Object.entries(finalValidation.buckets).flatMap(([resultGroup, payments]) =>
-            payments.map((payment) => ({ ...payment, resultGroup }))
-        );
-        const expectedFinalStatus = expectedInitiateStatus(intBatch.paymentDate) === "SCHEDULED" ? "SCHEDULED" : "SENT";
+        execution.payments = paymentsFromValidation(finalValidation);
         if (!sentTimedOut && execution.payments.length === expectedRecordCount && expectedRecordCount > 0 &&
             execution.payments.every((payment) => canonicalInitiateStatus(payment.statusCode) === expectedFinalStatus)) {
             execution.timestamps.finalStatusObservedAt = execution.timestamps.sentEndedAt;
@@ -2225,8 +2312,8 @@ export function runBulkFlow(ctx, afterInitiate) {
             "no failed payments after initiation": () => finalValidation.buckets.FAILED.length === 0,
             "no rejected payments after initiation": () => finalValidation.buckets.REJECTED.length === 0,
             "record count matches expected payment count": () => finalValidation.shortfall === 0,
-            "all payment records reached a final status": () => finalValidation.buckets.IN_PROGRESS.length === 0,
-            "SENT completed within maximum duration": () => !sentTimedOut,
+            [`all payment records reached ${expectedFinalStatus}`]: () => finalValidation.buckets.IN_PROGRESS.length === 0,
+            [`${expectedFinalStatus} completed within maximum duration`]: () => !sentTimedOut,
         });
 
         if (finalValidation.shortfall > 0) {
@@ -2249,11 +2336,7 @@ export function runBulkFlow(ctx, afterInitiate) {
             );
         }
 
-        console.log(
-            `[k6][RECORDS] fileId=${fileId} expected=${expectedRecordCount} totalValidated=${finalValidation.totalValidated} passed=${finalValidation.buckets.PASSED.length} ` +
-            `failed=${finalValidation.buckets.FAILED.length} rejected=${finalValidation.buckets.REJECTED.length} inProgress=${finalValidation.buckets.IN_PROGRESS.length} ` +
-            `unknown=${finalValidation.buckets.UNKNOWN.length}`
-        );
+        logChildPaymentCounts(fileId, expectedRecordCount, finalValidation, "single_auth_final");
 
         emitRecordsCapture({
             fileId,
@@ -2264,6 +2347,7 @@ export function runBulkFlow(ctx, afterInitiate) {
             meta: recordsMeta,
             expectedTotal: expectedRecordCount,
             shortfall: finalValidation.shortfall,
+            sentCount: finalValidation.sentCount,
             buckets: finalValidation.buckets,
         });
 
@@ -2277,18 +2361,26 @@ export function runBulkFlow(ctx, afterInitiate) {
             }
             setExecutionFailure(execution, {
                 stage,
-                expectedStatus: "SENT",
+                expectedStatus: expectedFinalStatus,
                 lastStatus,
                 timeoutMs: recordsPollTimeoutMs,
                 elapsedMs: execution.timings.sentMs,
-                message: `FT-ID records did not reach SENT before the polling duration expired. Last backend status: ${lastStatus}; expected=${expectedRecordCount} actual=${finalValidation.totalValidated} shortfall=${finalValidation.shortfall}`,
+                message: `FT-ID records did not reach ${expectedFinalStatus} before the polling duration expired. Last backend status: ${lastStatus}; expected=${expectedRecordCount} actual=${finalValidation.totalValidated} passed=${finalValidation.buckets.PASSED.length} sent=${finalValidation.sentCount} failed=${finalValidation.buckets.FAILED.length} rejected=${finalValidation.buckets.REJECTED.length} inProgress=${finalValidation.buckets.IN_PROGRESS.length} shortfall=${finalValidation.shortfall}`,
             });
             throw new Error(execution.failure.message);
         }
 
-        execution.status = finalValidation.buckets.FAILED.length > 0 || finalValidation.buckets.REJECTED.length > 0
-                ? "FAILED"
-                : "PASSED";
+        if (finalValidation.buckets.FAILED.length > 0 || finalValidation.buckets.REJECTED.length > 0) {
+            setExecutionFailure(execution, {
+                stage,
+                expectedStatus: expectedFinalStatus,
+                lastStatus: execution.statuses.sent,
+                elapsedMs: execution.timings.sentMs,
+                message: `${finalValidation.buckets.FAILED.length + finalValidation.buckets.REJECTED.length} of ${expectedRecordCount} child payment(s) did not reach ${expectedFinalStatus}. passed=${finalValidation.buckets.PASSED.length} sent=${finalValidation.sentCount} failed=${finalValidation.buckets.FAILED.length} rejected=${finalValidation.buckets.REJECTED.length}`,
+            });
+        } else {
+            execution.status = "PASSED";
+        }
 
         console.log(
             `[k6][PASS] file=${intBatch.fileDisplayName} fileId=${fileId} payments=${transactionIds.length} paymentType=${intBatch.paymentType} rail=${intBatch.railType}`

@@ -183,7 +183,7 @@ function pollApprovedChildren(context, expectedStatus, approverToken) {
       const finalStatusObservedAt = new Date(Date.now()).toISOString();
       const pendingAuthStarted = new Date(context.pendingAuthStartedAt || started).getTime();
       return {
-        expectedStatus, payments, requests: result.requests, meta: result.meta,
+        expectedStatus, payments, records: result.records, requests: result.requests, meta: result.meta,
         finalStatusObservedAt,
         pendingAuthToFinalMs: Date.now() - pendingAuthStarted,
       };

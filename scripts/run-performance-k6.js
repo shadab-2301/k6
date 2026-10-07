@@ -616,13 +616,18 @@ function conciseFailureReason(failure) {
     .replace(/[.;]\s*$/, "") || message;
 }
 
+function isSentStatus(statusCode) {
+  return String(statusCode || "").trim().toUpperCase() === "SENT";
+}
+
 function ftIdOutcomeCounts(execution) {
-  const counts = { PASSED: 0, FAILED: 0, REJECTED: 0, IN_PROGRESS: 0 };
+  const counts = { PASSED: 0, SENT: 0, FAILED: 0, REJECTED: 0, IN_PROGRESS: 0 };
   for (const payment of execution.payments || []) {
     const group = String(payment.resultGroup || "").toUpperCase();
     if (counts[group] !== undefined) {
       counts[group] += 1;
     }
+    if (isSentStatus(payment.statusCode)) counts.SENT += 1;
   }
   return counts;
 }
@@ -704,7 +709,7 @@ function renderDualAuthExecutionTable(executions) {
       </div>
       ${execution.failure ? `<div class="trace-subsection trace-failure"><div class="trace-subtitle">Failure Summary</div><div>${escapeHtml(stageLabel(execution.failure.stage))}: ${escapeHtml(conciseFailureReason(execution.failure))}</div></div>` : ""}
       <div class="trace-subsection"><div class="trace-subtitle">FT-ID Outcome Summary</div>
-        <div class="trace-outcomes"><span>Passed: <strong>${counts.PASSED}</strong></span><span>Failed: <strong>${counts.FAILED}</strong></span><span>Rejected: <strong>${counts.REJECTED}</strong></span><span>In Progress: <strong>${counts.IN_PROGRESS}</strong></span></div>
+        <div class="trace-outcomes"><span>Passed: <strong>${counts.PASSED}</strong></span><span>Sent: <strong>${counts.SENT}</strong></span><span>Failed: <strong>${counts.FAILED}</strong></span><span>Rejected: <strong>${counts.REJECTED}</strong></span><span>In Progress: <strong>${counts.IN_PROGRESS}</strong></span></div>
       </div>
     </td></tr>`;
   }).join("");
@@ -823,6 +828,7 @@ function renderExecutionTraceTable(executions) {
           <div class="trace-subtitle">FT-ID Outcome Summary</div>
           <div class="trace-outcomes">
             <span>Passed: <strong>${counts.PASSED}</strong></span>
+            <span>Sent: <strong>${counts.SENT}</strong></span>
             <span>Failed: <strong>${counts.FAILED}</strong></span>
             <span>Rejected: <strong>${counts.REJECTED}</strong></span>
             <span>In Progress: <strong>${counts.IN_PROGRESS}</strong></span>
@@ -1145,6 +1151,7 @@ function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expecte
   const paymentBuckets = paymentOnlyBuckets(buckets);
   const total = paymentBuckets.PASSED.length + paymentBuckets.FAILED.length + paymentBuckets.REJECTED.length + paymentBuckets.IN_PROGRESS.length + paymentBuckets.UNKNOWN.length;
   const allPayments = distinctPaymentRows(paymentBuckets);
+  const sentTotal = allPayments.filter((row) => isSentStatus(row.statusCode)).length;
   const generatedAt = new Date();
   const showRunWindow = summary?.env?.singleBulkFile === true;
   const overallStatus = runStatus(summary, ftIdValidationCompleted, totalShortfall, buckets);
@@ -1227,9 +1234,10 @@ ${REPORT_BASE_CSS}
     <section class="section">
       <h2>Payment Validation Summary (FT IDs)</h2>
       <div class="table-scroll"><table class="data-table validation-table"><thead><tr>
-        <th class="num">Passed</th><th class="num">Failed</th><th class="num">Rejected</th><th class="num">In Progress</th><th class="num">Unvalidated / Missing</th><th class="num">Validated / Expected</th>
+        <th class="num">Passed</th><th class="num">Sent</th><th class="num">Failed</th><th class="num">Rejected</th><th class="num">In Progress</th><th class="num">Unvalidated / Missing</th><th class="num">Validated / Expected</th>
       </tr></thead><tbody><tr>
         <td class="num${countTone(paymentBuckets.PASSED.length, "count-pass")}">${countValue(paymentBuckets.PASSED.length)}</td>
+        <td class="num${countTone(sentTotal, "count-pass")}">${countValue(sentTotal)}</td>
         <td class="num${countTone(paymentBuckets.FAILED.length, "count-fail")}">${countValue(paymentBuckets.FAILED.length)}</td>
         <td class="num${countTone(paymentBuckets.REJECTED.length, "count-fail")}">${countValue(paymentBuckets.REJECTED.length)}</td>
         <td class="num${countTone(paymentBuckets.IN_PROGRESS.length, "count-warn")}">${countValue(paymentBuckets.IN_PROGRESS.length)}</td>
