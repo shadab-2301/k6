@@ -1,0 +1,32 @@
+{
+  "testDataKey": "TPT_BatchDualAuth",
+  "paymentType": "TPT",
+  "currency": "ZAR",
+  "fromAccount": "1300433815580",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {"beneficiaryId":1286828,"beneficiaryName":"Cupids Arrow IncDom","beneficiaryReference":"MR DOM101","myReference":"MR DOM101","accountNumber":"62678965412","bankName":"FIRST NATIONAL BANK","branchCode":"250655","currency":"ZAR"},
+    {"beneficiaryId":1286826,"beneficiaryName":"Test Bulk 98","beneficiaryReference":"jhfc","myReference":"jhfc","accountNumber":"1069336580","bankName":"NEDBANK LIMITED","branchCode":"106909","currency":"ZAR"},
+    {"beneficiaryId":1286825,"beneficiaryName":"Test 5445","beneficiaryReference":"Bulk2","myReference":"Bulk2","accountNumber":"51000006742","bankName":"TYME BANK LIMITED","branchCode":"678910","currency":"ZAR"},
+    {"beneficiaryId":1286823,"beneficiaryName":"Reh 1","beneficiaryReference":"hgf","myReference":"ref","accountNumber":"1884840","bankName":"STANDARD BANK","branchCode":"051001","currency":"ZAR"},
+    {"beneficiaryId":1286827,"beneficiaryName":"Test Bulk 8","beneficiaryReference":"Bulk1","myReference":"Bulk1","accountNumber":"280400157","bankName":"ABSA BANK","branchCode":"632005","currency":"ZAR"},
+    {"beneficiaryId":1286824,"beneficiaryName":"Test Bulk 4","beneficiaryReference":"My Ref 4","myReference":"Bene Ref 4","accountNumber":"00034096003","bankName":"BIDVEST BANK LIMITED","branchCode":"462005","currency":"ZAR"},
+    {"beneficiaryId":1286822,"beneficiaryName":"Village Foods","beneficiaryReference":"Village Foods - Workers","myReference":"Village Foods - Workers","accountNumber":"62815503299","bankName":"FIRST NATIONAL BANK","branchCode":"250655","currency":"ZAR"}
+  ],
+  "csv": {
+    "detailRecordType": "2",
+    "referencePrefix": "TPT-EF-26",
+    "endToEndReferencePrefix": "E2E-EF-26",
+    "flag": "N",
+    "trailerRecordType": "99",
+    "trailerRejectedCount": 0
+  },
+  "rules": {
+    "rail": "runtime --rail",
+    "paymentDate": "runtime",
+    "recordCount": "runtime --payments",
+    "rotateBeneficiaries": true,
+    "trailerTotalAmount": "sum of generated payment amounts",
+    "uniqueReferencesPerPayment": true
+  }
+}

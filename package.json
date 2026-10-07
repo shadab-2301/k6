@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Performance testing suite using k6 for API and UI testing",
   "scripts": {
-    "perf:batch:k6": "node scripts/run-performance-k6.js"
+    "perf:batch:k6": "node scripts/run-performance-k6.js",
+    "perf:batch:dual:k6": "node scripts/run-performance-k6.js --auth-mode DUAL_AUTH"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",

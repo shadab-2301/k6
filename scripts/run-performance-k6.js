@@ -116,6 +116,33 @@ if (hasFlag("--single-bulk-file")) {
   env.K6_SINGLE_BULK_FILE = "true";
 }
 
+function localIsoDate(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+const explicitPaymentDate = readArg("--payment-date", "");
+if (explicitPaymentDate) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(explicitPaymentDate) || Number.isNaN(new Date(explicitPaymentDate).getTime())) {
+    console.error("Invalid --payment-date. Use YYYY-MM-DD.");
+    process.exit(1);
+  }
+  env.K6_PAYMENT_DATE = explicitPaymentDate;
+} else if (hasFlag("--future")) {
+  const rawDays = readArg("--future", "");
+  const futureDays = /^\d+$/.test(rawDays) ? Number(rawDays) : 1;
+  if (futureDays < 1) {
+    console.error("--future must be at least 1 day.");
+    process.exit(1);
+  }
+  const futureDate = new Date();
+  futureDate.setDate(futureDate.getDate() + futureDays);
+  env.K6_PAYMENT_DATE = localIsoDate(futureDate);
+}
+if (env.K6_PAYMENT_DATE) {
+  console.log(`[k6][config] paymentDate=${env.K6_PAYMENT_DATE}`);
+}
+
 const k6Candidates = [
   process.env.K6_PATH,
   path.join(process.env.ProgramFiles || "C:\\Program Files", "k6", "k6.exe"),
@@ -130,10 +157,27 @@ if (!k6Path) {
   process.exit(1);
 }
 
-const scriptPath = path.join(__dirname, "..", "apps", "test", "scripts", "performance", "bulk-payments-performance.k6.js");
+const authMode = String(readArg("--auth-mode", "SINGLE_AUTH")).trim().toUpperCase();
+if (!["SINGLE_AUTH", "DUAL_AUTH"].includes(authMode)) {
+  console.error("Unsupported auth mode. Use --auth-mode SINGLE_AUTH or DUAL_AUTH.");
+  process.exit(1);
+}
+if (authMode === "DUAL_AUTH" && selectedEnv !== "UAT") {
+  console.error("The Dual Auth script currently supports only --env UAT.");
+  process.exit(1);
+}
+env.K6_AUTH_MODE = authMode;
+if (authMode === "DUAL_AUTH" && !env.K6_PAYMENT_DATE) {
+  env.K6_PAYMENT_DATE = localIsoDate(new Date());
+}
+const scriptFile = authMode === "DUAL_AUTH"
+  ? "dual-auth-bulk-payments-performance.k6.js"
+  : "bulk-payments-performance.k6.js";
+const scriptPath = path.join(__dirname, "..", "apps", "test", "scripts", "performance", scriptFile);
 
 const rootDir = path.join(__dirname, "..");
 const reportsDir = path.join(rootDir, "reports", "performance");
+const batchUploadDir = path.join(rootDir, "BatchPerfuploaded");
 const matrixJsonPath = path.join(reportsDir, "performance-matrix.json");
 const matrixHtmlPath = path.join(reportsDir, "performance-matrix.html");
 const runStartedAt = new Date();
@@ -161,7 +205,7 @@ function startCaptureServer() {
 
   return new Promise((resolve, reject) => {
     const server = http.createServer(async (req, res) => {
-      if (req.method !== "POST" || (req.url !== "/records-capture" && req.url !== "/execution-capture")) {
+      if (req.method !== "POST" || !["/records-capture", "/execution-capture", "/batch-file-capture"].includes(req.url)) {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ ok: false, message: "Not found" }));
         return;
@@ -170,6 +214,18 @@ function startCaptureServer() {
       try {
         const raw = await readRequestBody(req);
         const payload = JSON.parse(raw || "{}");
+
+        if (req.url === "/batch-file-capture") {
+          const safePart = (value) => String(value || "").replace(/[^A-Za-z0-9._-]/g, "");
+          const fileName = [payload.env, payload.paymentType, payload.rail, payload.fileName].map(safePart).filter(Boolean).join("_");
+          fs.mkdirSync(batchUploadDir, { recursive: true });
+          const filePath = path.join(batchUploadDir, fileName || `batch_${Date.now()}.csv`);
+          fs.writeFileSync(filePath, String(payload.content || ""), "utf8");
+          console.log(`[k6][batch-file] saved ${path.relative(rootDir, filePath)}`);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true }));
+          return;
+        }
 
         if (req.url === "/execution-capture") {
           const existingIndex = collectedExecutions.findIndex((execution) =>
@@ -503,10 +559,84 @@ function executionStageRows(execution) {
   ].filter((stage) => stage.start || stage.end || stage.duration !== null && stage.duration !== undefined);
 }
 
+function renderLifecycleTimestamps(execution, dualAuth) {
+  const timestamps = execution.timestamps || {};
+  const events = [
+    ["File Upload Started", timestamps.fileUploadStartedAt || timestamps.uploadStartedAt],
+    ["File Upload Completed", timestamps.fileUploadCompletedAt],
+    ["Pending Initiation Observed", timestamps.pendingInitiationObservedAt],
+    ["Initiation Started", timestamps.initiationStartedAt],
+    ["Initiation Finished", timestamps.initiationFinishedAt],
+    ...(dualAuth ? [["Pending Approval Observed", timestamps.pendingApprovalObservedAt]] : []),
+    ["Approval Started", dualAuth ? timestamps.approvalStartedAt : null],
+    ["Approval Finished", dualAuth ? timestamps.approvalEndedAt : null],
+    ["Final Status Observed", timestamps.finalStatusObservedAt],
+  ];
+  return events.map(([label, value]) => {
+    const text = !dualAuth && label.startsWith("Approval ")
+      ? "N/A - Auto-approved during initiation"
+      : value ? formatTimestamp(value) : "N/A";
+    return `<div class="trace-kv"><span>${label}</span><strong>${escapeHtml(text)}</strong></div>`;
+  }).join("");
+}
+
+function renderDualAuthExecutionTable(executions) {
+  const rows = [...executions].sort((first, second) =>
+    Number(first.vu || 0) - Number(second.vu || 0) || Number(first.iteration || 0) - Number(second.iteration || 0)
+  ).map((execution) => {
+    const timings = execution.timings || {};
+    const timestamps = execution.timestamps || {};
+    const counts = ftIdOutcomeCounts(execution);
+    const validationMs = elapsedBetween(timestamps.uploadStartedAt, timestamps.pendinitEndedAt);
+    return `<tr class="batch-stage">
+      <td>${escapeHtml(execution.paymentType || "n/a")}</td>
+      <td>${escapeHtml(execution.railType || "n/a")}</td>
+      <td>${escapeHtml(execution.paymentCount ?? "n/a")}</td>
+      <td>${escapeHtml(formatDurationMs(validationMs))}</td>
+      <td>${escapeHtml(formatDurationMs(timings.initiationApiMs))}</td>
+      <td>${escapeHtml(formatDurationMs(timings.approvalApiMs))}</td>
+      <td>${escapeHtml(formatDurationMs(timings.pendingAuthToFinalMs))}</td>
+      <td>${escapeHtml(execution.fileId || "n/a")}</td>
+    </tr>
+    <tr class="batch-start"><td colspan="8">
+      <div class="trace-batch-title">VU ${escapeHtml(execution.vu)} / Iteration ${escapeHtml(execution.iteration)} | ${escapeHtml(overallResult(execution))}</div>
+      <div class="trace-identifiers">
+        <span><strong>File Name:</strong> ${escapeHtml(execution.fileName || "n/a")}</span>
+        <span><strong>Parent Transaction ID:</strong> ${escapeHtml(uniqueJoined(execution.parentTransactionIds))}</span>
+        <span><strong>BKREF:</strong> ${escapeHtml(uniqueJoined(execution.bkRefIds))}</span>
+      </div>
+      <div class="trace-subsection">
+        <div class="trace-subtitle">Execution Timeline</div>
+        <div class="trace-kv"><span>Execution Started</span><strong>${escapeHtml(formatTimestamp(timestamps.executionStartedAt || timestamps.uploadStartedAt))}</strong></div>
+        ${renderLifecycleTimestamps(execution, true)}
+        <div class="trace-kv"><span>Total Duration</span><strong>${escapeHtml(formatDurationMs(elapsedBetween(timestamps.uploadStartedAt, timestamps.sentEndedAt)))}</strong></div>
+        <div class="trace-kv"><span>Final Status</span><strong>${escapeHtml(execution.statuses?.sent || "n/a")}</strong></div>
+      </div>
+      ${execution.failure ? `<div class="trace-subsection trace-failure"><div class="trace-subtitle">Failure Summary</div><div>${escapeHtml(stageLabel(execution.failure.stage))}: ${escapeHtml(conciseFailureReason(execution.failure))}</div></div>` : ""}
+      <div class="trace-subsection"><div class="trace-subtitle">FT-ID Outcome Summary</div>
+        <div class="trace-outcomes"><span>Passed: <strong>${counts.PASSED}</strong></span><span>Failed: <strong>${counts.FAILED}</strong></span><span>Rejected: <strong>${counts.REJECTED}</strong></span><span>In Progress: <strong>${counts.IN_PROGRESS}</strong></span></div>
+      </div>
+    </td></tr>`;
+  }).join("");
+  return `<div class="table-scroll"><table class="endpoint-table execution-table"><thead><tr>
+    <th>PaymentTYPE</th><th>RAIL Type</th><th>Records</th><th>File Validation time</th>
+    <th>Initiation (API TAT)</th><th>Approval (API TAT)</th><th>Time from Pend App-&gt; Sent/Sched</th><th>File ID</th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function executionTimingSummary(executions, timingKey) {
+  const values = executions.map((execution) => execution.timings?.[timingKey])
+    .filter((value) => value !== undefined && value !== null && Number.isFinite(Number(value)))
+    .map(Number);
+  return values.length ? formatDurationMs(values.reduce((sum, value) => sum + value, 0) / values.length) : "n/a";
+}
+
 function renderExecutionTraceTable(executions) {
   if (executions.length === 0) {
     return `<div class="recommendation-item">No execution data was collected before the run ended.</div>`;
   }
+
+  if (authMode === "DUAL_AUTH") return renderDualAuthExecutionTable(executions);
 
   const sortedExecutions = [...executions].sort((a, b) =>
     Number(a.vu || 0) - Number(b.vu || 0) || Number(a.iteration || 0) - Number(b.iteration || 0)
@@ -533,7 +663,16 @@ function renderExecutionTraceTable(executions) {
       </div>` : "";
 
     return [
-      `<tr class="batch-start"><td colspan="5">
+      `<tr class="batch-stage">
+        <td>${escapeHtml(execution.paymentType || "n/a")}</td>
+        <td>${escapeHtml(execution.railType || "n/a")}</td>
+        <td>${escapeHtml(execution.paymentCount ?? "n/a")}</td>
+        <td>${escapeHtml(formatDurationMs(elapsedBetween(execution.timestamps?.uploadStartedAt, execution.timestamps?.pendinitEndedAt)))}</td>
+        <td>${escapeHtml(formatDurationMs(execution.timings?.initiationApiMs))}</td>
+        <td>${escapeHtml(formatDurationMs(execution.timings?.pendingInitiToFinalMs))}</td>
+        <td>${escapeHtml(execution.fileId || "n/a")}</td>
+      </tr>`,
+      `<tr class="batch-start"><td colspan="7">
         <div class="trace-batch-title">${escapeHtml(batchLabel)} | ${escapeHtml(result)}</div>
         <div class="trace-identifiers">
           <span><strong>File Name:</strong> ${escapeHtml(execution.fileName || "n/a")}</span>
@@ -544,9 +683,11 @@ function renderExecutionTraceTable(executions) {
         </div>
         <div class="trace-subsection">
           <div class="trace-subtitle">Execution Timeline</div>
-          <div class="trace-kv"><span>Execution Started</span><strong>${escapeHtml(formatTimestamp(executionStart))}</strong></div>
+          <div class="trace-kv"><span>Execution Started</span><strong>${escapeHtml(formatTimestamp(execution.timestamps?.executionStartedAt || executionStart))}</strong></div>
+          ${renderLifecycleTimestamps(execution, false)}
           <div class="trace-kv"><span>Execution Finished</span><strong>${escapeHtml(formatTimestamp(executionEnd))}</strong></div>
           <div class="trace-kv"><span>Total Duration</span><strong>${escapeHtml(formatDurationMs(totalDuration))}</strong></div>
+          <div class="trace-kv"><span>Final Status</span><strong>${escapeHtml(execution.statuses?.sent || "n/a")}</strong></div>
           <div class="trace-kv"><span>Result</span><strong>${escapeHtml(result.toUpperCase())}</strong></div>
           ${result !== "Passed" ? `<div class="trace-kv"><span>Failure Point</span><strong>${escapeHtml(failurePoint)}</strong></div>` : ""}
           ${result !== "Passed" ? `<div class="trace-kv"><span>Last Known Status</span><strong>${escapeHtml(lastKnownStatus)}</strong></div>` : ""}
@@ -562,19 +703,12 @@ function renderExecutionTraceTable(executions) {
           </div>
         </div>
       </td></tr>`,
-      ...stages.map((stage, index) => `
-        <tr class="batch-stage">
-          <td>${escapeHtml(stage.label)}</td>
-          <td>${escapeHtml(formatTimestamp(stage.start))}</td>
-          <td>${escapeHtml(formatTimestamp(stage.end))}</td>
-          <td>${escapeHtml(formatDurationMs(stage.duration ?? elapsedBetween(stage.start, stage.end)))}</td>
-          <td>${escapeHtml(stageResult(execution, stage))}</td>
-        </tr>`),
     ];
   }).join("");
 
   return `<div class="table-scroll"><table class="endpoint-table execution-table"><thead><tr>
-    <th>Process</th><th>Start Time</th><th>End Time</th><th>Duration</th><th>Result</th>
+    <th>PaymentTYPE</th><th>RAIL Type</th><th>Records</th><th>File Validation time</th>
+    <th>Initiation (API TAT)</th><th>Time from Pend Initi-&gt; Sent/Sched</th><th>File ID</th>
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -1020,8 +1154,12 @@ function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expecte
         <div class="metric-card"><div class="label">Upload to PENDINIT</div><div class="value">${metricSummary(metrics, "uploadToPendinitDuration")}</div></div>
         <div class="metric-card"><div class="label">Upload</div><div class="value">${metricSummary(metrics, "uploadDuration")}</div></div>
         <div class="metric-card"><div class="label">Time to PENDINIT</div><div class="value">${metricSummary(metrics, "pendinitDuration")}</div></div>
-        <div class="metric-card"><div class="label">Initiation</div><div class="value">${metricSummary(metrics, "initiationDuration")}</div></div>
-        <div class="metric-card"><div class="label">Time to SENT</div><div class="value">${metricSummary(metrics, "sentDuration")}</div></div>
+        ${authMode === "DUAL_AUTH" ? `
+        <div class="metric-card"><div class="label">Initiation (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "initiationApiMs")}</div></div>
+        <div class="metric-card"><div class="label">Approval (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "approvalApiMs")}</div></div>
+        <div class="metric-card"><div class="label">Pend App to Sent/Sched (Average)</div><div class="value">${executionTimingSummary(executions, "pendingAuthToFinalMs")}</div></div>` : `
+        <div class="metric-card"><div class="label">Initiation (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "initiationApiMs")}</div></div>
+        <div class="metric-card"><div class="label">Pend Initi to Sent/Sched (Average)</div><div class="value">${executionTimingSummary(executions, "pendingInitiToFinalMs")}</div></div>`}
       </div>
     </div>
     <div class="section">
@@ -1138,6 +1276,7 @@ async function run() {
     collector = await startCaptureServer();
     env.K6_RECORDS_COLLECTOR_URL = `http://127.0.0.1:${collector.port}/records-capture`;
     env.K6_EXECUTION_COLLECTOR_URL = `http://127.0.0.1:${collector.port}/execution-capture`;
+    env.K6_BATCH_FILE_COLLECTOR_URL = `http://127.0.0.1:${collector.port}/batch-file-capture`;
 
     const child = spawn(k6Path, ["run", "-e", `ENV=${selectedEnv}`, "-e", `TIER=${selectedEnv}`, "-e", `SAS_RETRY_IDEMPOTENCY_MODE=${env.SAS_RETRY_IDEMPOTENCY_MODE}`, scriptPath], {
       stdio: "inherit",

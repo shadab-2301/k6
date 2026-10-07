@@ -17,25 +17,32 @@ Only `SIT` and `UAT` are supported. Set the selected environment explicitly and
 provide its credentials through the process environment or secrets store:
 
 ```text
-UAT_LOGIN_USERNAME=...
 UAT_LOGIN_PASSWORD=...
-UAT_COMPANY=...
-UAT_BUSINESS_USERNAME=...
-UAT_GCN=...
+UAT_SINGLE_AUTH_COMPANY=...
+UAT_SINGLE_AUTH_INI_LOGINGIN_ID=...
+UAT_SINGLE_AUTH_INI_USERNAME=...
+UAT_SINGLE_AUTH_INI_GCN=...
+UAT_DUAL_AUTH_COMPANY=...
+UAT_DUAL_AUTH_INI_LOGINGIN_ID=...
+UAT_DUAL_AUTH_INI_USERNAME=...
+UAT_DUAL_AUTH_INI_GCN=...
+UAT_DUAL_AUTH_APP_LOGINGIN_ID=...
+UAT_DUAL_AUTH_APP_USERNAME=...
+UAT_DUAL_AUTH_APP_GCN=...
 UAT_OTP=...
 ```
 
 The first request is `POST https://apistg.secure.investec.com/auth` with
-`{ "Username": UAT_LOGIN_USERNAME, "Password": UAT_LOGIN_PASSWORD }`, followed
-by `POST /auth/otp`. `UAT_LOGIN_USERNAME` is the authentication Login ID; it is
-separate from `UAT_BUSINESS_USERNAME`, which is used by the SAS and batch APIs.
-Keep the password in the process environment or secrets store, never in this
-repository.
+`{ "Username": UAT_SINGLE_AUTH_INI_LOGINGIN_ID, "Password": UAT_LOGIN_PASSWORD }`,
+followed by `POST /auth/otp`. Single Auth SAS and downstream requests use only
+the `UAT_SINGLE_AUTH_*` identity settings. Dual Auth initiator and approver
+identities remain separate under `UAT_DUAL_AUTH_*`. Keep the password in the
+process environment or secrets store, never in this repository.
 
 Run it with the existing wrapper, for example:
 
 ```text
-npm run perf:batch:k6 -- --env UAT --payment-type INT --rail INT --payments 1 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 300s
+npm run perf:batch:k6 -- --env UAT --payment-type INT --rail INT --payments 1 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s
 ```
 
 PowerShell also supports selecting the environment with `$env:ENV = "SIT"` or `$env:ENV = "UAT"`; the wrapper additionally accepts `-e ENV=SIT` and `-e ENV=UAT`. The checked-in UAT data is separated by payment type; add future EFT, RTGS, and payroll fixtures as separate files rather than changing the Internal fixture.
@@ -334,3 +341,15 @@ For issues or questions:
 ## License
 
 This performance testing suite is provided as-is for testing purposes.
+
+
+npm run perf:batch:dual:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s
+
+# dual_auth
+`npm run perf:batch:dual:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s --future 7`
+
+
+
+# Single Auth
+`npm run perf:batch:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s --future 7`
+

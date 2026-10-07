@@ -5,7 +5,6 @@ import { md5 } from "k6/crypto";
 import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.4/index.js";
 
 const ADO_TOKEN_CLIENT = JSON.parse(open("../../../../ApiRegistry/adoTokenClient.json"));
-const TOKENS = JSON.parse(open("../../../../ApiRegistry/Tokens.json"));
 const PLATFORM_ENV = parseEnvFile(open("../../../../.env.platform"));
 
 const TST_INT_DATA = JSON.parse(
@@ -33,6 +32,18 @@ const UAT_INT_BATCH_FILE = open(
     "../../../../Test Data/UAT/payments/batch payments/internal-transfer-batch-payment-v2.csv",
     "b"
 );
+const isDualAuth = String(__ENV.K6_AUTH_MODE || "").toUpperCase() === "DUAL_AUTH";
+const authLabel = isDualAuth ? "DUAL AUTH" : "SINGLE AUTH";
+const UAT_BATCH_DATA = isDualAuth ? {
+    INT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/INT_BatchDualAuth.json")),
+    TPT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/TPT_BatchDualAuth.json")),
+    PRLSD: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/PRLSD_BatchDualAuth.json")),
+} : {
+    INT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/INT_BatchSingleAuth.json")),
+    TPT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/TPT_BatchSingleAuth.json")),
+    ADHOC: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/ADHOC_BatchSingleAuth.json")),
+    PRLSD: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/PRLSD_BatchSingleAuth.json")),
+};
 
 const uploadDuration = new Trend("batch_upload_duration", true);
 const uploadToPendinitDuration = new Trend("batch_upload_to_pendinit_duration", true);
@@ -130,7 +141,7 @@ const singleBulkFile = envBool(["K6_SINGLE_BULK_FILE"], false);
 const configuredPaymentType = sanitizeFileToken(envText(["K6_PAYMENT_TYPE"]) || "INT", "INT").toUpperCase();
 const requestedRail = sanitizeFileToken(envText(["K6_RAIL"]) || configuredPaymentType, configuredPaymentType).toUpperCase();
 const tptRailThreshold = 5000000;
-const configuredRail = configuredPaymentType === "TPT"
+const configuredRail = configuredPaymentType === "TPT" && requestedRail !== "PAYSHAP"
     ? configuredAmountMax <= tptRailThreshold
         ? "EFT"
         : "RTGS"
@@ -214,11 +225,17 @@ function validatePreflight() {
     if (!environmentConfig.authBaseUrl) missing.push(`${selectedEnv}_AUTH_URL`);
     if (!environmentConfig.batchBaseUrl) missing.push(`${selectedEnv}_CAPI_URL`);
     if (!environmentConfig.paymentsBaseUrl) missing.push(`${selectedEnv}_BAPI_URL`);
-    if (!environmentConfig.username) missing.push(`${selectedEnv}_LOGIN_USERNAME`);
+    const identityPrefix = isDualAuth ? "dualAuth" : "singleAuth";
+    const identityEnvPrefix = isDualAuth ? "DUAL_AUTH" : "SINGLE_AUTH";
+    if (!environmentConfig[`${identityPrefix}IniLoginginId`]) missing.push(`${selectedEnv}_${identityEnvPrefix}_INI_LOGINGIN_ID`);
     if (!environmentConfig.password) missing.push(`${selectedEnv}_LOGIN_PASSWORD`);
-    if (!environmentConfig.company) missing.push(`${selectedEnv}_COMPANY`);
-    if (!environmentConfig.businessUsername) missing.push(`${selectedEnv}_BUSINESS_USERNAME`);
-    if (!environmentConfig.gcn) missing.push(`${selectedEnv}_GCN`);
+    if (!environmentConfig[`${identityPrefix}Company`]) missing.push(`${selectedEnv}_${identityEnvPrefix}_COMPANY`);
+    if (!environmentConfig[`${identityPrefix}IniUsername`]) missing.push(`${selectedEnv}_${identityEnvPrefix}_INI_USERNAME`);
+    if (!environmentConfig[`${identityPrefix}IniGCN`]) missing.push(`${selectedEnv}_${identityEnvPrefix}_INI_GCN`);
+    if (isDualAuth) {
+        if (!environmentConfig.dualAuthAppUsername) missing.push(`${selectedEnv}_DUAL_AUTH_APP_USERNAME`);
+        if (!environmentConfig.dualAuthAppGCN) missing.push(`${selectedEnv}_DUAL_AUTH_APP_GCN`);
+    }
     if (!environmentConfig.initialOtp) missing.push(`${selectedEnv}_OTP`);
     if (!getEnvironmentBatchFile()) missing.push(`${selectedEnv} batch CSV for ${configuredPaymentType}/${configuredRail}`);
 
@@ -238,15 +255,15 @@ function validatePreflight() {
         missing.push("K6_AMOUNT_MIN and K6_AMOUNT_MAX must be > 0 and min <= max");
     }
 
-    if (configuredPaymentType === "TPT" && configuredAmountMin <= tptRailThreshold && configuredAmountMax > tptRailThreshold) {
+    if (configuredPaymentType === "TPT" && configuredRail !== "PAYSHAP" && configuredAmountMin <= tptRailThreshold && configuredAmountMax > tptRailThreshold) {
         missing.push("TPT amount range cannot cross R5,000,000 because a batch file supports one rail; run EFT and RTGS ranges separately");
     }
 
     if (!paymentProfile) {
-            missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, and PRLSD/EFT`);
+            missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, TPT/PAYSHAP, ADHOC/EFT, ADHOC/RTGS, ADHOC/PAYSHAP, PRLSD/EFT, and PRLSD/PAYSHAP`);
     }
 
-    if (paymentProfile && !RAIL_LOCAL_INSTRUMENTS[paymentProfile.rail]) {
+    if (paymentProfile && !paymentProfile.csvOnly && !RAIL_LOCAL_INSTRUMENTS[paymentProfile.rail]) {
         missing.push(`No local instrument is configured for rail ${paymentProfile.rail} (${configuredPaymentType}/${configuredRail})`);
     }
 
@@ -277,6 +294,13 @@ function getAppBearerTokenFromEnv() {
 
 function getEnvData() {
     if (selectedEnv === "UAT") {
+        if (isDualAuth && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON && !UAT_BATCH_DATA[configuredPaymentType]) {
+            throw new Error(`Missing or empty ${configuredPaymentType}_BatchDualAuth.json; Single Auth data cannot be used for Dual Auth.`);
+        }
+        if (!externalTestDataFile && !__ENV.K6_TEST_DATA_JSON && UAT_BATCH_DATA[configuredPaymentType]) {
+            // File-level settings (channel, singleDebit) still come from the base UAT data.
+            return { ...UAT_INT_DATA, ...UAT_BATCH_DATA[configuredPaymentType] };
+        }
         if (configuredPaymentType === "INT" && configuredRail === "INT" && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON) {
             return UAT_INT_DATA;
         }
@@ -303,12 +327,94 @@ function getEnvData() {
 
 function getEnvironmentBatchFile() {
     if (externalBatchFile) return externalBatchFile;
+    if (isDualAuth || configuredRail === "PAYSHAP") {
+        return buildUatBatchCsv(getEnvData(), configuredNumPayments);
+    }
+    if (selectedEnv === "UAT" && UAT_BATCH_DATA[configuredPaymentType]) {
+        return buildUatBatchCsv(UAT_BATCH_DATA[configuredPaymentType], configuredNumPayments);
+    }
     if (selectedEnv === "UAT" && configuredPaymentType === "INT" && configuredRail === "INT") return UAT_INT_BATCH_FILE;
     return null;
 }
 
+function parseOptionalJson(text) {
+    const trimmed = String(text || "").trim();
+    return trimmed ? JSON.parse(trimmed) : null;
+}
+
+function csvField(value) {
+    const text = String(value ?? "");
+    return /[",\r\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function csvPaymentDate() {
+    const [year, month, day] = String(__ENV.K6_PAYMENT_DATE || new Date().toISOString().slice(0, 10)).split("-");
+    return `${day}/${month}/${year}`;
+}
+
+function buildUatBatchCsv(data, numPayments) {
+    const isInternal = configuredPaymentType === "INT";
+    const counterparties = isInternal
+        ? (data.toAccounts || []).map((accountNumber) => ({ accountNumber, branchCode: data.beneficiaryId, name: "" }))
+        : (data.beneficiaries || []).map((b) => ({ accountNumber: b.accountNumber, branchCode: b.branchCode, name: b.myReference || b.beneficiaryName || "" }));
+    if (!data.fromAccount || counterparties.length === 0 || counterparties.some((c) => !c.accountNumber || !c.branchCode)) {
+        throw new Error(
+            `[k6][FAIL][file_generation] ${configuredPaymentType}_BatchSingleAuth.json needs fromAccount and ` +
+            (isInternal ? "beneficiaryId plus at least one toAccounts entry." : "at least one beneficiary with accountNumber and branchCode.")
+        );
+    }
+
+    const prefix = data.csv?.referencePrefix || configuredPaymentType;
+    const endToEndPrefix = data.csv?.endToEndReferencePrefix || "E2E";
+    const referenceStart = Number(data.csv?.referenceStart ?? 1);
+    if (!Number.isSafeInteger(referenceStart) || referenceStart < 1 || !Number.isSafeInteger(referenceStart + numPayments - 1)) {
+        throw new Error("[k6][FAIL][file_generation] csv.referenceStart must be a positive safe integer with room for all payment references.");
+    }
+    const railColumn = isInternal ? data.paymentMethod || "INTERNAL" : configuredRail;
+    const paymentDate = csvPaymentDate();
+    const hasDefaultAmount = data.defaultAmount !== undefined && data.defaultAmount !== null && data.defaultAmount !== "";
+    const rows = ["1,2,,,,,,,,,,,,,"];
+    let totalCents = 0;
+    for (let i = 0; i < numPayments; i++) {
+        // Round-robin never repeats an account consecutively when more than one is configured.
+        const counterparty = counterparties[i % counterparties.length];
+        const amount = hasDefaultAmount ? Number(data.defaultAmount) : randomAmount(configuredAmountMin, configuredAmountMax);
+        totalCents += Math.round(amount * 100);
+        const fields = [
+            "2", data.fromAccount, "", "", counterparty.name, counterparty.accountNumber, counterparty.branchCode,
+            data.currency || "ZAR", amount.toFixed(2), railColumn, paymentDate,
+            `${prefix}-${referenceStart + i}`, `${endToEndPrefix}-${referenceStart + i}-${prefix}`, data.csv?.flag || "N", "",
+        ];
+        if (isInternal) fields.push("");
+        rows.push(fields.map(csvField).join(","));
+    }
+    rows.push(`99,${numPayments},${(totalCents / 100).toFixed(2)},0,,,,,,,,,,,`);
+    return `${rows.join("\r\n")}\r\n`;
+}
+
 function getPaymentProfile() {
     const profiles = {
+        "ADHOC/PAYSHAP": {
+            paymentType: "ADHOC",
+            rail: "PAYSHAP",
+            source: "beneficiary",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+        "TPT/PAYSHAP": {
+            paymentType: "TPT",
+            rail: "PAYSHAP",
+            source: "beneficiary",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+        "PRLSD/PAYSHAP": {
+            paymentType: "PRLSD",
+            rail: "PAYSHAP",
+            source: "payroll",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
         "INT/INT": {
             paymentType: "INT",
             rail: "INT",
@@ -330,6 +436,22 @@ function getPaymentProfile() {
             rail: "RTGS",
             source: "beneficiary",
             creditAccountScheme: "BENEID",
+            includeCreditorAgent: true,
+            minimumAmount: 5000000.01,
+        },
+        "ADHOC/EFT": {
+            paymentType: "ADHOC",
+            rail: "EFT",
+            source: "beneficiary",
+            creditAccountScheme: "ACCT",
+            includeCreditorAgent: true,
+            minimumAmount: 0,
+        },
+        "ADHOC/RTGS": {
+            paymentType: "ADHOC",
+            rail: "RTGS",
+            source: "beneficiary",
+            creditAccountScheme: "ACCT",
             includeCreditorAgent: true,
             minimumAmount: 5000000.01,
         },
@@ -605,7 +727,7 @@ function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
  * Fetches records for every parent/batch transaction ID (BKREF) returned by
  * get file batches, merging the pages from each into one record list.
  */
-function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar) {
+export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar) {
     const records = [];
     const requests = [];
     let lastMeta = null;
@@ -687,6 +809,26 @@ function emitExecutionCapture(execution) {
 
     if (response.status >= 300) {
         console.error(`[k6][WARN][execution-capture] status=${response.status} body=${safeBodySnippet(response.body) || "<empty>"}`);
+    }
+}
+
+function emitBatchFileCapture(fileName, body) {
+    const collectorUrl = envText(["K6_BATCH_FILE_COLLECTOR_URL"]);
+    if (!collectorUrl) return;
+
+    let content = typeof body === "string" ? body : "";
+    if (typeof body !== "string") {
+        const bytes = new Uint8Array(body);
+        for (let i = 0; i < bytes.length; i += 8192) content += String.fromCharCode(...bytes.subarray(i, i + 8192));
+    }
+    const response = http.post(collectorUrl, JSON.stringify({ env: selectedEnv, paymentType: configuredPaymentType, rail: configuredRail, fileName, content }), {
+        headers: { "Content-Type": "application/json" },
+        timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
+        tags: { stage: "batch_file_capture" },
+    });
+
+    if (response.status >= 300) {
+        console.error(`[k6][WARN][batch-file-capture] status=${response.status} body=${safeBodySnippet(response.body) || "<empty>"}`);
     }
 }
 
@@ -1006,6 +1148,18 @@ function buildPaymentBatchXml(data, numPayments) {
         throw new Error(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}`);
     }
 
+    if (paymentProfile.csvOnly) {
+        return {
+            fileDisplayName: makeUniqueBatchFileName(),
+            channel: String(data.channel || "WEB"),
+            railType: configuredRail,
+            paymentType: configuredPaymentType,
+            paymentDate: String(__ENV.K6_PAYMENT_DATE || new Date().toISOString().slice(0, 10)),
+            singleDebit: parseBool(data.singleDebit, false),
+            numPayments,
+        };
+    }
+
     const runId = `${Date.now()}-${Math.floor(Math.random() * 100000)}`;
     const currency = String(data?.currency || "ZAR");
     const channel = String(data?.channel || "WEB");
@@ -1113,27 +1267,16 @@ function buildInitiateRequestBody(batch, fileId, transactionId) {
         return { ...common, rail: "INT" };
     }
 
-    if (batch.paymentType === "TPT" && (batch.railType === "EFT" || batch.railType === "RTGS")) {
+    if ((batch.paymentType === "TPT" || batch.paymentType === "ADHOC") &&
+        (batch.railType === "EFT" || batch.railType === "RTGS" || batch.railType === "PAYSHAP")) {
         return { ...common, rail: batch.railType };
     }
 
-    if (batch.paymentType === "PRLSD" && batch.railType === "EFT") {
-        return { ...common, rail: "EFT" };
+    if (batch.paymentType === "PRLSD" && (batch.railType === "EFT" || batch.railType === "PAYSHAP")) {
+        return { ...common, rail: batch.railType };
     }
 
     throw new Error(`No initiate request body is defined for ${batch.paymentType}/${batch.railType}`);
-}
-
-function getTokenProfile() {
-    const profile = TOKENS[selectedEnv]?.getToken_SingleAuth;
-    if (!profile?.GCN || !profile?.company || !profile?.username) {
-        throw new Error(`[k6][SINGLE AUTH] Missing getToken_SingleAuth profile for ${selectedEnv} in ApiRegistry/Tokens.json.`);
-    }
-    return {
-        GCN: String(profile.GCN),
-        company: String(profile.company),
-        username: String(profile.username),
-    };
 }
 
 function parseJsonResponse(response) {
@@ -1267,7 +1410,7 @@ function sasOtpWaitSeconds() {
 }
 
 function buildSasEndpoint(ctx) {
-    return `${ctx.batchBaseUrl}/api/v1/files/batch/sas-url?username=${encodeURIComponent(ctx.singleAuthUser)}&company=${encodeURIComponent(ctx.singleAuthCompany)}`;
+    return `${ctx.batchBaseUrl}/api/v1/files/batch/sas-url?username=${encodeURIComponent(ctx.singleAuthIniUsername)}&company=${encodeURIComponent(ctx.singleAuthCompany)}`;
 }
 
 function submitOtp(authBaseUrl, otpValue, cookieHeader, durationMetric, stageName) {
@@ -1362,17 +1505,19 @@ function getSasUrl(ctx, sasPayload, sasIdempotencyKey, stageName, cookieHeader, 
     return { kind: "sas", ...data, response };
 }
 
-function uploadFileToSasUrl(sasUrl, uploadHeaders, csvFileBody) {
+function uploadFileToSasUrl(sasUrl, uploadHeaders, csvFileBody, timestamps) {
     if (!sasUrl || !csvFileBody) throw new Error("File Manager upload requires a SAS URL and CSV file body.");
     if (!uploadHeaders || typeof uploadHeaders !== "object" || Object.keys(uploadHeaders).length === 0) {
         throw new Error("File Manager upload requires the uploadHeaders returned by Get SAS URL.");
     }
 
+    if (timestamps) timestamps.fileUploadStartedAt = new Date().toISOString();
     const response = http.put(sasUrl, csvFileBody, {
         headers: { ...uploadHeaders },
         timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
         tags: { stage: "file_manager_upload" },
     });
+    if (timestamps && response.status === 201) timestamps.fileUploadCompletedAt = new Date().toISOString();
     logRuntimeExchange("file_manager_upload", "PUT", "<redacted SAS URL>", uploadHeaders, "<CSV file bytes omitted>", response);
     check(response, { "File Manager upload status is 201": (r) => r.status === 201 });
     if (response.status !== 201) throw new Error(`File Manager upload failed. status=${response.status}`);
@@ -1409,19 +1554,19 @@ function getAdoToken() {
     return json.access_token;
 }
 
-function getAppToken(baseUrl, tokenProfile, adoToken) {
-    const url = `${baseUrl}/tokens-service/api/v2/tokens?company=${encodeURIComponent(tokenProfile.company)}&username=${encodeURIComponent(tokenProfile.username)}`;
+function getAppToken(baseUrl, singleAuthContext, adoToken) {
+    const url = `${baseUrl}/tokens-service/api/v2/tokens?company=${encodeURIComponent(singleAuthContext.singleAuthCompany)}&username=${encodeURIComponent(singleAuthContext.singleAuthIniUsername)}`;
     const res = http.get(url, {
         headers: {
             "Content-Type": "application/json; charset=utf-8",
             Accept: "application/json",
             Authorization: `Bearer ${adoToken}`,
-            GCN: tokenProfile.gcn,
+            GCN: singleAuthContext.singleAuthIniGCN,
         },
         timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
         tags: { stage: "auth_app" },
     });
-    logRuntimeExchange("auth_app", "GET", url, { "Content-Type": "application/json; charset=utf-8", Accept: "application/json", Authorization: "<redacted>", GCN: tokenProfile.gcn }, "<empty>", res);
+    logRuntimeExchange("auth_app", "GET", url, { "Content-Type": "application/json; charset=utf-8", Accept: "application/json", Authorization: "<redacted>", GCN: singleAuthContext.singleAuthIniGCN }, "<empty>", res);
 
     check(res, { "App token status is 200": (r) => r.status === 200 });
     const json = res.json() || {};
@@ -1437,7 +1582,7 @@ function getBapiAuthHeaders(ctx) {
     }
     return {
         Authorization: `Bearer ${ctx.singleAuthBapiToken}`,
-        GCN: ctx.singleAuthUserGCN,
+        GCN: ctx.singleAuthIniGCN,
         Accept: "application/json",
     };
 }
@@ -1446,26 +1591,37 @@ export function setup() {
     console.info(`[k6][config] env=${selectedEnv}`);
     console.info(`[k6][config] authHost=${endpointHost(environmentConfig.authBaseUrl)} batchHost=${endpointHost(environmentConfig.batchBaseUrl)} paymentsHost=${endpointHost(environmentConfig.paymentsBaseUrl)}`);
     validatePreflight();
-    const tokenProfile = getTokenProfile();
+    const identityPrefix = isDualAuth ? "dualAuth" : "singleAuth";
     return {
         selectedEnv,
         environmentConfig,
         batchBaseUrl: environmentConfig.batchBaseUrl.replace(/\/+$/, ""),
         baseUrl: environmentConfig.paymentsBaseUrl.replace(/\/+$/, ""),
-        tokenProfile,
-        singleAuthCompany: tokenProfile.company,
-        singleAuthUser: tokenProfile.username,
-        singleAuthUserGCN: tokenProfile.GCN,
-        singleAuthLoginId: environmentConfig.username,
+        singleAuthCompany: environmentConfig[`${identityPrefix}Company`],
+        singleAuthIniUsername: environmentConfig[`${identityPrefix}IniUsername`],
+        singleAuthIniGCN: environmentConfig[`${identityPrefix}IniGCN`],
+        singleAuthIniLoginginId: environmentConfig[`${identityPrefix}IniLoginginId`],
         singleAuthPassword: environmentConfig.password,
+        dualAuthCompany: environmentConfig.dualAuthCompany,
+        dualAuthIniLoginginId: environmentConfig.dualAuthIniLoginginId,
+        dualAuthIniUsername: environmentConfig.dualAuthIniUsername,
+        dualAuthIniGCN: environmentConfig.dualAuthIniGCN,
+        dualAuthAppLoginginId: environmentConfig.dualAuthAppLoginginId,
+        dualAuthAppUsername: environmentConfig.dualAuthAppUsername,
+        dualAuthAppGCN: environmentConfig.dualAuthAppGCN,
     };
 }
 
 export default function (ctx) {
+    return runBulkFlow(ctx);
+}
+
+export function runBulkFlow(ctx, afterInitiate) {
     const started = Date.now();
     let flowOk = true;
     let stage = "FILE_UPLOAD";
     const execution = {
+        authMode: isDualAuth ? "DUAL_AUTH" : "SINGLE_AUTH",
         vu: __VU,
         iteration: __ITER + 1,
         paymentType: configuredPaymentType,
@@ -1486,16 +1642,16 @@ export default function (ctx) {
     };
 
     try {
-        console.info("[SINGLE AUTH] Validate");
+        console.info(`[${authLabel}] Validate`);
         const auth = authenticate({
             authBaseUrl: ctx.environmentConfig.authBaseUrl,
-            username: ctx.singleAuthLoginId,
+            username: ctx.singleAuthIniLoginginId,
             password: ctx.singleAuthPassword,
         });
         let currentCookie = auth.cookie;
         const jar = {};
         for (const c of currentCookie.cookies || []) if (c && c.name) jar[c.name] = c.value;
-        console.info("[SINGLE AUTH] OTP Attempt #1");
+        console.info(`[${authLabel}] OTP Attempt #1`);
         const initialOtp = submitOtp(
             ctx.environmentConfig.authBaseUrl,
             ctx.environmentConfig.initialOtp,
@@ -1519,7 +1675,7 @@ export default function (ctx) {
         console.info(`[k6][debug][wait] stage=initial_otp->otp_attempt_2 seconds=${sasOtpWait}`);
         sleep(sasOtpWait);
 
-        console.info("[SINGLE AUTH] OTP Attempt #2");
+        console.info(`[${authLabel}] OTP Attempt #2`);
         const secondOtp = submitOtp(
             ctx.environmentConfig.authBaseUrl,
             ctx.environmentConfig.initialOtp,
@@ -1562,20 +1718,22 @@ export default function (ctx) {
         );
         const originalName = `${sasFileName}.csv`;
         const uploadBody = selectedBatchFile;
+        emitBatchFileCapture(originalName, uploadBody);
         intBatch.fileDisplayName = sasFileName;
         execution.fileName = sasFileName;
         emitExecutionSnapshot(execution);
         const sasPayload = buildSasRequest(sasFileName, originalName);
         const initialSasUrl = buildSasEndpoint(ctx);
         const initialSasPayload = JSON.stringify(sasPayload);
-        const initialSasUsername = ctx.singleAuthUser;
+        const initialSasUsername = ctx.singleAuthIniUsername;
         const initialSasCompany = ctx.singleAuthCompany;
         const initialSasIdempotencyKey = makeIdempotencyKey();
         const retryIdempotencyMode = sasRetryIdempotencyMode();
-        console.info("[SINGLE AUTH] Get SAS URL");
+        console.info(`[${authLabel}] Get SAS URL`);
         const sasSessionCookie = jarHeader(jar);
         const sasCookieFingerprint = ssoStagingFingerprint(sasSessionCookie);
         console.info(`[k6][debug][cookie] stage=get_sas_url cookiePresent=${Boolean(sasSessionCookie)} fingerprint=${sasCookieFingerprint}`);
+        console.info(`[k6][auth-context] authMode=${isDualAuth ? "DUAL_AUTH" : "SINGLE_AUTH"} company=${ctx.singleAuthCompany} username=${ctx.singleAuthIniUsername}${isDualAuth ? " role=INITIATOR" : ""}`);
         console.info(`[k6][debug][sas-idempotency] stage=initial mode=${retryIdempotencyMode} keyGenerated=true`);
         if (otp2CookieFingerprint) {
             if (sasCookieFingerprint !== otp2CookieFingerprint) {
@@ -1618,7 +1776,7 @@ export default function (ctx) {
             const [initialSasBaseUrl, initialSasQuery = ""] = initialSasUrl.split("?", 2);
             const [retrySasBaseUrl, retrySasQuery = ""] = retrySasUrl.split("?", 2);
             console.info(`[k6][debug][sas-idempotency] stage=retry mode=${retryIdempotencyMode} sameIdempotencyKey=${sameIdempotencyKey} newKeyGenerated=${!sameIdempotencyKey}`);
-            console.info(`[k6][debug][sas-compare] sameUrl=${retrySasBaseUrl === initialSasBaseUrl} sameQuery=${retrySasQuery === initialSasQuery} samePayload=${JSON.stringify(sasPayload) === initialSasPayload} sameFilename=${sasPayload.fileName === sasFileName} sameOriginalName=${sasPayload.originalName === originalName} sameUsername=${ctx.singleAuthUser === initialSasUsername} sameCompany=${ctx.singleAuthCompany === initialSasCompany} cookieUpdated=${cookieUpdated} sameIdempotencyKey=${sameIdempotencyKey}`);
+            console.info(`[k6][debug][sas-compare] sameUrl=${retrySasBaseUrl === initialSasBaseUrl} sameQuery=${retrySasQuery === initialSasQuery} samePayload=${JSON.stringify(sasPayload) === initialSasPayload} sameFilename=${sasPayload.fileName === sasFileName} sameOriginalName=${sasPayload.originalName === originalName} sameUsername=${ctx.singleAuthIniUsername === initialSasUsername} sameCompany=${ctx.singleAuthCompany === initialSasCompany} cookieUpdated=${cookieUpdated} sameIdempotencyKey=${sameIdempotencyKey}`);
             sasData = getSasUrl(ctx, sasPayload, retrySasIdempotencyKey, "get_sas_url_retry", jarHeader(jar), {
                 mode: retryIdempotencyMode,
                 sameIdempotencyKey,
@@ -1636,10 +1794,11 @@ export default function (ctx) {
         }
         console.info("[PASS] SAS URL generated");
 
-        console.info("[SINGLE AUTH] Upload File");
+        console.info(`[${authLabel}] Upload File`);
         const uploadStart = Date.now();
         execution.timestamps.uploadStartedAt = new Date(uploadStart).toISOString();
-        const uploadRes = uploadFileToSasUrl(sasData.sasUrl, sasData.uploadHeaders, uploadBody);
+        execution.timestamps.executionStartedAt = execution.timestamps.uploadStartedAt;
+        const uploadRes = uploadFileToSasUrl(sasData.sasUrl, sasData.uploadHeaders, uploadBody, execution.timestamps);
         uploadDuration.add(Date.now() - uploadStart);
         execution.timings.uploadMs = Date.now() - uploadStart;
         execution.timestamps.uploadEndedAt = new Date().toISOString();
@@ -1663,11 +1822,11 @@ export default function (ctx) {
         console.info("[AUTH] Getting ADO token");
         ctx.singleAuthAdoAccessToken = getAdoToken();
         console.info("[AUTH] ADO token received");
-        console.info("[AUTH] Generating SINGLE AUTH BAPI token");
-        ctx.singleAuthBapiToken = getAppToken(ctx.baseUrl, ctx.tokenProfile, ctx.singleAuthAdoAccessToken);
-        console.info("[AUTH] SINGLE AUTH BAPI token received");
+        console.info(`[AUTH] Generating ${authLabel} BAPI token`);
+        ctx.singleAuthBapiToken = getAppToken(ctx.baseUrl, ctx, ctx.singleAuthAdoAccessToken);
+        console.info(`[AUTH] ${authLabel} BAPI token received`);
         ctx.authHeaders = getBapiAuthHeaders(ctx);
-        console.info("[AUTH] SINGLE AUTH user context configured");
+        console.info(`[AUTH] ${authLabel} user context configured`);
         console.info("[FLOW] Continuing with existing Get File flow");
 
         stage = "PENDINIT";
@@ -1715,6 +1874,9 @@ export default function (ctx) {
                     fileId = String(match.refId || fileId || "");
                     execution.fileId = fileId;
                     fileStatus = String((match.status && match.status.code) || match.status || "");
+                    if (fileStatus === "PENDINIT" && !execution.timestamps.pendingInitiationObservedAt) {
+                        execution.timestamps.pendingInitiationObservedAt = new Date().toISOString();
+                    }
                     execution.statuses.pendinit = fileStatus || "UNKNOWN";
                     latestFileRecord = match;
                     emitExecutionSnapshot(execution);
@@ -1799,13 +1961,14 @@ export default function (ctx) {
 
         const batchPayload = getBatchesRes.json() || {};
         const batchRows = Array.isArray(batchPayload.data) ? batchPayload.data : [];
-        const returnedRails = [...new Set(batchRows.map((row) => String(row?.rail || "").trim().toUpperCase()).filter(Boolean))];
+        const expectedRail = String(configuredRail || "").toUpperCase();
+        const returnedRails = [...new Set(batchRows.map((row) => String(row?.rail?.code || "").toUpperCase()).filter(Boolean))];
         check(true, {
-            "get file batches rail matches selected rail": () => returnedRails.length > 0 && returnedRails.every((rail) => rail === configuredRail),
+            "get file batches rail matches selected rail": () => returnedRails.length > 0 && returnedRails.every((rail) => rail === expectedRail),
         });
-        if (returnedRails.length === 0 || returnedRails.some((rail) => rail !== configuredRail)) {
+        if (returnedRails.length === 0 || returnedRails.some((rail) => rail !== expectedRail)) {
             throw new Error(
-                `Get file batches rail validation failed for fileId=${fileId}. expectedRail=${configuredRail} actualRails=${returnedRails.join(",") || "<missing>"}`
+                `Get file batches rail validation failed for fileId=${fileId}. expectedRail=${expectedRail} actualRails=[${returnedRails.join(",") || "<missing>"}]`
             );
         }
         const transactionIds = batchRows
@@ -1849,6 +2012,10 @@ export default function (ctx) {
         const initiateStarted = Date.now();
         execution.timestamps.initiationStartedAt = new Date(initiateStarted).toISOString();
         const initiateResponses = http.batch(initiateRequests);
+        const initiationReturnedAt = new Date().toISOString();
+        if (initiateResponses.length > 0 && initiateResponses.every((response) => response.status === 200)) {
+            execution.timestamps.initiationFinishedAt = initiationReturnedAt;
+        }
         const responseDurations = initiateResponses.map((r) => Number(r?.timings?.duration || 0));
         const slowestDuration = responseDurations.length ? Math.max(...responseDurations) : 0;
         const slowestIndex = responseDurations.indexOf(slowestDuration);
@@ -1857,8 +2024,9 @@ export default function (ctx) {
         const slowestRequestBody = initiateRequests[slowestIndex]?.[2] || "";
 
         let allInitiated = true;
-    const initiationStatuses = [];
+        const initiationStatuses = [];
         const expectedStatusAfterInitiate = expectedInitiateStatus(intBatch.paymentDate);
+
         for (let i = 0; i < initiateResponses.length; i++) {
             const response = initiateResponses[i];
             const durationMs = Number(response?.timings?.duration || 0);
@@ -1874,6 +2042,10 @@ export default function (ctx) {
                 }
             })();
             const apiStatus = extractStatusCodeFromPayload(initiatePayload);
+            if (isDualAuth && response.status === 200 && String(apiStatus || "").toUpperCase() === "PENDAUTH" &&
+                !execution.timestamps.pendingApprovalObservedAt) {
+                execution.timestamps.pendingApprovalObservedAt = new Date().toISOString();
+            }
             const normalizedStatus = canonicalInitiateStatus(apiStatus);
             initiationStatuses.push(normalizedStatus || apiStatus || `HTTP ${response.status}`);
             const expectedCanonicalStatus = canonicalInitiateStatus(expectedStatusAfterInitiate);
@@ -1918,6 +2090,7 @@ export default function (ctx) {
         const totalInitiationMs = Date.now() - initiateStarted;
         initiationDuration.add(totalInitiationMs);
         execution.timings.initiationMs = totalInitiationMs;
+        execution.timings.initiationApiMs = slowestDuration;
         execution.timestamps.initiationEndedAt = new Date().toISOString();
         execution.statuses.initiation = uniqueStatusText(initiationStatuses, allInitiated ? "INITIATED" : "UNKNOWN");
         emitExecutionSnapshot(execution);
@@ -1935,6 +2108,51 @@ export default function (ctx) {
                 `parentTransactionId=${slowestTxId} initiationMs=${totalInitiationMs.toFixed(0)} slowestUrl=${slowestUrl} ` +
                 `slowestRequest=${safeBodySnippet(slowestRequestBody)}`
             );
+        }
+
+        if (afterInitiate) {
+            stage = "DUAL_AUTH_APPROVAL";
+            const recordsStart = Date.now();
+            execution.timestamps.sentStartedAt = new Date(recordsStart).toISOString();
+            const result = afterInitiate({
+                adoToken: ctx.singleAuthAdoAccessToken,
+                baseUrl: ctx.baseUrl,
+                parentTransactionIds: transactionIds,
+                bkRefIds: bkRefIds.length > 0 ? bkRefIds : transactionIds,
+                paymentDate: intBatch.paymentDate,
+                expectedCount: Number(intBatch.numPayments),
+                jar: ctx.jar,
+                pendingAuthStartedAt: execution.timestamps.initiationEndedAt,
+                recordApproval: ({ startedAt, endedAt, apiMs, status }) => {
+                    execution.timestamps.approvalStartedAt = execution.timestamps.approvalStartedAt || startedAt;
+                    if (status === 200) execution.timestamps.approvalEndedAt = endedAt;
+                    execution.timings.approvalApiMs = Math.max(execution.timings.approvalApiMs || 0, apiMs);
+                    execution.statuses.approval = `HTTP ${status}`;
+                    emitExecutionSnapshot(execution);
+                },
+            });
+            execution.timings.sentMs = Date.now() - recordsStart;
+            sentDuration.add(execution.timings.sentMs);
+            execution.timestamps.sentEndedAt = new Date().toISOString();
+            execution.timings.pendingAuthToFinalMs = result.pendingAuthToFinalMs;
+            execution.timestamps.pendingAuthStartedAt = execution.timestamps.initiationEndedAt;
+            execution.timestamps.finalStatusObservedAt = result.finalStatusObservedAt;
+            execution.statuses.sent = result.expectedStatus;
+            execution.payments = result.payments;
+            execution.requestDetails.ftIds = result.requests;
+            execution.status = "PASSED";
+            emitRecordsCapture({
+                fileId,
+                paymentType: intBatch.paymentType,
+                railType: intBatch.railType,
+                parentTransactionIds: transactionIds,
+                bkRefIds,
+                meta: result.meta,
+                expectedTotal: Number(intBatch.numPayments),
+                shortfall: 0,
+                buckets: { PASSED: result.payments, FAILED: [], REJECTED: [], IN_PROGRESS: [], UNKNOWN: [] },
+            });
+            return;
         }
 
         stage = "SENT";
@@ -1982,6 +2200,13 @@ export default function (ctx) {
         execution.payments = Object.entries(finalValidation.buckets).flatMap(([resultGroup, payments]) =>
             payments.map((payment) => ({ ...payment, resultGroup }))
         );
+        const expectedFinalStatus = expectedInitiateStatus(intBatch.paymentDate) === "SCHEDULED" ? "SCHEDULED" : "SENT";
+        if (!sentTimedOut && execution.payments.length === expectedRecordCount && expectedRecordCount > 0 &&
+            execution.payments.every((payment) => canonicalInitiateStatus(payment.statusCode) === expectedFinalStatus)) {
+            execution.timestamps.finalStatusObservedAt = execution.timestamps.sentEndedAt;
+            execution.timings.pendingInitiToFinalMs = new Date(execution.timestamps.sentEndedAt).getTime() -
+                new Date(execution.timestamps.pendinitEndedAt).getTime();
+        }
         emitExecutionSnapshot(execution);
 
         check(true, {
@@ -2075,7 +2300,7 @@ export default function (ctx) {
 }
 
 function redactRuntimeValue(value, key = "") {
-    const sensitive = /password|secret|authorization|bearer|cookie|token|otp|signature|sasurl|sas_url|sso_staging|idempotency|biotoken|access_token|client_secret/i.test(key);
+    const sensitive = /password|secret|authorization|bearer|cookie|token|jwt|otp|signature|sasurl|sas_url|sso_staging|idempotency|biotoken|access_token|client_secret/i.test(key);
     if (sensitive) return "<redacted>";
     if (Array.isArray(value)) return value.map((item) => redactRuntimeValue(item, key));
     if (value && typeof value === "object") {
@@ -2107,7 +2332,7 @@ function safeRuntimeHeaders(headers) {
     return result;
 }
 
-function logRuntimeExchange(step, method, url, requestHeaders, requestBody, response) {
+export function logRuntimeExchange(step, method, url, requestHeaders, requestBody, response) {
     const safeUrl = String(url || "").replace(/([?&](?:sig|se|sp|sv|sr|token|key)=[^&]*)/gi, "$1=<redacted>");
     console.info(`[k6][trace][${step}] request=${JSON.stringify({ method, url: safeUrl, headers: safeRuntimeHeaders(requestHeaders), body: safeRuntimeBody(requestBody) })}`);
     console.info(`[k6][trace][${step}] response=${JSON.stringify({ status: response?.status, headers: safeRuntimeHeaders(response?.headers), body: safeRuntimeBody(response?.body, "response") })}`);
@@ -2131,22 +2356,36 @@ const ENVIRONMENTS = {
         authBaseUrl: runtimeValue("SIT_AUTH_URL"),
         batchBaseUrl: runtimeValue("SIT_CAPI_URL"),
         paymentsBaseUrl: runtimeValue("SIT_BAPI_URL"),
-        username: runtimeValue("SIT_LOGIN_USERNAME"),
         password: runtimeValue("SIT_LOGIN_PASSWORD"),
-        company: runtimeValue("SIT_COMPANY"),
-        businessUsername: runtimeValue("SIT_BUSINESS_USERNAME"),
-        gcn: runtimeValue("SIT_GCN"),
+        singleAuthCompany: runtimeValue("SIT_SINGLE_AUTH_COMPANY"),
+        singleAuthIniLoginginId: runtimeValue("SIT_SINGLE_AUTH_INI_LOGINGIN_ID"),
+        singleAuthIniUsername: runtimeValue("SIT_SINGLE_AUTH_INI_USERNAME"),
+        singleAuthIniGCN: runtimeValue("SIT_SINGLE_AUTH_INI_GCN"),
+        dualAuthCompany: runtimeValue("SIT_DUAL_AUTH_COMPANY"),
+        dualAuthIniLoginginId: runtimeValue("SIT_DUAL_AUTH_INI_LOGINGIN_ID"),
+        dualAuthIniUsername: runtimeValue("SIT_DUAL_AUTH_INI_USERNAME"),
+        dualAuthIniGCN: runtimeValue("SIT_DUAL_AUTH_INI_GCN"),
+        dualAuthAppLoginginId: runtimeValue("SIT_DUAL_AUTH_APP_LOGINGIN_ID"),
+        dualAuthAppUsername: runtimeValue("SIT_DUAL_AUTH_APP_USERNAME"),
+        dualAuthAppGCN: runtimeValue("SIT_DUAL_AUTH_APP_GCN"),
         initialOtp: runtimeValue("SIT_OTP") || envText(["K6_OTP", "OTP"]),
     },
     UAT: {
         authBaseUrl: runtimeValue("UAT_AUTH_URL"),
         batchBaseUrl: runtimeValue("UAT_CAPI_URL"),
         paymentsBaseUrl: runtimeValue("UAT_BAPI_URL"),
-        username: runtimeValue("UAT_LOGIN_USERNAME"),
         password: runtimeValue("UAT_LOGIN_PASSWORD"),
-        company: runtimeValue("UAT_COMPANY"),
-        businessUsername: runtimeValue("UAT_BUSINESS_USERNAME"),
-        gcn: runtimeValue("UAT_GCN"),
+        singleAuthCompany: runtimeValue("UAT_SINGLE_AUTH_COMPANY"),
+        singleAuthIniLoginginId: runtimeValue("UAT_SINGLE_AUTH_INI_LOGINGIN_ID"),
+        singleAuthIniUsername: runtimeValue("UAT_SINGLE_AUTH_INI_USERNAME"),
+        singleAuthIniGCN: runtimeValue("UAT_SINGLE_AUTH_INI_GCN"),
+        dualAuthCompany: runtimeValue("UAT_DUAL_AUTH_COMPANY"),
+        dualAuthIniLoginginId: runtimeValue("UAT_DUAL_AUTH_INI_LOGINGIN_ID"),
+        dualAuthIniUsername: runtimeValue("UAT_DUAL_AUTH_INI_USERNAME"),
+        dualAuthIniGCN: runtimeValue("UAT_DUAL_AUTH_INI_GCN"),
+        dualAuthAppLoginginId: runtimeValue("UAT_DUAL_AUTH_APP_LOGINGIN_ID"),
+        dualAuthAppUsername: runtimeValue("UAT_DUAL_AUTH_APP_USERNAME"),
+        dualAuthAppGCN: runtimeValue("UAT_DUAL_AUTH_APP_GCN"),
         initialOtp: runtimeValue("UAT_OTP") || envText(["K6_OTP", "OTP"]),
     },
 };

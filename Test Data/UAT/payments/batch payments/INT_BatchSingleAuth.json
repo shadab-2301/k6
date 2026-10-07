@@ -1,0 +1,16 @@
+{
+"testDataKey": "INT_BatchSingleAuth",
+"paymentType": "INT",
+"rail": "INTERNAL",
+"paymentMethod": "INTERNAL",
+"currency": "ZAR",
+"fromAccount": "1300596363580",
+"beneficiaryId": "39528",
+"defaultAmount": 1.00,
+"toAccounts": [
+"1300596363001",
+"1300596363581",
+"1300596363582",
+"1300596363583"
+]
+}

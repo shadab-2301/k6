@@ -1,0 +1,15 @@
+{
+  "testDataKey": "PRLSD_BatchSingleAuth",
+  "paymentType": "PRLSD",
+  "currency": "ZAR",
+  "fromAccount": "",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {"beneficiaryName":"","accountNumber":"","bankName":"","branchCode":"","myReference":""}
+  ],
+  "csv": {
+    "referencePrefix": "PRLSD",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N"
+  }
+}

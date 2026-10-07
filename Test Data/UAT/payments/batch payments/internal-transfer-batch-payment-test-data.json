@@ -1,5 +1,5 @@
 {
-  "debitAccount": "1300433815580",
+  "debitAccount": "1300596363580",
   "currency": "ZAR",
   "paymentType": "INT",
   "companyId": "1805",
@@ -9,16 +9,16 @@
   "allowDuplicate": "false",
   "internalTransfer": {
     "localInstrument": "INT",
-    "debitAccount": "1300433815580",
+    "debitAccount": "1300596363580",
     "creditAccountScheme": "ACCT",
     "creditMemberId": "580105",
     "creditAccounts": [
-      "1300433815500"
+      "1100596363500"
     ]
   },
   "transactions": [
     {
-      "creditAccountNumber": "1300433815500",
+      "creditAccountNumber": "1100596363500",
       "branchCode": "580105",
       "amount": "1.00",
       "currency": "ZAR",

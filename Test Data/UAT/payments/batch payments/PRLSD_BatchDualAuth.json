@@ -1,0 +1,49 @@
+{
+  "testDataKey": "PRLSD_BatchDualAuth",
+  "paymentType": "PRLSD",
+  "currency": "ZAR",
+  "fromAccount": "1300433815582",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {
+      "beneficiaryName": "FNB Staff1",
+      "accountNumber": "62488330417",
+      "bankName": "",
+      "branchCode": "250655",
+      "myReference": ""
+    },
+    {
+      "beneficiaryName": "Bene Dom21",
+      "accountNumber": "1918017468",
+      "bankName": "",
+      "branchCode": "198765",
+      "myReference": ""
+    },
+    {
+      "beneficiaryName": "Felkon mVKxYAq Multiple Automation",
+      "accountNumber": "4051858858",
+      "bankName": "",
+      "branchCode": "632005",
+      "myReference": ""
+    },
+    {
+      "beneficiaryName": "Test Ben four",
+      "accountNumber": "1312958403",
+      "bankName": "",
+      "branchCode": "470010",
+      "myReference": ""
+    },
+    {
+      "beneficiaryName": "test UAT1",
+      "accountNumber": "4000572261",
+      "bankName": "",
+      "branchCode": "450105",
+      "myReference": ""
+    }
+  ],
+  "csv": {
+    "referencePrefix": "PRLSD",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N"
+  }
+}

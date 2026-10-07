@@ -1,0 +1,15 @@
+{
+"testDataKey": "INT_BatchDualAuth",
+"paymentType": "INT",
+"rail": "INTERNAL",
+"paymentMethod": "INTERNAL",
+"currency": "ZAR",
+"fromAccount": "1300433815582",
+"beneficiaryId": "39528",
+"defaultAmount": 1.00,
+"toAccounts": [
+"1300433815500",
+"1300433815580",
+"1300433815501"
+]
+}

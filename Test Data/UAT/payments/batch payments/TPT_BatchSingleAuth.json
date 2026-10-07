@@ -1,0 +1,35 @@
+{
+  "testDataKey": "TPT_BatchSingleAuth",
+  "paymentType": "TPT",
+  "currency": "ZAR",
+  "fromAccount": "1300596363580",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {"beneficiaryId":585013,"beneficiaryName":"FERTIVA","accountNumber":"63167056548","bankName":"FIRST NATIONAL BANK","branchCode":"250655","beneficiaryReference":"IMPALA KUNSMIS","myReference":"PAYMENT - FERTIVA"},
+    {"beneficiaryId":417595,"beneficiaryName":"NOSIPHO REFILWE CHISSANO","accountNumber":"1856447624","bankName":"CAPITEC BANK LIMITED","branchCode":"470010","beneficiaryReference":"IMPALA KUNMIS","myReference":"4400/111  - CHISSANO NR"},
+    {"beneficiaryId":585014,"beneficiaryName":"SASOL FERTILIZER","accountNumber":"401767442","bankName":"STANDARD BANK","branchCode":"051001","beneficiaryReference":"1100978 IMPALA KUNSMIS","myReference":"PAYMENT - SASOL FERTILIZER"},
+    {"beneficiaryId":369730,"beneficiaryName":"FOSKOR","accountNumber":"4086932629","bankName":"ABSA BANK","branchCode":"632005","beneficiaryReference":"43204","myReference":"PAYMENT - FOSKOR"},
+    {"beneficiaryId":244716,"beneficiaryName":"MACRO SOURCE","accountNumber":"00188727400","bankName":"STANDARD CHARTERED BANK SA","branchCode":"730020","beneficiaryReference":"IMPALA KUNSMIS","myReference":"PAYMENT - MACRO SOURCE"},
+    {"beneficiaryId":973296,"beneficiaryName":"2043 MR L STONE","accountNumber":"1545292203","bankName":"CAPITEC BANK LIMITED","branchCode":"470010","beneficiaryReference":"IMPALA KUNSMIS","myReference":"2043 MR L STONE"},
+    {"beneficiaryId":743531,"beneficiaryName":"2042 MRS AE SWART","accountNumber":"2231869604","bankName":"CAPITEC BANK LIMITED","branchCode":"470010","beneficiaryReference":"IMPALA KUNSMIS","myReference":"2042 MRS AE SWART"},
+    {"beneficiaryId":482727,"beneficiaryName":"4001 DM NKUNA","accountNumber":"1989831506","bankName":"CAPITEC BANK LIMITED","branchCode":"470010","beneficiaryReference":"IMPALA KUNSMIS","myReference":"4001 DM NKUNA"},
+    {"beneficiaryId":402634,"beneficiaryName":"3006 E.L CHIGULO","accountNumber":"1275539602","bankName":"NEDBANK LIMITED","branchCode":"198765","beneficiaryReference":"IMPALA KUNSMIS","myReference":"3006 E.L CHIGULO"},
+    {"beneficiaryId":298374,"beneficiaryName":"3015 S J NYAMBI","accountNumber":"10248223206","bankName":"STANDARD BANK","branchCode":"051001","beneficiaryReference":"IMPALA KUNSMIS","myReference":"3015 S J NYAMBI"}
+  ],
+  "csv": {
+    "detailRecordType": "2",
+    "referencePrefix": "TPT",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N",
+    "trailerRecordType": "99",
+    "trailerRejectedCount": 0
+  },
+  "rules": {
+    "rail": "runtime --rail",
+    "paymentDate": "runtime",
+    "recordCount": "runtime --payments",
+    "rotateBeneficiaries": true,
+    "trailerTotalAmount": "sum of generated payment amounts",
+    "uniqueReferencesPerPayment": true
+  }
+}

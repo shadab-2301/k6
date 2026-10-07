@@ -1,0 +1,21 @@
+{
+  "testDataKey": "ADHOC_BatchSingleAuth",
+  "paymentType": "ADHOC",
+  "currency": "ZAR",
+  "fromAccount": "1300596363580",
+  "defaultAmount": 1.00,
+  "beneficiaries": [
+    {
+      "beneficiaryName": "",
+      "accountNumber": "1300433815500",
+      "bankName": "",
+      "branchCode": "580105",
+      "myReference": ""
+    }
+  ],
+  "csv": {
+    "referencePrefix": "ADHOC",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N"
+  }
+}
