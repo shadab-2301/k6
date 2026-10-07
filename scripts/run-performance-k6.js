@@ -473,14 +473,6 @@ const REPORT_BASE_CSS = `
   }
 `;
 
-function metricSummary(metrics, key, digits = 0) {
-  const values = metrics?.[key] || {};
-  const p95 = values["p(95)"];
-  const avg = values.avg;
-  if (p95 === undefined && avg === undefined) return "n/a";
-  return `avg ${(Number(avg || 0) / 1000).toFixed(2)}s / p95 ${(Number(p95 || 0) / 1000).toFixed(2)}s`;
-}
-
 function metricAvgMs(metrics, key) {
   const avg = metrics?.[key]?.avg;
   return avg === undefined ? "n/a" : `${(Number(avg) / 1000).toFixed(2)}s`;
@@ -711,16 +703,52 @@ function renderDualAuthExecutionTable(executions) {
     </td></tr>`;
   }).join("");
   return `<div class="table-scroll"><table class="data-table execution-table"><thead><tr>
-    <th>Payment Type</th><th>Rail Type</th><th class="num">Records</th><th class="num">File Validation Time</th>
-    <th class="num">Initiation (API TAT)</th><th class="num">Approval (API TAT)</th><th class="num">Pending Approval to Sent/Scheduled</th><th>File ID</th>
+    ${performanceColumnHeaders(true)}
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-function executionTimingSummary(executions, timingKey) {
-  const values = executions.map((execution) => execution.timings?.[timingKey])
-    .filter((value) => value !== undefined && value !== null && Number.isFinite(Number(value)))
-    .map(Number);
-  return values.length ? formatDurationMs(values.reduce((sum, value) => sum + value, 0) / values.length) : "n/a";
+function performanceColumnHeaders(dualAuth) {
+  return [
+    `<th>Payment Type</th>`,
+    `<th>RAIL Type</th>`,
+    `<th class="num">Records</th>`,
+    `<th class="num">File Validation Time</th>`,
+    `<th class="num">Initiation API TAT</th>`,
+    ...(dualAuth ? [`<th class="num">Approval API TAT</th>`] : []),
+    dualAuth
+      ? `<th class="num">Time From Pending Auth to Sent / Sched</th>`
+      : `<th class="num">Time From Pending Initiation to Sent / Sched</th>`,
+    `<th>File ID</th>`,
+  ].join("");
+}
+
+function renderPerformanceMetricsTable(executions) {
+  if (executions.length === 0) {
+    return `<div class="empty-state">No execution data was collected before the run ended.</div>`;
+  }
+
+  const dualAuth = authMode === "DUAL_AUTH";
+  const rows = [...executions]
+    .sort((a, b) => Number(a.vu || 0) - Number(b.vu || 0) || Number(a.iteration || 0) - Number(b.iteration || 0))
+    .map((execution) => {
+      const timings = execution.timings || {};
+      const timestamps = execution.timestamps || {};
+      return `<tr>
+        <td class="nowrap">${escapeHtml(execution.paymentType || "n/a")}</td>
+        <td class="nowrap">${escapeHtml(execution.railType || "n/a")}</td>
+        <td class="num">${escapeHtml(execution.paymentCount ?? "n/a")}</td>
+        <td class="num">${escapeHtml(formatDurationMs(elapsedBetween(timestamps.uploadStartedAt, timestamps.pendinitEndedAt)))}</td>
+        <td class="num">${escapeHtml(formatDurationMs(timings.initiationApiMs))}</td>
+        ${dualAuth ? `<td class="num">${escapeHtml(formatDurationMs(timings.approvalApiMs))}</td>` : ""}
+        <td class="num">${escapeHtml(formatDurationMs(dualAuth ? timings.pendingAuthToFinalMs : timings.pendingInitiToFinalMs))}</td>
+        <td class="id">${escapeHtml(execution.fileId || "n/a")}</td>
+      </tr>`;
+    })
+    .join("");
+
+  return `<div class="table-scroll"><table class="data-table striped"><thead><tr>
+    ${performanceColumnHeaders(dualAuth)}
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function renderExecutionTraceTable(executions) {
@@ -799,8 +827,7 @@ function renderExecutionTraceTable(executions) {
   }).join("");
 
   return `<div class="table-scroll"><table class="data-table execution-table"><thead><tr>
-    <th>Payment Type</th><th>Rail Type</th><th class="num">Records</th><th class="num">File Validation Time</th>
-    <th class="num">Initiation (API TAT)</th><th class="num">Pending Initiation to Sent/Scheduled</th><th>File ID</th>
+    ${performanceColumnHeaders(false)}
   </tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
@@ -1170,7 +1197,6 @@ function buildIssuesHtml(buckets, totalShortfall, ftIdValidationCompleted) {
 }
 
 function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expectedTotal, ftIdValidationCompleted, runDetails, executions, environment }) {
-  const metrics = summary?.metrics || {};
   const paymentBuckets = paymentOnlyBuckets(buckets);
   const total = paymentBuckets.PASSED.length + paymentBuckets.FAILED.length + paymentBuckets.REJECTED.length + paymentBuckets.IN_PROGRESS.length + paymentBuckets.UNKNOWN.length;
   const allPayments = distinctPaymentRows(paymentBuckets);
@@ -1252,17 +1278,7 @@ ${REPORT_BASE_CSS}
     </section>
     <section class="section">
       <h2>Performance Metrics</h2>
-      <div class="metrics-grid">
-        <div class="metric-card"><div class="label">Upload to PENDINIT</div><div class="value">${metricSummary(metrics, "uploadToPendinitDuration")}</div></div>
-        <div class="metric-card"><div class="label">Upload</div><div class="value">${metricSummary(metrics, "uploadDuration")}</div></div>
-        <div class="metric-card"><div class="label">Time to PENDINIT</div><div class="value">${metricSummary(metrics, "pendinitDuration")}</div></div>
-        ${authMode === "DUAL_AUTH" ? `
-        <div class="metric-card"><div class="label">Initiation (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "initiationApiMs")}</div></div>
-        <div class="metric-card"><div class="label">Approval (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "approvalApiMs")}</div></div>
-        <div class="metric-card"><div class="label">Pending Approval to Sent/Scheduled (Average)</div><div class="value">${executionTimingSummary(executions, "pendingAuthToFinalMs")}</div></div>` : `
-        <div class="metric-card"><div class="label">Initiation (API TAT, Average)</div><div class="value">${executionTimingSummary(executions, "initiationApiMs")}</div></div>
-        <div class="metric-card"><div class="label">Pending Initiation to Sent/Scheduled (Average)</div><div class="value">${executionTimingSummary(executions, "pendingInitiToFinalMs")}</div></div>`}
-      </div>
+      ${renderPerformanceMetricsTable(executions)}
     </section>
     <section class="section">
       <h2>Payment Validation Summary (FT IDs)</h2>
