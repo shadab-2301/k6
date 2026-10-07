@@ -102,6 +102,43 @@ for (const authMode of ['SINGLE_AUTH', 'DUAL_AUTH']) {
 }
 console.log('PASS TPT/PRLSD PAYSHAP in both auth modes and Single Auth ADHOC: 5000 CSV rows, account rotation, totals, future date and initiation rail');
 
+for (const authMode of ['SINGLE_AUTH', 'DUAL_AUTH']) {
+  for (const paymentType of ['TPT', 'ADHOC', 'PRLSD']) {
+    const overrides = {
+      K6_PAYMENT_TYPE: paymentType, K6_RAIL: 'RTGS', K6_NUM_PAYMENTS: '10', K6_PAYMENT_DATE: '2099-12-01',
+    };
+    if ((authMode === 'SINGLE_AUTH' && paymentType === 'PRLSD') ||
+        (authMode === 'DUAL_AUTH' && paymentType === 'ADHOC')) {
+      overrides.K6_TEST_DATA_JSON = JSON.stringify({
+        paymentType, fromAccount: 'test-debit', defaultAmount: 2,
+        beneficiaries: [{ accountNumber: 'test-credit', branchCode: '001' }],
+      });
+    }
+    const context = loadSetup(authMode, overrides);
+    context.__VU = 1;
+    context.__ITER = 0;
+    context.md5 = () => 'test-hash';
+    vm.runInContext('data = getEnvData(); batch = buildPaymentBatchXml(data, configuredNumPayments); request = buildInitiateRequestBody(batch, "FILE", "TX");', context);
+    const rows = context.csv.trim().split(/\r?\n/);
+    assert.equal(rows.length, 12);
+    assert.ok(rows.slice(1, -1).every(row => row.split(',')[9] === 'RTGS'));
+    assert.ok(rows.slice(1, -1).every(row => row.split(',')[8] === Number(context.data.defaultAmount).toFixed(2)));
+    assert.equal(context.batch.railType, 'RTGS');
+    assert.equal(context.request.rail, 'RTGS');
+    assert.equal(context.request.paymentDate, '2099-12-01');
+  }
+}
+for (const [amountMin, amountMax, expectedRail] of [
+  ['10', '100', 'EFT'], ['5000001', '5000002', 'RTGS'],
+]) {
+  const context = loadSetup('DUAL_AUTH', { K6_RAIL: '', K6_AMOUNT_MIN: amountMin, K6_AMOUNT_MAX: amountMax });
+  vm.runInContext('profile = getPaymentProfile();', context);
+  assert.equal(context.profile.rail, expectedRail);
+}
+assert.throws(() => loadSetup('DUAL_AUTH', { K6_RAIL: '', K6_AMOUNT_MIN: '1', K6_AMOUNT_MAX: '5000001' }), /amount range cannot cross/);
+assert.throws(() => loadSetup('SINGLE_AUTH', { K6_PAYMENT_TYPE: 'INT', K6_RAIL: 'RTGS' }), /Unsupported payment type and rail combination: INT\/RTGS/);
+console.log('PASS explicit RTGS for TPT/ADHOC/PRLSD, unchanged JSON amounts, automatic TPT rail fallback and INT isolation');
+
 function exerciseInitiator(paymentDate) {
   const context = loadSetup('DUAL_AUTH');
   Object.assign(context.__ENV, {

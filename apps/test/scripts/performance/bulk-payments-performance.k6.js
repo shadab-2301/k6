@@ -139,9 +139,10 @@ const configuredAmountMax = envNumber(["K6_AMOUNT_MAX", "AMOUNT_MAX"], 100);
 const strictLoadConfig = envBool(["K6_REQUIRE_EXPLICIT_LOAD_CONFIG"], false);
 const singleBulkFile = envBool(["K6_SINGLE_BULK_FILE"], false);
 const configuredPaymentType = sanitizeFileToken(envText(["K6_PAYMENT_TYPE"]) || "INT", "INT").toUpperCase();
+const explicitRail = envText(["K6_RAIL"]);
 const requestedRail = sanitizeFileToken(envText(["K6_RAIL"]) || configuredPaymentType, configuredPaymentType).toUpperCase();
 const tptRailThreshold = 5000000;
-const configuredRail = configuredPaymentType === "TPT" && requestedRail !== "PAYSHAP"
+const configuredRail = configuredPaymentType === "TPT" && !explicitRail
     ? configuredAmountMax <= tptRailThreshold
         ? "EFT"
         : "RTGS"
@@ -255,19 +256,19 @@ function validatePreflight() {
         missing.push("K6_AMOUNT_MIN and K6_AMOUNT_MAX must be > 0 and min <= max");
     }
 
-    if (configuredPaymentType === "TPT" && configuredRail !== "PAYSHAP" && configuredAmountMin <= tptRailThreshold && configuredAmountMax > tptRailThreshold) {
+    if (configuredPaymentType === "TPT" && !explicitRail && configuredAmountMin <= tptRailThreshold && configuredAmountMax > tptRailThreshold) {
         missing.push("TPT amount range cannot cross R5,000,000 because a batch file supports one rail; run EFT and RTGS ranges separately");
     }
 
     if (!paymentProfile) {
-            missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, TPT/PAYSHAP, ADHOC/EFT, ADHOC/RTGS, ADHOC/PAYSHAP, PRLSD/EFT, and PRLSD/PAYSHAP`);
+            missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, TPT/PAYSHAP, ADHOC/EFT, ADHOC/RTGS, ADHOC/PAYSHAP, PRLSD/EFT, PRLSD/RTGS, and PRLSD/PAYSHAP`);
     }
 
     if (paymentProfile && !paymentProfile.csvOnly && !RAIL_LOCAL_INSTRUMENTS[paymentProfile.rail]) {
         missing.push(`No local instrument is configured for rail ${paymentProfile.rail} (${configuredPaymentType}/${configuredRail})`);
     }
 
-    if (paymentProfile?.minimumAmount && configuredAmountMin < paymentProfile.minimumAmount) {
+    if (!explicitRail && paymentProfile?.minimumAmount && configuredAmountMin < paymentProfile.minimumAmount) {
         missing.push(`K6_AMOUNT_MIN must be at least ${paymentProfile.minimumAmount} for ${configuredPaymentType}/${configuredRail}`);
     }
 
@@ -327,7 +328,7 @@ function getEnvData() {
 
 function getEnvironmentBatchFile() {
     if (externalBatchFile) return externalBatchFile;
-    if (isDualAuth || configuredRail === "PAYSHAP") {
+    if (isDualAuth || configuredRail === "PAYSHAP" || externalTestDataFile || __ENV.K6_TEST_DATA_JSON) {
         return buildUatBatchCsv(getEnvData(), configuredNumPayments);
     }
     if (selectedEnv === "UAT" && UAT_BATCH_DATA[configuredPaymentType]) {
@@ -434,6 +435,7 @@ function getPaymentProfile() {
         "TPT/RTGS": {
             paymentType: "TPT",
             rail: "RTGS",
+            csvOnly: true,
             source: "beneficiary",
             creditAccountScheme: "BENEID",
             includeCreditorAgent: true,
@@ -450,7 +452,17 @@ function getPaymentProfile() {
         "ADHOC/RTGS": {
             paymentType: "ADHOC",
             rail: "RTGS",
+            csvOnly: true,
             source: "beneficiary",
+            creditAccountScheme: "ACCT",
+            includeCreditorAgent: true,
+            minimumAmount: 5000000.01,
+        },
+        "PRLSD/RTGS": {
+            paymentType: "PRLSD",
+            rail: "RTGS",
+            csvOnly: true,
+            source: "payroll",
             creditAccountScheme: "ACCT",
             includeCreditorAgent: true,
             minimumAmount: 5000000.01,
@@ -1272,7 +1284,7 @@ function buildInitiateRequestBody(batch, fileId, transactionId) {
         return { ...common, rail: batch.railType };
     }
 
-    if (batch.paymentType === "PRLSD" && (batch.railType === "EFT" || batch.railType === "PAYSHAP")) {
+    if (batch.paymentType === "PRLSD" && (batch.railType === "EFT" || batch.railType === "RTGS" || batch.railType === "PAYSHAP")) {
         return { ...common, rail: batch.railType };
     }
 
