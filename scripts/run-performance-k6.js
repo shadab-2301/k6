@@ -420,7 +420,7 @@ function renderReportHeader(title, facts) {
 
 function statusTone(value) {
   const text = String(value || "").trim().toUpperCase().replace(/[\s-]+/g, "_");
-  if (["PASSED", "PASS", "SUCCESS", "SENT", "SCHEDULED", "COMPLETED"].includes(text)) return "pass";
+  if (["PASSED", "PASS", "SUCCESS", "SENT", "SCHEDULED", "SCHED", "COMPLETED"].includes(text)) return "pass";
   if (["FAILED", "FAIL", "REJECTED", "TIMED_OUT", "MISSING_RECORDS", "PAYMENT_FAILED", "PAYMENT_REJECTED", "ERROR"].includes(text)) return "fail";
   if (["IN_PROGRESS", "INCOMPLETE", "PENDING", "UNKNOWN"].includes(text)) return "warn";
   return "neutral";
@@ -658,27 +658,6 @@ function executionStageRows(execution) {
   ].filter((stage) => stage.start || stage.end || stage.duration !== null && stage.duration !== undefined);
 }
 
-function renderLifecycleTimestamps(execution, dualAuth) {
-  const timestamps = execution.timestamps || {};
-  const events = [
-    ["File Upload Started", timestamps.fileUploadStartedAt || timestamps.uploadStartedAt],
-    ["File Upload Completed", timestamps.fileUploadCompletedAt],
-    ["Pending Initiation Observed", timestamps.pendingInitiationObservedAt],
-    ["Initiation Started", timestamps.initiationStartedAt],
-    ["Initiation Finished", timestamps.initiationFinishedAt],
-    ...(dualAuth ? [["Pending Approval Observed", timestamps.pendingApprovalObservedAt]] : []),
-    ["Approval Started", dualAuth ? timestamps.approvalStartedAt : null],
-    ["Approval Finished", dualAuth ? timestamps.approvalEndedAt : null],
-    ["Final Status Observed", timestamps.finalStatusObservedAt],
-  ];
-  return events.map(([label, value]) => {
-    const text = !dualAuth && label.startsWith("Approval ")
-      ? "N/A - Auto-approved during initiation"
-      : value ? formatTimestamp(value) : "N/A";
-    return `<div class="trace-kv"><span>${label}</span><strong>${escapeHtml(text)}</strong></div>`;
-  }).join("");
-}
-
 function renderDualAuthExecutionTable(executions) {
   const rows = [...executions].sort((first, second) =>
     Number(first.vu || 0) - Number(second.vu || 0) || Number(first.iteration || 0) - Number(second.iteration || 0)
@@ -703,13 +682,6 @@ function renderDualAuthExecutionTable(executions) {
         <span><strong>File Name:</strong> ${escapeHtml(execution.fileName || "n/a")}</span>
         <span><strong>Parent Transaction ID:</strong> ${escapeHtml(uniqueJoined(execution.parentTransactionIds))}</span>
         <span><strong>BKREF:</strong> ${escapeHtml(uniqueJoined(execution.bkRefIds))}</span>
-      </div>
-      <div class="trace-subsection">
-        <div class="trace-subtitle">Execution Timeline</div>
-        <div class="trace-kv"><span>Execution Started</span><strong>${escapeHtml(formatTimestamp(timestamps.executionStartedAt || timestamps.uploadStartedAt))}</strong></div>
-        ${renderLifecycleTimestamps(execution, true)}
-        <div class="trace-kv"><span>Total Duration</span><strong>${escapeHtml(formatDurationMs(elapsedBetween(timestamps.uploadStartedAt, timestamps.sentEndedAt)))}</strong></div>
-        <div class="trace-kv"><span>Final Status</span><strong>${escapeHtml(execution.statuses?.sent || "n/a")}</strong></div>
       </div>
       ${execution.failure ? `<div class="trace-subsection trace-failure"><div class="trace-subtitle">Failure Summary</div><div>${escapeHtml(stageLabel(execution.failure.stage))}: ${escapeHtml(conciseFailureReason(execution.failure))}</div></div>` : ""}
       <div class="trace-subsection"><div class="trace-subtitle">FT-ID Outcome Summary</div>
@@ -1092,17 +1064,6 @@ function renderExecutionTraceTable(executions) {
           <span><strong>Parent Transaction ID:</strong> ${escapeHtml(uniqueJoined(execution.parentTransactionIds))}</span>
           <span><strong>BKREF:</strong> ${escapeHtml(uniqueJoined(execution.bkRefIds))}</span>
           <span><strong>Total Execution Duration:</strong> ${escapeHtml(formatDurationMs(totalDuration))}</span>
-        </div>
-        <div class="trace-subsection">
-          <div class="trace-subtitle">Execution Timeline</div>
-          <div class="trace-kv"><span>Execution Started</span><strong>${escapeHtml(formatTimestamp(execution.timestamps?.executionStartedAt || executionStart))}</strong></div>
-          ${renderLifecycleTimestamps(execution, false)}
-          <div class="trace-kv"><span>Execution Finished</span><strong>${escapeHtml(formatTimestamp(executionEnd))}</strong></div>
-          <div class="trace-kv"><span>Total Duration</span><strong>${escapeHtml(formatDurationMs(totalDuration))}</strong></div>
-          <div class="trace-kv"><span>Final Status</span><strong>${escapeHtml(execution.statuses?.sent || "n/a")}</strong></div>
-          <div class="trace-kv"><span>Result</span><strong>${statusBadge(result)}</strong></div>
-          ${result !== "Passed" ? `<div class="trace-kv"><span>Failure Point</span><strong>${escapeHtml(failurePoint)}</strong></div>` : ""}
-          ${result !== "Passed" ? `<div class="trace-kv"><span>Last Known Status</span><strong>${escapeHtml(lastKnownStatus)}</strong></div>` : ""}
         </div>
         ${failureSummary}
         <div class="trace-subsection">
@@ -1562,12 +1523,12 @@ ${REPORT_BASE_CSS}
 <div class="container">
   ${renderReportHeader("Bulk Payments Performance Report", headerFacts)}
   <main>
+    ${renderLinearTimelines(executions, environment)}
     <section class="section">
       <h2>Batch Execution Trace</h2>
       ${renderExecutionTraceTable(executions)}
     </section>
     ${renderPerBatchBreakdown(executions)}
-    ${renderLinearTimelines(executions, environment)}
     <section class="section">
       <h2>Performance Metrics</h2>
       ${renderPerformanceMetricsTable(executions)}
