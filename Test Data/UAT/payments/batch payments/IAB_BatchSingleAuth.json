@@ -1,0 +1,38 @@
+{
+  "testDataKey": "IAB_BatchSingleAuth",
+  "paymentType": "IAB",
+  "currency": "ZAR",
+  "fromAccount": "1300307803580",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {
+      "beneficiaryName": "SANRAL e toll",
+      "beneficiaryId": "440492",
+      "myReference": "6272063006115121",
+      "validationFormat": "^[0-9]{16}$"
+    },
+    {
+      "beneficiaryName": "Wesbank",
+      "beneficiaryId": "680997",
+      "myReference": "85347333811",
+      "validationFormat": "^([0-9]{9}|[0-9]{11})$"
+    },
+    {
+      "beneficiaryName": "SARS ITA Assessed tax",
+      "beneficiaryId": "390054",
+      "myReference": "9197001705T00000000",
+      "validationFormat": "^[01239][0-9]{9}[AT](0|[A-NP-Z])[0-9]{7}$"
+    },
+    {
+      "beneficiaryName": "ABSA Credit Card",
+      "beneficiaryId": "1299113",
+      "myReference": "9876543219876541",
+      "validationFormat": "^[0-9]{16}$"
+    }
+  ],
+  "csv": {
+    "referencePrefix": "IAB",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N"
+  }
+}

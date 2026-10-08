@@ -38,11 +38,17 @@ const UAT_BATCH_DATA = isDualAuth ? {
     INT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/INT_BatchDualAuth.json")),
     TPT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/TPT_BatchDualAuth.json")),
     PRLSD: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/PRLSD_BatchDualAuth.json")),
+    PRLEX: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/PRLEX_BatchDualAuth.json")),
+    IAB: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/IAB_BatchDualAuth.json")),
+    ADHOC: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/ADHOC_BatchDualAuth.json")),
 } : {
     INT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/INT_BatchSingleAuth.json")),
     TPT: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/TPT_BatchSingleAuth.json")),
     ADHOC: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/ADHOC_BatchSingleAuth.json")),
+
     PRLSD: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/PRLSD_BatchSingleAuth.json")),
+    PRLEX: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/PRLEX_BatchSingleAuth.json")),
+    IAB: parseOptionalJson(open("../../../../Test Data/UAT/payments/batch payments/IAB_BatchSingleAuth.json")),
 };
 
 const uploadDuration = new Trend("batch_upload_duration", true);
@@ -261,7 +267,15 @@ function validatePreflight() {
     }
 
     if (!paymentProfile) {
-            missing.push(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. Supported combinations are INT/INT, TPT/EFT, TPT/RTGS, TPT/PAYSHAP, ADHOC/EFT, ADHOC/RTGS, ADHOC/PAYSHAP, PRLSD/EFT, PRLSD/RTGS, and PRLSD/PAYSHAP`);
+missing.push(
+    `Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. ` +
+    `Supported combinations are INT/INT, ` +
+    `TPT/EFT, TPT/RTGS, TPT/PAYSHAP, ` +
+    `ADHOC/EFT, ADHOC/RTGS, ADHOC/PAYSHAP, ` +
+    `PRLSD/EFT, PRLSD/RTGS, PRLSD/PAYSHAP, ` +
+    `PRLEX/EFT, PRLEX/RTGS, PRLEX/PAYSHAP, ` +
+    `IAB/EFT, IAB/RTGS, and IAB/PAYSHAP`
+);
     }
 
     if (paymentProfile && !paymentProfile.csvOnly && !RAIL_LOCAL_INSTRUMENTS[paymentProfile.rail]) {
@@ -354,16 +368,41 @@ function csvPaymentDate() {
 }
 
 function buildUatBatchCsv(data, numPayments) {
-    const isInternal = configuredPaymentType === "INT";
-    const counterparties = isInternal
-        ? (data.toAccounts || []).map((accountNumber) => ({ accountNumber, branchCode: data.beneficiaryId, name: "" }))
-        : (data.beneficiaries || []).map((b) => ({ accountNumber: b.accountNumber, branchCode: b.branchCode, name: b.myReference || b.beneficiaryName || "" }));
-    if (!data.fromAccount || counterparties.length === 0 || counterparties.some((c) => !c.accountNumber || !c.branchCode)) {
-        throw new Error(
-            `[k6][FAIL][file_generation] ${configuredPaymentType}_BatchSingleAuth.json needs fromAccount and ` +
-            (isInternal ? "beneficiaryId plus at least one toAccounts entry." : "at least one beneficiary with accountNumber and branchCode.")
-        );
-    }
+const isInternal = configuredPaymentType === "INT";
+const isIab = configuredPaymentType === "IAB";
+
+const counterparties = isInternal
+    ? (data.toAccounts || []).map((accountNumber) => ({
+        accountNumber,
+        branchCode: data.beneficiaryId,
+        name: ""
+    }))
+    : isIab
+        ? (data.beneficiaries || []).map((b) => ({
+            accountNumber: b.beneficiaryId,
+            branchCode: "",
+            name: b.beneficiaryName || "",
+            myReference: b.myReference || ""
+        }))
+        : (data.beneficiaries || []).map((b) => ({
+            accountNumber: b.accountNumber,
+            branchCode: b.branchCode,
+            name: b.myReference || b.beneficiaryName || ""
+        }));
+const invalidCounterparty = configuredPaymentType === "IAB"
+    ? counterparties.some((c) => !c.accountNumber)
+    : counterparties.some((c) => !c.accountNumber || !c.branchCode);
+
+if (!data.fromAccount || counterparties.length === 0 || invalidCounterparty) {
+    throw new Error(
+        `[k6][FAIL][file_generation] ${configuredPaymentType}_${isDualAuth ? "BatchDualAuth" : "BatchSingleAuth"}.json needs fromAccount and ` +
+        (isInternal
+            ? "beneficiaryId plus at least one toAccounts entry."
+            : configuredPaymentType === "IAB"
+                ? "at least one beneficiary with beneficiaryId."
+                : "at least one beneficiary with accountNumber and branchCode.")
+    );
+}
 
     const prefix = data.csv?.referencePrefix || configuredPaymentType;
     const endToEndPrefix = data.csv?.endToEndReferencePrefix || "E2E";
@@ -473,6 +512,48 @@ function getPaymentProfile() {
             source: "payroll",
             creditAccountScheme: "ACCT",
             includeCreditorAgent: true,
+            minimumAmount: 0,
+        },
+                "IAB/EFT": {
+            paymentType: "IAB",
+            rail: "EFT",
+            source: "beneficiary",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+        "IAB/RTGS": {
+            paymentType: "IAB",
+            rail: "RTGS",
+            source: "beneficiary",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+        "IAB/PAYSHAP": {
+            paymentType: "IAB",
+            rail: "PAYSHAP",
+            source: "beneficiary",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+                "PRLEX/EFT": {
+            paymentType: "PRLEX",
+            rail: "EFT",
+            source: "payroll",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+        "PRLEX/RTGS": {
+            paymentType: "PRLEX",
+            rail: "RTGS",
+            source: "payroll",
+            csvOnly: true,
+            minimumAmount: 0,
+        },
+        "PRLEX/PAYSHAP": {
+            paymentType: "PRLEX",
+            rail: "PAYSHAP",
+            source: "payroll",
+            csvOnly: true,
             minimumAmount: 0,
         },
     };
@@ -1337,14 +1418,12 @@ function buildInitiateRequestBody(batch, fileId, transactionId) {
         return { ...common, rail: "INT" };
     }
 
-    if ((batch.paymentType === "TPT" || batch.paymentType === "ADHOC") &&
-        (batch.railType === "EFT" || batch.railType === "RTGS" || batch.railType === "PAYSHAP")) {
-        return { ...common, rail: batch.railType };
-    }
-
-    if (batch.paymentType === "PRLSD" && (batch.railType === "EFT" || batch.railType === "RTGS" || batch.railType === "PAYSHAP")) {
-        return { ...common, rail: batch.railType };
-    }
+if (
+    ["TPT", "ADHOC", "PRLSD", "PRLEX", "IAB"].includes(batch.paymentType) &&
+    ["EFT", "RTGS", "PAYSHAP"].includes(batch.railType)
+) {
+    return { ...common, rail: batch.railType };
+}
 
     throw new Error(`No initiate request body is defined for ${batch.paymentType}/${batch.railType}`);
 }

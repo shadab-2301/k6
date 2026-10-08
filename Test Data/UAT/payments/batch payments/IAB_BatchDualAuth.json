@@ -1,0 +1,26 @@
+{
+  "testDataKey": "IAB_BatchDualAuth",
+  "paymentType": "IAB",
+  "currency": "ZAR",
+  "fromAccount": "1300307803580",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {
+      "beneficiaryName": "ABSA Credit Card",
+      "beneficiaryId": "1299106",
+      "myReference": "9876543210654987",
+      "validationFormat": "^[0-9]{16}$"
+    },
+    {
+      "beneficiaryName": "AR MAHOMED INC",
+      "beneficiaryId": "1299105",
+      "myReference": "aasdadsdsaasddasasd",
+      "validationFormat": "^[a-zA-Z0-9]{1,24}$"
+    }
+  ],
+  "csv": {
+    "referencePrefix": "IAB",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N"
+  }
+}

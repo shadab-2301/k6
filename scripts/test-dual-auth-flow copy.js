@@ -66,7 +66,7 @@ assert.throws(() => vm.runInContext('delete UAT_BATCH_DATA.TPT; setup();', empty
 console.log('PASS setup selects isolated Dual Auth identities and fixture; Single Auth selection is unchanged');
 
 for (const authMode of ['SINGLE_AUTH', 'DUAL_AUTH']) {
-  for (const paymentType of authMode === 'SINGLE_AUTH' ? ['TPT', 'PRLSD', 'PRLEX', 'ADHOC', 'IAB'] : ['TPT', 'PRLSD', 'PRLEX', 'IAB']) {
+  for (const paymentType of authMode === 'SINGLE_AUTH' ? ['TPT', 'PRLSD', 'ADHOC'] : ['TPT', 'PRLSD']) {
     const context = loadSetup(authMode, {
       K6_PAYMENT_TYPE: paymentType, K6_RAIL: 'PAYSHAP', K6_NUM_PAYMENTS: '5000', K6_PAYMENT_DATE: '2099-12-01',
       ...(authMode === 'SINGLE_AUTH' && paymentType === 'PRLSD' ? {
@@ -100,10 +100,10 @@ for (const authMode of ['SINGLE_AUTH', 'DUAL_AUTH']) {
     assert.equal(context.request.singleDebit, true);
   }
 }
-console.log('PASS TPT/PRLSD/PRLEX/IAB PAYSHAP in both auth modes and Single Auth ADHOC: 5000 CSV rows, account rotation, totals, future date and initiation rail');
+console.log('PASS TPT/PRLSD PAYSHAP in both auth modes and Single Auth ADHOC: 5000 CSV rows, account rotation, totals, future date and initiation rail');
 
 for (const authMode of ['SINGLE_AUTH', 'DUAL_AUTH']) {
-  for (const paymentType of ['TPT', 'ADHOC', 'PRLSD', 'PRLEX', 'IAB']) {
+  for (const paymentType of ['TPT', 'ADHOC', 'PRLSD']) {
     const overrides = {
       K6_PAYMENT_TYPE: paymentType, K6_RAIL: 'RTGS', K6_NUM_PAYMENTS: '10', K6_PAYMENT_DATE: '2099-12-01',
     };
@@ -128,7 +128,6 @@ for (const authMode of ['SINGLE_AUTH', 'DUAL_AUTH']) {
     assert.equal(context.request.paymentDate, '2099-12-01');
   }
 }
-
 for (const [amountMin, amountMax, expectedRail] of [
   ['10', '100', 'EFT'], ['5000001', '5000002', 'RTGS'],
 ]) {

@@ -1,0 +1,43 @@
+{
+  "testDataKey": "PRLEX_BatchSingleAuth",
+  "paymentType": "PRLEX",
+  "currency": "ZAR",
+  "fromAccount": "1300307803580",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {
+      "beneficiaryId": 1299112,
+      "beneficiaryName": "Lebo Radabe",
+      "accountNumber": "62617125689",
+      "bankName": "FIRST NATIONAL BANK",
+      "branchCode": "250655",
+      "beneficiaryReference": "",
+      "myReference": ""
+    },
+    {
+      "beneficiaryId": 1299111,
+      "beneficiaryName": "Suresh padala",
+      "accountNumber": "63026841840",
+      "bankName": "FIRST NATIONAL BANK",
+      "branchCode": "250655",
+      "beneficiaryReference": "",
+      "myReference": ""
+    }
+  ],
+  "csv": {
+    "detailRecordType": "2",
+    "referencePrefix": "PRLEX",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N",
+    "trailerRecordType": "99",
+    "trailerRejectedCount": 0
+  },
+  "rules": {
+    "rail": "runtime --rail",
+    "paymentDate": "runtime",
+    "recordCount": "runtime --payments",
+    "rotateBeneficiaries": true,
+    "trailerTotalAmount": "sum of generated payment amounts",
+    "uniqueReferencesPerPayment": true
+  }
+}

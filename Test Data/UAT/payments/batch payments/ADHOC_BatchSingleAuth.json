@@ -6,11 +6,11 @@
   "defaultAmount": 1.00,
   "beneficiaries": [
     {
-      "beneficiaryName": "",
-      "accountNumber": "1300433815500",
-      "bankName": "",
-      "branchCode": "580105",
-      "myReference": ""
+      "beneficiaryName": "John Doe",
+      "accountNumber": "271102934",
+      "bankName": "STANDARD BANK",
+      "branchCode": "051001",
+      "myReference": "sf"
     }
   ],
   "csv": {

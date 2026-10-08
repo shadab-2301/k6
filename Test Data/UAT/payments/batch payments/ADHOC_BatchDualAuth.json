@@ -1,11 +1,17 @@
 {
-  "testDataKey": "ADHOC_BatchSingleAuth",
+  "testDataKey": "ADHOC_BatchDualAuth",
   "paymentType": "ADHOC",
   "currency": "ZAR",
-  "fromAccount": "",
-  "defaultAmount": 2.00,
+  "fromAccount": "1300433815582",
+  "defaultAmount": 1.00,
   "beneficiaries": [
-    {"beneficiaryName":"","accountNumber":"","bankName":"","branchCode":"","myReference":""}
+    {
+      "beneficiaryName": "John Doe",
+      "accountNumber": "271102934",
+      "bankName": "STANDARD BANK",
+      "branchCode": "051001",
+      "myReference": "ABC"
+    }
   ],
   "csv": {
     "referencePrefix": "ADHOC",

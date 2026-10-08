@@ -1,0 +1,61 @@
+{
+  "testDataKey": "PRLEX_BatchDualAuth",
+  "paymentType": "PRLEX",
+  "currency": "ZAR",
+  "fromAccount": "1300433815580",
+  "defaultAmount": 2.00,
+  "beneficiaries": [
+    {
+      "beneficiaryId": 1299108,
+      "beneficiaryName": "Sylvania Emp1",
+      "accountNumber": "62006635166",
+      "bankName": "FIRST NATIONAL BANK",
+      "branchCode": "250655",
+      "beneficiaryReference": "",
+      "myReference": ""
+    },
+    {
+      "beneficiaryId": 1299107,
+      "beneficiaryName": "Sylvania Emp2",
+      "accountNumber": "63000162808",
+      "bankName": "FIRST NATIONAL BANK",
+      "branchCode": "250655",
+      "beneficiaryReference": "",
+      "myReference": ""
+    },
+    {
+      "beneficiaryId": 1299104,
+      "beneficiaryName": "Shadab Anwar",
+      "accountNumber": "62617125689",
+      "bankName": "FIRST NATIONAL BANK",
+      "branchCode": "250655",
+      "beneficiaryReference": "",
+      "myReference": ""
+    },
+    {
+      "beneficiaryId": 1299103,
+      "beneficiaryName": "Suresh Padala",
+      "accountNumber": "4104399636",
+      "bankName": "ABSA BANK",
+      "branchCode": "632005",
+      "beneficiaryReference": "",
+      "myReference": ""
+    }
+  ],
+  "csv": {
+    "detailRecordType": "2",
+    "referencePrefix": "PRLEX",
+    "endToEndReferencePrefix": "E2E",
+    "flag": "N",
+    "trailerRecordType": "99",
+    "trailerRejectedCount": 0
+  },
+  "rules": {
+    "rail": "runtime --rail",
+    "paymentDate": "runtime",
+    "recordCount": "runtime --payments",
+    "rotateBeneficiaries": true,
+    "trailerTotalAmount": "sum of generated payment amounts",
+    "uniqueReferencesPerPayment": true
+  }
+}

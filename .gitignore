@@ -39,3 +39,5 @@ ApiRegistry/DynamicBearerToken.json
 ApiRegistry/Tokens.json
 
 apps/test/resources/generated-batch-files/
+BatchPerfuploaded/
+reports/performance/
