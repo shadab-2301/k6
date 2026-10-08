@@ -788,11 +788,6 @@ function assignRows(items, gap = 0.6) {
   return Math.max(1, rowEnds.length);
 }
 
-function shortBkRef(bkRef) {
-  const value = String(bkRef || "");
-  return value.length > 7 ? `BK...${value.slice(-5)}` : value || "n/a";
-}
-
 function renderLinearTimeline(execution, environment, dualAuth, showRunLabel) {
   const ts = execution.timestamps || {};
   const timings = execution.timings || {};
@@ -904,7 +899,7 @@ function renderLinearTimeline(execution, environment, dualAuth, showRunLabel) {
       const width = Number.isFinite(to) ? Math.max(pos(to) - left, 0.5) : 0.5;
       return `<div class="lt-bk-seg ${cls}" style="left:${Math.min(left, 100 - width).toFixed(3)}%;width:${width.toFixed(3)}%" title="${escapeHtml(title)}: ${escapeHtml(formatTimestamp(fromIso))}${Number.isFinite(to) ? ` to ${escapeHtml(formatTimestamp(toIso))}` : ""}"></div>`;
     };
-    const label = `${entry.paymentType || "n/a"}/${entry.rail || "n/a"} - ${shortBkRef(entry.bkRef)}`;
+    const label = `${entry.paymentType || "n/a"}/${entry.rail || "n/a"} - ${entry.bkRef || entry.transactionId || "n/a"}`;
     return `<div class="lt-bk-row"><div class="lt-bk-label" title="${escapeHtml(`${entry.transactionId} / ${entry.bkRef}`)}">${escapeHtml(label)}</div>
         <div class="lt-bk-track">${segment(entry.initiationStartedAt, entry.initiationFinishedAt, "lt-initiation", "Initiation")}${dualAuth ? segment(entry.approvalStartedAt, entry.approvalFinishedAt, "lt-approval", "Approval") : ""}${segment(entry.finalStatusObservedAt, "", "lt-final", "Final status observed")}</div></div>`;
   }).join("");
