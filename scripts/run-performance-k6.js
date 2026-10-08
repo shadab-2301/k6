@@ -853,7 +853,7 @@ function renderLinearTimeline(execution, environment, dualAuth, showRunLabel) {
     { key: "validation", name: "File Validation", sub: "(Upload to Pending Initiation)", from: at("File Upload Completed"), to: at("Pending Initiation Observed") },
     { key: "initiation", name: "Initiation API", from: at("Initiation Started"), to: at("Initiation Finished") },
     ...(dualAuth ? [{ key: "approval", name: "Approval API", from: at("Approval Started"), to: at("Approval Finished") }] : []),
-    { key: "pending", name: dualAuth ? "Pending Auth → Sent/Sched" : "Pending Initiation → Sent/Sched", from: at(pendingStartLabel) ?? Date.parse(ts.pendinitEndedAt || ""), to: at("Final Status Observed") },
+    { key: "pending", name: dualAuth ? "Pending Auth → Sent/Sched" : "Pending Initiation → Sent/Sched", from: (dualAuth ? at("Approval Finished") : undefined) ?? at(pendingStartLabel) ?? Date.parse(ts.pendinitEndedAt || ""), to: at("Final Status Observed") },
   ];
   const MIN_BAR = 0.8;
   const stages = stageDefs.filter((stage) => Number.isFinite(stage.from) && Number.isFinite(stage.to) && stage.to >= stage.from).map((stage) => {
