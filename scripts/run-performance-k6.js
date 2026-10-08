@@ -737,6 +737,244 @@ function performanceColumnHeaders(dualAuth) {
   ].join("");
 }
 
+const TIMELINE_COLORS = {
+  start: "#334155",
+  upload: "#2563eb",
+  validation: "#f59e0b",
+  initiation: "#16a34a",
+  pendingApproval: "#7c3aed",
+  approval: "#dc2626",
+  pending: "#7cc4fa",
+  final: "#1e40af",
+};
+
+function executionTotalDurationMs(execution, dualAuth) {
+  const ts = execution.timestamps || {};
+  if (dualAuth) return elapsedBetween(ts.uploadStartedAt, ts.sentEndedAt);
+  const stages = executionStageRows(execution);
+  const start = stages[0]?.start || ts.uploadStartedAt;
+  const end = stages[stages.length - 1]?.end || ts.sentEndedAt || ts.initiationEndedAt || ts.pendinitEndedAt;
+  return elapsedBetween(start, end) ?? totalExecutionDurationMs(execution.timings);
+}
+
+function utcClock(value, precision = "ms") {
+  const iso = new Date(value).toISOString();
+  return precision === "minute" ? iso.slice(11, 16) : precision === "second" ? iso.slice(11, 19) : iso.slice(11, 23);
+}
+
+function formatSecondsWithMinutes(ms) {
+  if (!Number.isFinite(Number(ms)) || ms === null) return "n/a";
+  const seconds = Number(ms) / 1000;
+  return `${seconds.toFixed(2)}s (${Math.floor(seconds / 60)}m ${(seconds % 60).toFixed(2)}s)`;
+}
+
+function timelineTicks(startMs, endMs) {
+  const span = endMs - startMs;
+  const steps = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200].map((s) => s * 1000);
+  const step = steps.find((candidate) => span / candidate <= 10) || steps[steps.length - 1];
+  const ticks = [];
+  for (let t = Math.ceil(startMs / step) * step; t <= endMs; t += step) ticks.push(t);
+  return { ticks, precision: step < 60000 ? "second" : "minute" };
+}
+
+// Greedy row assignment: each item goes into the first row whose previous item ends before it starts.
+function assignRows(items, gap = 0.6) {
+  const rowEnds = [];
+  for (const item of [...items].sort((a, b) => a.from - b.from)) {
+    let row = rowEnds.findIndex((end) => end + gap <= item.from);
+    if (row === -1) { row = rowEnds.length; rowEnds.push(item.to); } else { rowEnds[row] = item.to; }
+    item.row = row;
+  }
+  return Math.max(1, rowEnds.length);
+}
+
+function shortBkRef(bkRef) {
+  const value = String(bkRef || "");
+  return value.length > 7 ? `BK...${value.slice(-5)}` : value || "n/a";
+}
+
+function renderLinearTimeline(execution, environment, dualAuth, showRunLabel) {
+  const ts = execution.timestamps || {};
+  const timings = execution.timings || {};
+  const eventDefs = [
+    ["Execution Started", ts.executionStartedAt || ts.uploadStartedAt, TIMELINE_COLORS.start],
+    ["File Upload Started", ts.fileUploadStartedAt || ts.uploadStartedAt, TIMELINE_COLORS.upload],
+    ["File Upload Completed", ts.fileUploadCompletedAt, TIMELINE_COLORS.upload],
+    ["Pending Initiation Observed", ts.pendingInitiationObservedAt, TIMELINE_COLORS.validation],
+    ["Initiation Started", ts.initiationStartedAt, TIMELINE_COLORS.initiation],
+    ["Initiation Finished", ts.initiationFinishedAt, TIMELINE_COLORS.initiation],
+    ...(dualAuth ? [
+      ["Pending Approval Observed", ts.pendingApprovalObservedAt, TIMELINE_COLORS.pendingApproval],
+      ["Approval Started", ts.approvalStartedAt, TIMELINE_COLORS.approval],
+      ["Approval Finished", ts.approvalEndedAt, TIMELINE_COLORS.approval],
+    ] : []),
+    ["Final Status Observed", ts.finalStatusObservedAt, TIMELINE_COLORS.final],
+  ];
+  const events = eventDefs
+    .map(([label, value, color]) => ({ label, value, color, t: Date.parse(value || "") }))
+    .filter((event) => Number.isFinite(event.t));
+  if (events.length < 2) return "";
+
+  const startMs = Number.isFinite(Date.parse(ts.executionStartedAt || ts.uploadStartedAt || "")) ? Date.parse(ts.executionStartedAt || ts.uploadStartedAt) : Math.min(...events.map((e) => e.t));
+  const finalMs = Date.parse(ts.finalStatusObservedAt || "");
+  const endMs = Number.isFinite(finalMs) ? finalMs : Math.max(...events.map((e) => e.t));
+  if (!(endMs > startMs)) return "";
+  const pos = (t) => Math.min(100, Math.max(0, ((t - startMs) / (endMs - startMs)) * 100));
+  const at = (label) => events.find((event) => event.label === label)?.t;
+
+  // Event labels above the axis. Markers stay at their true positions; labels are spread sideways
+  // (over as few rows as fit) and joined to their marker by a leader line when displaced.
+  const LABEL_WIDTH = 12.5;
+  const LABEL_GAP = 0.6;
+  for (const event of events) event.pos = pos(event.t);
+  const labelRows = Math.max(1, Math.ceil((events.length * (LABEL_WIDTH + LABEL_GAP)) / 100));
+  const byPosition = [...events].sort((a, b) => a.pos - b.pos);
+  for (let row = 0; row < labelRows; row++) {
+    const rowEvents = byPosition.filter((_, index) => index % labelRows === row);
+    let previous = -Infinity;
+    for (const event of rowEvents) {
+      event.row = row;
+      event.center = Math.max(event.pos, LABEL_WIDTH / 2, previous + LABEL_WIDTH + LABEL_GAP);
+      previous = event.center;
+    }
+    let next = Infinity;
+    for (const event of [...rowEvents].reverse()) {
+      event.center = Math.min(event.center, 100 - LABEL_WIDTH / 2, next - LABEL_WIDTH - LABEL_GAP);
+      next = event.center;
+    }
+  }
+  const LABEL_ROW_H = 46;
+  const LEADER_H = 26;
+  const labelsH = labelRows * LABEL_ROW_H + LEADER_H;
+
+  const pendingStartLabel = dualAuth ? "Pending Approval Observed" : "Pending Initiation Observed";
+  const stageDefs = [
+    { key: "upload", name: "File Upload", from: at("File Upload Started"), to: at("File Upload Completed") },
+    { key: "validation", name: "File Validation", sub: "(Upload to Pending Initiation)", from: at("File Upload Completed"), to: at("Pending Initiation Observed") },
+    { key: "initiation", name: "Initiation API", from: at("Initiation Started"), to: at("Initiation Finished") },
+    ...(dualAuth ? [{ key: "approval", name: "Approval API", from: at("Approval Started"), to: at("Approval Finished") }] : []),
+    { key: "pending", name: dualAuth ? "Pending Auth → Sent/Sched" : "Pending Initiation → Sent/Sched", from: at(pendingStartLabel) ?? Date.parse(ts.pendinitEndedAt || ""), to: at("Final Status Observed") },
+  ];
+  const MIN_BAR = 0.8;
+  const stages = stageDefs.filter((stage) => Number.isFinite(stage.from) && Number.isFinite(stage.to) && stage.to >= stage.from).map((stage) => {
+    const left = pos(stage.from);
+    const width = Math.max(pos(stage.to) - left, MIN_BAR);
+    const barLeft = Math.min(left, 100 - width);
+    const durationText = `${((stage.to - stage.from) / 1000).toFixed(2)}s`;
+    const nameWidth = Math.max(stage.name.length, (stage.sub || "").length) * 0.62;
+    const center = barLeft + width / 2;
+    const inside = width >= durationText.length * 0.75 + 1;
+    const nameFrom = Math.max(0, Math.min(100 - nameWidth, center - nameWidth / 2));
+    return { ...stage, barLeft, width, durationText, inside, nameFrom, nameWidth,
+      from: Math.min(barLeft, nameFrom), to: Math.max(barLeft + width + (inside ? 0 : durationText.length * 0.75 + 1), nameFrom + nameWidth) };
+  });
+  const laneCount = assignRows(stages, 1);
+  const LANE_H = 64;
+  const barsTop = labelsH + 22;
+  const barsH = laneCount * LANE_H;
+
+  const { ticks, precision } = timelineTicks(startMs, endMs);
+  const plotH = barsTop + barsH + 10;
+
+  const labelTop = (event) => (labelRows - 1 - event.row) * LABEL_ROW_H;
+  const labelsHtml = events.map((event) => `<div class="lt-label" style="left:${event.center.toFixed(3)}%;top:${labelTop(event)}px">
+        <strong>${escapeHtml(event.label)}</strong><span>${escapeHtml(utcClock(event.value))}</span></div>`).join("");
+  const leadersHtml = `<svg class="lt-leaders" viewBox="0 0 100 ${labelsH}" preserveAspectRatio="none" style="height:${labelsH}px">${events.map((event) => {
+    const y1 = labelTop(event) + LABEL_ROW_H - 6;
+    return `<line x1="${event.center.toFixed(3)}" y1="${y1}" x2="${event.pos.toFixed(3)}" y2="${labelsH}" stroke="${event.color}" />`;
+  }).join("")}</svg>`;
+  const markersHtml = events.map((event) => `
+      <div class="lt-line" style="left:${event.pos.toFixed(3)}%;top:${labelsH + 8}px;height:${plotH - labelsH - 8}px"></div>
+      <div class="lt-dot" style="left:${event.pos.toFixed(3)}%;top:${labelsH + 2}px;background:${event.color}" title="${escapeHtml(event.label)} ${escapeHtml(formatTimestamp(event.value))}"></div>`).join("");
+  const gridHtml = ticks.map((t) => `<div class="lt-grid" style="left:${pos(t).toFixed(3)}%;top:${labelsH + 8}px;height:${plotH - labelsH - 8}px"></div>`).join("");
+  const barsHtml = stages.map((stage) => {
+    const top = barsTop + stage.row * LANE_H;
+    const durationOutside = stage.inside ? "" : `<div class="lt-bar-outside" style="left:calc(${(stage.barLeft + stage.width).toFixed(3)}% + 4px);top:${top}px">${escapeHtml(stage.durationText)}</div>`;
+    return `<div class="lt-bar lt-${stage.key}" style="left:${stage.barLeft.toFixed(3)}%;width:${stage.width.toFixed(3)}%;top:${top}px" title="${escapeHtml(stage.name)} ${escapeHtml(stage.durationText)}">${stage.inside ? escapeHtml(stage.durationText) : ""}</div>${durationOutside}
+      <div class="lt-bar-name" style="left:${stage.nameFrom.toFixed(3)}%;width:${stage.nameWidth.toFixed(3)}%;top:${top + 26}px"><strong>${escapeHtml(stage.name)}</strong>${stage.sub ? `<span>${escapeHtml(stage.sub)}</span>` : ""}</div>`;
+  }).join("");
+  const axisHtml = ticks.map((t) => `<div class="lt-tick" style="left:${pos(t).toFixed(3)}%">${escapeHtml(utcClock(t, precision))}</div>`).join("");
+
+  const perBatch = Array.isArray(execution.perBatch) ? execution.perBatch : [];
+  const bkRows = perBatch.map((entry) => {
+    const segment = (fromIso, toIso, cls, title) => {
+      const from = Date.parse(fromIso || ""); const to = Date.parse(toIso || "");
+      if (!Number.isFinite(from)) return "";
+      const left = pos(from);
+      const width = Number.isFinite(to) ? Math.max(pos(to) - left, 0.5) : 0.5;
+      return `<div class="lt-bk-seg ${cls}" style="left:${Math.min(left, 100 - width).toFixed(3)}%;width:${width.toFixed(3)}%" title="${escapeHtml(title)}: ${escapeHtml(formatTimestamp(fromIso))}${Number.isFinite(to) ? ` to ${escapeHtml(formatTimestamp(toIso))}` : ""}"></div>`;
+    };
+    const label = `${entry.paymentType || "n/a"}/${entry.rail || "n/a"} - ${shortBkRef(entry.bkRef)}`;
+    return `<div class="lt-bk-row"><div class="lt-bk-label" title="${escapeHtml(`${entry.transactionId} / ${entry.bkRef}`)}">${escapeHtml(label)}</div>
+        <div class="lt-bk-track">${segment(entry.initiationStartedAt, entry.initiationFinishedAt, "lt-initiation", "Initiation")}${dualAuth ? segment(entry.approvalStartedAt, entry.approvalFinishedAt, "lt-approval", "Approval") : ""}${segment(entry.finalStatusObservedAt, "", "lt-final", "Final status observed")}</div></div>`;
+  }).join("");
+  const bkHtml = bkRows ? `<div class="lt-bk"><div class="lt-bk-title">Per-BK initiation${dualAuth ? " / approval" : ""} markers</div>${bkRows}</div>` : "";
+
+  const sorted = [...events].sort((a, b) => a.t - b.t);
+  const eventRows = sorted.map((event, index) => `<tr><td class="num">${index + 1}</td><td>${escapeHtml(event.label)}</td><td class="nowrap">${escapeHtml(formatTimestamp(event.value))}</td><td class="num">${index === 0 ? "-" : `${((event.t - sorted[index - 1].t) / 1000).toFixed(2)}s`}</td></tr>`).join("");
+
+  const legend = stages.map((stage) => `<div class="lt-legend-item"><span class="lt-swatch lt-${stage.key}"></span>${escapeHtml(stage.name)} (${escapeHtml(stage.durationText)})</div>`).join("");
+  const totalMs = executionTotalDurationMs(execution, dualAuth);
+  const result = overallResult(execution);
+  const passed = result === "Passed";
+  const metrics = [
+    ["File Validation Time", formatDurationMs(elapsedBetween(ts.uploadStartedAt, ts.pendinitEndedAt))],
+    ["Initiation API TAT", formatDurationMs(timings.initiationApiMs)],
+    ["Approval API TAT", dualAuth ? formatDurationMs(timings.approvalApiMs) : "N/A"],
+    [dualAuth ? "Pending Auth → Sent/Sched" : "Pending Initiation → Sent/Sched", formatDurationMs(dualAuth ? timings.pendingAuthToFinalMs : timings.pendingInitiToFinalMs)],
+    ["Total Duration", formatDurationMs(totalMs)],
+    ["Final Status", execution.statuses?.sent || "n/a"],
+  ].map(([label, value]) => `<tr><td>${escapeHtml(label)}</td><td class="num">${escapeHtml(value)}</td></tr>`).join("");
+  const railText = String(execution.railType || "n/a").split("+").join(" + ");
+  const typeRail = String(execution.paymentType || "").toUpperCase() === "MIX" ? `MIX (${railText})` : `${execution.paymentType || "n/a"} / ${railText}`;
+
+  return `<div class="lt-card">
+    <div class="lt-head">
+      <div>
+        <div class="lt-title">Bulk Payments Execution Timeline (Linear View)${showRunLabel ? ` <span class="lt-run">VU ${escapeHtml(execution.vu)} / Iteration ${escapeHtml(execution.iteration)}</span>` : ""}</div>
+        <div class="lt-meta">
+          <span>File: <strong>${escapeHtml(execution.fileName || "n/a")}</strong></span>
+          <span>File ID: <strong>${escapeHtml(execution.fileId || "n/a")}</strong></span>
+          <span>Environment: <strong>${escapeHtml(environment || "n/a")}</strong></span>
+          <span>Payment Type / Rail: <strong>${escapeHtml(typeRail)}</strong></span>
+          <span>Total Records: <strong>${escapeHtml(execution.paymentCount ?? "n/a")}</strong></span>
+        </div>
+      </div>
+      <div class="lt-status ${passed ? "lt-status-pass" : "lt-status-fail"}">
+        <div class="lt-status-title">Overall Status: ${escapeHtml(result.toUpperCase())}</div>
+        <div>Final Status: <strong>${escapeHtml(execution.statuses?.sent || "n/a")}</strong></div>
+        <div>Total Duration: <strong>${escapeHtml(formatSecondsWithMinutes(totalMs))}</strong></div>
+      </div>
+    </div>
+    <div class="lt-scroll"><div class="lt-plot" style="height:${plotH}px">
+      ${gridHtml}${leadersHtml}${markersHtml}${labelsHtml}${barsHtml}
+      <div class="lt-axis" style="top:${plotH}px"></div>
+    </div>
+    <div class="lt-axis-labels">${axisHtml}</div>
+    <div class="lt-axis-title">Time (UTC)</div>
+    ${bkHtml}</div>
+    <div class="lt-lower">
+      <div>
+        <h3>Timeline Events</h3>
+        <div class="table-scroll"><table class="data-table striped"><thead><tr><th class="num">#</th><th>Event</th><th>Timestamp (UTC)</th><th class="num">Duration from Previous</th></tr></thead><tbody>${eventRows}</tbody></table></div>
+      </div>
+      <div>
+        <h3>Stage Legend</h3>
+        <div class="lt-legend">${legend}</div>
+        <h3>Key Metrics</h3>
+        <div class="table-scroll"><table class="data-table lt-metrics"><tbody>${metrics}</tbody></table></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderLinearTimelines(executions, environment) {
+  const dualAuth = authMode === "DUAL_AUTH";
+  const sorted = [...executions].sort((a, b) => Number(a.vu || 0) - Number(b.vu || 0) || Number(a.iteration || 0) - Number(b.iteration || 0));
+  const cards = sorted.map((execution) => renderLinearTimeline(execution, environment, dualAuth, sorted.length > 1)).filter(Boolean).join("");
+  return cards ? `<section class="section">${cards}</section>` : "";
+}
+
 function renderPerBatchBreakdown(executions) {
   const withBatches = [...executions]
     .filter((execution) => Array.isArray(execution.perBatch) && execution.perBatch.length > 0)
@@ -1254,6 +1492,57 @@ ${REPORT_BASE_CSS}
   .per-bk-table tbody tr.per-bk-detail td { background:var(--surface); padding:8px 12px 12px; border-bottom:1px solid var(--line-strong); }
   .per-bk-timestamps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px 20px; font-size:12px; }
   .per-bk-timestamps span { color:var(--muted); }
+  .lt-card { border:1px solid var(--line); border-radius:8px; padding:18px 20px 20px; background:#ffffff; margin-bottom:20px; }
+  .lt-head { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:16px; align-items:start; margin-bottom:18px; }
+  @media (max-width: 900px) { .lt-head { grid-template-columns:1fr; } }
+  .lt-title { font-size:19px; font-weight:700; color:#0f2a4a; }
+  .lt-run { font-size:13px; font-weight:600; color:var(--muted); margin-left:8px; }
+  .lt-meta { display:flex; flex-wrap:wrap; gap:4px 18px; margin-top:6px; font-size:12.5px; color:var(--muted); }
+  .lt-meta strong { color:var(--ink); font-weight:600; }
+  .lt-status { border-radius:8px; padding:10px 16px; font-size:13px; min-width:260px; }
+  .lt-status-pass { background:var(--pass-bg); border:1px solid var(--pass-line); color:var(--pass); }
+  .lt-status-fail { background:var(--fail-bg); border:1px solid var(--fail-line); color:var(--fail); }
+  .lt-status-title { font-size:15px; font-weight:700; margin-bottom:2px; }
+  .lt-status strong { color:var(--ink); font-weight:600; }
+  .lt-scroll { overflow-x:auto; padding:0 64px 4px; }
+  .lt-plot { position:relative; min-width:860px; }
+  .lt-label { position:absolute; width:118px; transform:translateX(-50%); text-align:center; font-size:11px; line-height:1.25; color:var(--ink); background:#ffffff; z-index:4; }
+  .lt-leaders { position:absolute; left:0; top:0; width:100%; overflow:visible; z-index:1; }
+  .lt-leaders line { stroke-width:1; vector-effect:non-scaling-stroke; opacity:.7; }
+  .lt-label strong { display:block; font-weight:600; }
+  .lt-label span { color:var(--muted); font-variant-numeric:tabular-nums; }
+  .lt-dot { position:absolute; width:12px; height:12px; border-radius:50%; transform:translateX(-50%); border:2px solid #ffffff; box-shadow:0 0 0 1px rgba(15,23,42,.25); z-index:3; }
+  .lt-line { position:absolute; border-left:1.5px dashed #94a3b8; transform:translateX(-0.75px); z-index:1; }
+  .lt-grid { position:absolute; border-left:1px solid #eef1f5; z-index:0; }
+  .lt-bar { position:absolute; height:22px; border-radius:3px; color:#ffffff; font-size:11.5px; font-weight:700; text-align:center; line-height:22px; white-space:nowrap; overflow:hidden; z-index:2; }
+  .lt-bar-outside { position:absolute; font-size:11.5px; font-weight:700; line-height:22px; color:var(--ink); white-space:nowrap; z-index:2; }
+  .lt-bar-name { position:absolute; font-size:11.5px; line-height:1.3; text-align:center; color:var(--ink); z-index:2; }
+  .lt-bar-name strong { display:block; font-weight:600; }
+  .lt-bar-name span { display:block; color:var(--muted); font-size:11px; }
+  .lt-upload { background:${TIMELINE_COLORS.upload}; }
+  .lt-validation { background:${TIMELINE_COLORS.validation}; }
+  .lt-initiation { background:${TIMELINE_COLORS.initiation}; }
+  .lt-approval { background:${TIMELINE_COLORS.approval}; }
+  .lt-pending { background:${TIMELINE_COLORS.pending}; color:#0f2a4a; }
+  .lt-final { background:${TIMELINE_COLORS.final}; }
+  .lt-axis { position:absolute; left:0; right:0; border-top:1.5px solid #94a3b8; }
+  .lt-axis-labels { position:relative; height:22px; min-width:860px; }
+  .lt-tick { position:absolute; top:6px; transform:translateX(-50%); font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums; }
+  .lt-axis-title { text-align:center; font-size:12px; font-weight:600; color:var(--ink); margin-top:4px; min-width:860px; }
+  .lt-bk { margin-top:14px; padding-top:10px; border-top:1px solid var(--line); min-width:860px; }
+  .lt-bk-title { font-size:11.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .lt-bk-row { margin:4px 0; }
+  .lt-bk-label { font-size:11px; color:var(--ink); font-family:Consolas, "SFMono-Regular", Menlo, monospace; }
+  .lt-bk-track { position:relative; height:8px; background:#f1f5f9; border-radius:4px; margin-top:2px; }
+  .lt-bk-seg { position:absolute; top:0; height:8px; border-radius:4px; }
+  .lt-lower { display:grid; grid-template-columns:minmax(0,3fr) minmax(260px,2fr); gap:20px; margin-top:18px; }
+  .lt-lower h3 { margin-top:0; }
+  .lt-lower > div > h3 + .lt-legend + h3 { margin-top:16px; }
+  .lt-legend { border:1px solid var(--line); border-radius:6px; padding:10px 12px; font-size:12.5px; }
+  .lt-legend-item { display:flex; align-items:center; gap:8px; padding:3px 0; }
+  .lt-swatch { width:22px; height:12px; border-radius:2px; display:inline-block; }
+  .lt-metrics td:first-child { color:var(--muted); }
+  @media (max-width: 900px) { .lt-lower { grid-template-columns:1fr; } }
   .per-bk-timestamps strong { color:var(--ink); font-weight:500; }
   .pagination-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:0 0 10px; font-size:13px; color:var(--muted); }
   .pagination-controls button { background:#ffffff; color:var(--ink); border:1px solid var(--line-strong); border-radius:4px; padding:6px 14px; cursor:pointer; font:inherit; font-weight:600; }
@@ -1283,6 +1572,7 @@ ${REPORT_BASE_CSS}
       ${renderExecutionTraceTable(executions)}
     </section>
     ${renderPerBatchBreakdown(executions)}
+    ${renderLinearTimelines(executions, environment)}
     <section class="section">
       <h2>Performance Metrics</h2>
       ${renderPerformanceMetricsTable(executions)}
