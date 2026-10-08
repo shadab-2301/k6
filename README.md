@@ -353,3 +353,12 @@ npm run perf:batch:dual:k6 -- --env UAT --payment-type TPT --rail EFT --payments
 # Single Auth
 `npm run perf:batch:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s --future 7`
 
+
+# Mixed batch upload (several payment types and rails in one file)
+Add `--mix` with comma-separated `TYPE/RAIL:COUNT` entries. All entries go into one CSV upload; the backend splits it into one batch per rail/type, and each batch is initiated with its own rail. `COUNT` is optional and defaults to `--payments`. `--payment-type` and `--rail` are ignored when `--mix` is set. UAT only; each type needs its `<TYPE>_BatchSingleAuth.json` (or `_BatchDualAuth.json`) test data.
+
+`npm run perf:batch:k6 -- --env UAT --mix "TPT/EFT:5,TPT/PAYSHAP:5,ADHOC/RTGS:2,IAB/EFT:3" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
+
+`npm run perf:batch:dual:k6 -- --env UAT --mix "TPT/EFT:5,PRLEX/PAYSHAP:5" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
+
+In Windows PowerShell, quote the separator (`'--'`) or use `npm.cmd`, otherwise PowerShell drops the flags before npm sees them.

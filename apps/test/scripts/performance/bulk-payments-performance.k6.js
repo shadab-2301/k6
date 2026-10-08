@@ -139,20 +139,50 @@ function envBool(keys, fallback) {
 
 const vus = envNumber(["PERF_VUS"], 10);
 const iterations = envNumber(["PERF_ITERATIONS"], 10);
-const configuredNumPayments = envNumber(["K6_NUM_PAYMENTS", "NUM_PAYMENTS"], 5000);
+const requestedNumPayments = envNumber(["K6_NUM_PAYMENTS", "NUM_PAYMENTS"], 5000);
+const mixBatchSpec = envText(["K6_MIX_BATCH"]);
+const isMixBatch = Boolean(mixBatchSpec);
+const mixEntries = isMixBatch ? parseMixBatchSpec(mixBatchSpec, requestedNumPayments) : [];
+const mixRails = [...new Set(mixEntries.map((entry) => entry.rail))];
+const configuredNumPayments = isMixBatch ? mixEntries.reduce((sum, entry) => sum + entry.count, 0) : requestedNumPayments;
 const configuredAmountMin = envNumber(["K6_AMOUNT_MIN", "AMOUNT_MIN"], 10);
 const configuredAmountMax = envNumber(["K6_AMOUNT_MAX", "AMOUNT_MAX"], 100);
 const strictLoadConfig = envBool(["K6_REQUIRE_EXPLICIT_LOAD_CONFIG"], false);
 const singleBulkFile = envBool(["K6_SINGLE_BULK_FILE"], false);
-const configuredPaymentType = sanitizeFileToken(envText(["K6_PAYMENT_TYPE"]) || "INT", "INT").toUpperCase();
+const configuredPaymentType = isMixBatch ? "MIX" : sanitizeFileToken(envText(["K6_PAYMENT_TYPE"]) || "INT", "INT").toUpperCase();
 const explicitRail = envText(["K6_RAIL"]);
 const requestedRail = sanitizeFileToken(envText(["K6_RAIL"]) || configuredPaymentType, configuredPaymentType).toUpperCase();
 const tptRailThreshold = 5000000;
-const configuredRail = configuredPaymentType === "TPT" && !explicitRail
-    ? configuredAmountMax <= tptRailThreshold
-        ? "EFT"
-        : "RTGS"
-    : requestedRail;
+const configuredRail = isMixBatch
+    ? mixRails.join("+")
+    : configuredPaymentType === "TPT" && !explicitRail
+        ? configuredAmountMax <= tptRailThreshold
+            ? "EFT"
+            : "RTGS"
+        : requestedRail;
+
+// Mixed batch spec: comma-separated TYPE/RAIL[:COUNT] entries, e.g. "TPT/EFT:5,TPT/PAYSHAP:5,ADHOC/RTGS".
+// COUNT defaults to --payments. INT entries always use the INT rail.
+function parseMixBatchSpec(spec, defaultCount) {
+    const entries = String(spec).split(",").map((part) => part.trim()).filter(Boolean).map((part) => {
+        const match = /^([A-Za-z]+)\s*[/:-]\s*([A-Za-z]+)(?:\s*:\s*(\d+))?$/.exec(part);
+        if (!match) {
+            throw new Error(`[k6][preflight] Invalid --mix entry "${part}". Use TYPE/RAIL or TYPE/RAIL:COUNT, e.g. TPT/EFT:5`);
+        }
+        const paymentType = match[1].toUpperCase();
+        const rail = paymentType === "INT" ? "INT" : match[2].toUpperCase();
+        const count = match[3] === undefined ? Number(defaultCount) : Number(match[3]);
+        return { paymentType, rail, count, key: `${paymentType}/${rail}` };
+    });
+    if (entries.length < 2) {
+        throw new Error("[k6][preflight] --mix needs at least two TYPE/RAIL entries, e.g. TPT/EFT:5,TPT/PAYSHAP:5");
+    }
+    const duplicate = entries.find((entry, index) => entries.findIndex((other) => other.key === entry.key) !== index);
+    if (duplicate) {
+        throw new Error(`[k6][preflight] --mix lists ${duplicate.key} more than once; combine the counts into one entry.`);
+    }
+    return entries;
+}
 const testDataVariant = envText(["K6_TEST_DATA"]).toUpperCase() || "VALID";
 const pollingIntervalMs = envNumber(["K6_POLLING_INTERVAL_MS", "K6_POLL_INTERVAL_MS"], 2000);
 const maxDurationMs = envNumber(["K6_MAX_DURATION_MS", "K6_POLL_TIMEOUT_MS"], 120000);
@@ -192,6 +222,7 @@ function buildSummary(data) {
             numPayments: configuredNumPayments,
             paymentType: configuredPaymentType,
             railType: configuredRail,
+            mix: isMixBatch ? mixEntries.map((entry) => `${entry.key}:${entry.count}`).join(", ") : "",
             singleBulkFile,
         },
         metrics: {
@@ -244,7 +275,18 @@ function validatePreflight() {
         if (!environmentConfig.dualAuthAppGCN) missing.push(`${selectedEnv}_DUAL_AUTH_APP_GCN`);
     }
     if (!environmentConfig.initialOtp) missing.push(`${selectedEnv}_OTP`);
-    if (!getEnvironmentBatchFile()) missing.push(`${selectedEnv} batch CSV for ${configuredPaymentType}/${configuredRail}`);
+    const mixProblems = [];
+    if (isMixBatch) {
+        if (selectedEnv !== "UAT") mixProblems.push("--mix is only supported with --env UAT (it builds the CSV from the UAT *_Batch*Auth.json test data)");
+        if (externalBatchFile) mixProblems.push("--mix cannot be combined with --batch-file");
+        for (const entry of mixEntries) {
+            if (!getPaymentProfile(entry.paymentType, entry.rail)) mixProblems.push(`Unsupported payment type and rail combination in --mix: ${entry.key}`);
+            if (!Number.isSafeInteger(entry.count) || entry.count <= 0) mixProblems.push(`--mix payment count for ${entry.key} must be a whole number > 0`);
+            if (!UAT_BATCH_DATA[entry.paymentType]) mixProblems.push(`Missing or empty ${entry.paymentType}_Batch${isDualAuth ? "Dual" : "Single"}Auth.json for --mix entry ${entry.key}`);
+        }
+        missing.push(...mixProblems);
+    }
+    if (mixProblems.length === 0 && !getEnvironmentBatchFile()) missing.push(`${selectedEnv} batch CSV for ${configuredPaymentType}/${configuredRail}`);
 
     if (strictLoadConfig) {
         if (!envText(["PERF_VUS"])) missing.push("PERF_VUS");
@@ -266,7 +308,7 @@ function validatePreflight() {
         missing.push("TPT amount range cannot cross R5,000,000 because a batch file supports one rail; run EFT and RTGS ranges separately");
     }
 
-    if (!paymentProfile) {
+    if (!paymentProfile && !isMixBatch) {
 missing.push(
     `Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}. ` +
     `Supported combinations are INT/INT, ` +
@@ -307,16 +349,16 @@ function getAppBearerTokenFromEnv() {
     return token || "";
 }
 
-function getEnvData() {
+function getEnvData(paymentType = configuredPaymentType, rail = configuredRail) {
     if (selectedEnv === "UAT") {
-        if (isDualAuth && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON && !UAT_BATCH_DATA[configuredPaymentType]) {
-            throw new Error(`Missing or empty ${configuredPaymentType}_BatchDualAuth.json; Single Auth data cannot be used for Dual Auth.`);
+        if (isDualAuth && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON && !UAT_BATCH_DATA[paymentType]) {
+            throw new Error(`Missing or empty ${paymentType}_BatchDualAuth.json; Single Auth data cannot be used for Dual Auth.`);
         }
-        if (!externalTestDataFile && !__ENV.K6_TEST_DATA_JSON && UAT_BATCH_DATA[configuredPaymentType]) {
+        if (!externalTestDataFile && !__ENV.K6_TEST_DATA_JSON && UAT_BATCH_DATA[paymentType]) {
             // File-level settings (channel, singleDebit) still come from the base UAT data.
-            return { ...UAT_INT_DATA, ...UAT_BATCH_DATA[configuredPaymentType] };
+            return { ...UAT_INT_DATA, ...UAT_BATCH_DATA[paymentType] };
         }
-        if (configuredPaymentType === "INT" && configuredRail === "INT" && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON) {
+        if (paymentType === "INT" && rail === "INT" && !externalTestDataFile && !__ENV.K6_TEST_DATA_JSON) {
             return UAT_INT_DATA;
         }
         try {
@@ -325,12 +367,12 @@ function getEnvData() {
             throw new Error("UAT test data is missing or invalid JSON; refusing to use SIT data.");
         }
     }
-    if (configuredPaymentType === "PRLSD") {
+    if (paymentType === "PRLSD") {
         if (selectedEnv !== "SIT") throw new Error("PRLSD test data is not configured for UAT.");
         return TST_PRLSD_DATA;
     }
 
-    if (configuredPaymentType === "TPT") {
+    if (paymentType === "TPT") {
         if (testDataVariant === "INVALID" && selectedEnv === "SIT") {
             return TST_TPT_INVALID_DATA;
         }
@@ -341,6 +383,7 @@ function getEnvData() {
 }
 
 function getEnvironmentBatchFile() {
+    if (isMixBatch) return buildMixedBatchCsv();
     if (externalBatchFile) return externalBatchFile;
     if (isDualAuth || configuredRail === "PAYSHAP" || externalTestDataFile || __ENV.K6_TEST_DATA_JSON) {
         return buildUatBatchCsv(getEnvData(), configuredNumPayments);
@@ -367,9 +410,9 @@ function csvPaymentDate() {
     return `${day}/${month}/${year}`;
 }
 
-function buildUatBatchCsv(data, numPayments) {
-const isInternal = configuredPaymentType === "INT";
-const isIab = configuredPaymentType === "IAB";
+function buildUatBatchRows(data, numPayments, paymentType = configuredPaymentType, rail = configuredRail, referenceOffset = 0) {
+const isInternal = paymentType === "INT";
+const isIab = paymentType === "IAB";
 
 const counterparties = isInternal
     ? (data.toAccounts || []).map((accountNumber) => ({
@@ -389,31 +432,31 @@ const counterparties = isInternal
             branchCode: b.branchCode,
             name: b.myReference || b.beneficiaryName || ""
         }));
-const invalidCounterparty = configuredPaymentType === "IAB"
+const invalidCounterparty = paymentType === "IAB"
     ? counterparties.some((c) => !c.accountNumber)
     : counterparties.some((c) => !c.accountNumber || !c.branchCode);
 
 if (!data.fromAccount || counterparties.length === 0 || invalidCounterparty) {
     throw new Error(
-        `[k6][FAIL][file_generation] ${configuredPaymentType}_${isDualAuth ? "BatchDualAuth" : "BatchSingleAuth"}.json needs fromAccount and ` +
+        `[k6][FAIL][file_generation] ${paymentType}_${isDualAuth ? "BatchDualAuth" : "BatchSingleAuth"}.json needs fromAccount and ` +
         (isInternal
             ? "beneficiaryId plus at least one toAccounts entry."
-            : configuredPaymentType === "IAB"
+            : paymentType === "IAB"
                 ? "at least one beneficiary with beneficiaryId."
                 : "at least one beneficiary with accountNumber and branchCode.")
     );
 }
 
-    const prefix = data.csv?.referencePrefix || configuredPaymentType;
+    const prefix = data.csv?.referencePrefix || paymentType;
     const endToEndPrefix = data.csv?.endToEndReferencePrefix || "E2E";
-    const referenceStart = Number(data.csv?.referenceStart ?? 1);
+    const referenceStart = Number(data.csv?.referenceStart ?? 1) + referenceOffset;
     if (!Number.isSafeInteger(referenceStart) || referenceStart < 1 || !Number.isSafeInteger(referenceStart + numPayments - 1)) {
         throw new Error("[k6][FAIL][file_generation] csv.referenceStart must be a positive safe integer with room for all payment references.");
     }
-    const railColumn = isInternal ? data.paymentMethod || "INTERNAL" : configuredRail;
+    const railColumn = isInternal ? data.paymentMethod || "INTERNAL" : rail;
     const paymentDate = csvPaymentDate();
     const hasDefaultAmount = data.defaultAmount !== undefined && data.defaultAmount !== null && data.defaultAmount !== "";
-    const rows = ["1,2,,,,,,,,,,,,,"];
+    const rows = [];
     let totalCents = 0;
     for (let i = 0; i < numPayments; i++) {
         // Round-robin never repeats an account consecutively when more than one is configured.
@@ -428,11 +471,38 @@ if (!data.fromAccount || counterparties.length === 0 || invalidCounterparty) {
         if (isInternal) fields.push("");
         rows.push(fields.map(csvField).join(","));
     }
-    rows.push(`99,${numPayments},${(totalCents / 100).toFixed(2)},0,,,,,,,,,,,`);
+    return { rows, totalCents };
+}
+
+function assembleBatchCsv(detailRows, paymentCount, totalCents) {
+    const rows = ["1,2,,,,,,,,,,,,,", ...detailRows, `99,${paymentCount},${(totalCents / 100).toFixed(2)},0,,,,,,,,,,,`];
     return `${rows.join("\r\n")}\r\n`;
 }
 
-function getPaymentProfile() {
+function buildUatBatchCsv(data, numPayments) {
+    const { rows, totalCents } = buildUatBatchRows(data, numPayments);
+    return assembleBatchCsv(rows, numPayments, totalCents);
+}
+
+// One CSV holding every --mix entry's rows. References continue across entries that
+// share a reference prefix so every payment reference in the file stays unique.
+function buildMixedBatchCsv() {
+    const detailRows = [];
+    const usedByPrefix = {};
+    let totalCents = 0;
+    for (const entry of mixEntries) {
+        const data = getEnvData(entry.paymentType, entry.rail);
+        const prefix = data.csv?.referencePrefix || entry.paymentType;
+        const offset = usedByPrefix[prefix] || 0;
+        const built = buildUatBatchRows(data, entry.count, entry.paymentType, entry.rail, offset);
+        usedByPrefix[prefix] = offset + entry.count;
+        detailRows.push(...built.rows);
+        totalCents += built.totalCents;
+    }
+    return assembleBatchCsv(detailRows, configuredNumPayments, totalCents);
+}
+
+function getPaymentProfile(paymentType = configuredPaymentType, rail = configuredRail) {
     const profiles = {
         "ADHOC/PAYSHAP": {
             paymentType: "ADHOC",
@@ -558,7 +628,7 @@ function getPaymentProfile() {
         },
     };
 
-    return profiles[`${configuredPaymentType}/${configuredRail}`] || null;
+    return profiles[`${paymentType}/${rail}`] || null;
 }
 
 const RAIL_LOCAL_INSTRUMENTS = {
@@ -763,6 +833,16 @@ function classifyRecordStatus(statusCode) {
  * Pages through GET /batch-payments/:BKREF/records until all pages are
  * retrieved, returning the combined record list and the last page's meta.
  */
+// Per-iteration map of BKREF / transactionId -> { paymentType, railType } for mixed batches, so each
+// record can be labelled with the batch it belongs to. Empty for single type/rail runs.
+let recordBatchLabels = {};
+
+function batchRowPaymentType(row) {
+    const value = row?.paymentType;
+    if (value && typeof value === "object") return String(value.code || value.description || "");
+    return String(value || "");
+}
+
 function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
     const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
     const records = [];
@@ -794,7 +874,8 @@ function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
 
         const payload = res.json() || {};
         const rows = Array.isArray(payload.data) ? payload.data : [];
-        records.push(...rows);
+        const label = recordBatchLabels[bkref];
+        records.push(...(label ? rows.map((row) => ({ ...row, __batchPaymentType: label.paymentType, __batchRail: label.railType })) : rows));
         lastMeta = payload.meta || null;
         totalPages = Number(lastMeta?.totalPages || 1);
 
@@ -865,6 +946,7 @@ function validateBatchRecords(records, expectedCount, expectedFinalStatus = "") 
             amount: record?.amount,
             toAccountReference: record?.toAccountReference || "",
             fromAccountReference: record?.fromAccountReference || "",
+            ...(record?.__batchRail ? { paymentType: record.__batchPaymentType || "MIX", railType: record.__batchRail } : {}),
         });
     }
 
@@ -1294,6 +1376,19 @@ function buildPmtInf(tx, index, settings) {
 }
 
 function buildPaymentBatchXml(data, numPayments) {
+    if (isMixBatch) {
+        return {
+            fileDisplayName: makeUniqueBatchFileName(),
+            channel: String(data.channel || "WEB"),
+            railType: configuredRail,
+            paymentType: configuredPaymentType,
+            mixEntries,
+            paymentDate: String(__ENV.K6_PAYMENT_DATE || new Date().toISOString().slice(0, 10)),
+            singleDebit: parseBool(data.singleDebit, false),
+            numPayments,
+        };
+    }
+
     const paymentProfile = getPaymentProfile();
     if (!paymentProfile) {
         throw new Error(`Unsupported payment type and rail combination: ${configuredPaymentType}/${configuredRail}`);
@@ -1413,6 +1508,11 @@ function buildInitiateRequestBody(batch, fileId, transactionId) {
         batchName: sanitizeBatchName(batch.fileDisplayName, "Batch"),
         singleDebit: batch.singleDebit,
     };
+
+    if (batch.paymentType === "MIX") {
+        if (!batch.batchRail) throw new Error(`Mixed batch transactionId=${transactionId} has no rail on its get file batches row; cannot build the initiate request.`);
+        return { ...common, rail: batch.batchRail };
+    }
 
     if (batch.paymentType === "INT" && batch.railType === "INT") {
         return { ...common, rail: "INT" };
@@ -1852,7 +1952,10 @@ export function runBulkFlow(ctx, afterInitiate) {
         sleep(sasOtpWait);
 
         const numPayments = configuredNumPayments;
-        const data = getEnvData();
+        const data = isMixBatch ? getEnvData(mixEntries[0].paymentType, mixEntries[0].rail) : getEnvData();
+        if (isMixBatch) {
+            console.info(`[UPLOAD][MIX] building one CSV with ${mixEntries.map((entry) => `${entry.key}:${entry.count}`).join(", ")} (total=${configuredNumPayments})`);
+        }
         const intBatch = buildPaymentBatchXml(data, numPayments);
 
         console.info("[UPLOAD] Loading CSV");
@@ -2110,15 +2213,35 @@ export function runBulkFlow(ctx, afterInitiate) {
 
         const batchPayload = getBatchesRes.json() || {};
         const batchRows = Array.isArray(batchPayload.data) ? batchPayload.data : [];
-        const expectedRail = String(configuredRail || "").toUpperCase();
         const returnedRails = [...new Set(batchRows.map((row) => String(row?.rail?.code || "").toUpperCase()).filter(Boolean))];
-        check(true, {
-            "get file batches rail matches selected rail": () => returnedRails.length > 0 && returnedRails.every((rail) => rail === expectedRail),
-        });
-        if (returnedRails.length === 0 || returnedRails.some((rail) => rail !== expectedRail)) {
-            throw new Error(
-                `Get file batches rail validation failed for fileId=${fileId}. expectedRail=${expectedRail} actualRails=[${returnedRails.join(",") || "<missing>"}]`
-            );
+        if (isMixBatch) {
+            const unexpectedRails = returnedRails.filter((rail) => !mixRails.includes(rail));
+            const missingRails = mixRails.filter((rail) => !returnedRails.includes(rail));
+            for (const row of batchRows) {
+                console.info(
+                    `[k6][BATCHES][MIX] transactionId=${row?.transactionId || "n/a"} bkRef=${extractBkRefId(row) || "n/a"} ` +
+                    `rail=${row?.rail?.code || "n/a"} paymentType=${batchRowPaymentType(row) || "n/a"} payments=${row?.numberOfPayments ?? row?.batchNoOfPayments ?? "n/a"}`
+                );
+            }
+            check(true, {
+                "get file batches rails match mix rails": () => returnedRails.length > 0 && unexpectedRails.length === 0 && missingRails.length === 0,
+            });
+            if (returnedRails.length === 0 || unexpectedRails.length > 0 || missingRails.length > 0) {
+                throw new Error(
+                    `Get file batches rail validation failed for mixed fileId=${fileId}. expectedRails=[${mixRails.join(",")}] ` +
+                    `actualRails=[${returnedRails.join(",") || "<missing>"}] missing=[${missingRails.join(",")}] unexpected=[${unexpectedRails.join(",")}]`
+                );
+            }
+        } else {
+            const expectedRail = String(configuredRail || "").toUpperCase();
+            check(true, {
+                "get file batches rail matches selected rail": () => returnedRails.length > 0 && returnedRails.every((rail) => rail === expectedRail),
+            });
+            if (returnedRails.length === 0 || returnedRails.some((rail) => rail !== expectedRail)) {
+                throw new Error(
+                    `Get file batches rail validation failed for fileId=${fileId}. expectedRail=${expectedRail} actualRails=[${returnedRails.join(",") || "<missing>"}]`
+                );
+            }
         }
         const transactionIds = batchRows
             .map((r) => String(r.transactionId || ""))
@@ -2132,6 +2255,13 @@ export function runBulkFlow(ctx, afterInitiate) {
         // The get file batches response returns both a transaction ID (used to initiate) and a
         // separate BK-prefixed batch reference (BKREF) used to look up records for that batch.
         const bkRefIds = batchRows.map((r) => extractBkRefId(r)).filter((id) => id.length > 0);
+        const batchRowByTransactionId = new Map(batchRows.map((row) => [String(row?.transactionId || ""), row]));
+        recordBatchLabels = isMixBatch
+            ? Object.fromEntries(batchRows.flatMap((row) => {
+                const label = { paymentType: batchRowPaymentType(row), railType: String(row?.rail?.code || "").toUpperCase() };
+                return [extractBkRefId(row), String(row?.transactionId || "")].filter(Boolean).map((key) => [key, label]);
+            }))
+            : {};
         execution.parentTransactionIds = transactionIds;
         execution.bkRefIds = bkRefIds;
         emitExecutionSnapshot(execution);
@@ -2144,7 +2274,11 @@ export function runBulkFlow(ctx, afterInitiate) {
         const initiateRequests = transactionIds.map((txId) => [
             "POST",
             `${ctx.baseUrl}/payments-manager/api/v1/batch-payments/${txId}/initiate?operation=CREATE`,
-            JSON.stringify(buildInitiateRequestBody(intBatch, fileId, txId)),
+            JSON.stringify(buildInitiateRequestBody(
+                isMixBatch ? { ...intBatch, batchRail: String(batchRowByTransactionId.get(txId)?.rail?.code || "").toUpperCase() } : intBatch,
+                fileId,
+                txId
+            )),
             {
                 headers: {
                     ...ctx.authHeaders,

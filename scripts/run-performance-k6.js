@@ -100,6 +100,10 @@ const scenarioMaxDurationSeconds = Math.max(requestedMaxDurationSeconds, derived
 env.K6_MAX_DURATION = `${Number.isFinite(scenarioMaxDurationSeconds) ? scenarioMaxDurationSeconds : 195}s`;
 setEnvFromArg("K6_PAYMENT_TYPE", "--payment-type", readArg("--payment-type", "INT"));
 setEnvFromArg("K6_RAIL", "--rail", readArg("--rail", "INT"));
+setEnvFromArg("K6_MIX_BATCH", "--mix", readArg("--mix", ""));
+if (env.K6_MIX_BATCH) {
+  console.log(`[k6][config] mixed batch upload: ${env.K6_MIX_BATCH} (--payment-type and --rail are ignored)`);
+}
 setEnvFromArg("K6_TEST_DATA", "--test-data", readArg("--test-data", "VALID"));
 setEnvFromArg("K6_USER_TYPE", "--user-type", readArg("--user-type", ""));
 setEnvFromArg("K6_BATCH_FILE_PATH", "--batch-file", readArg("--batch-file", ""));
@@ -331,8 +335,8 @@ function aggregateRecordCaptures(captures) {
         buckets[bucketName].push({
           ...row,
           fileId: capture.fileId,
-          paymentType: capture.paymentType || "",
-          railType: capture.railType || "",
+          paymentType: row.paymentType || capture.paymentType || "",
+          railType: row.railType || capture.railType || "",
         });
       }
     }
@@ -1160,6 +1164,7 @@ function buildHtmlReport({ summary, buckets, shortfalls, totalShortfall, expecte
   const headerFacts = [
     ["Environment", escapeHtml(environment || "n/a")],
     ["Payment Type / Rail", `${escapeHtml(summary?.env?.paymentType || "n/a")} / ${escapeHtml(summary?.env?.railType || "n/a")}`],
+    ...(summary?.env?.mix ? [["Mixed Batch", escapeHtml(summary.env.mix)]] : []),
     ["Payments Requested", escapeHtml(summary?.env?.numPayments ?? "n/a")],
     ["VUs / Iterations per VU", `${escapeHtml(summary?.env?.vus ?? "n/a")} / ${escapeHtml(summary?.env?.iterations ?? "n/a")}`],
     ...(showRunWindow ? [
