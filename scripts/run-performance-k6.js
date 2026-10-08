@@ -737,6 +737,50 @@ function performanceColumnHeaders(dualAuth) {
   ].join("");
 }
 
+function renderPerBatchBreakdown(executions) {
+  const withBatches = [...executions]
+    .filter((execution) => Array.isArray(execution.perBatch) && execution.perBatch.length > 0)
+    .sort((a, b) => Number(a.vu || 0) - Number(b.vu || 0) || Number(a.iteration || 0) - Number(b.iteration || 0));
+  if (withBatches.length === 0) return "";
+
+  const dualAuth = authMode === "DUAL_AUTH";
+  const pendingLabel = dualAuth ? "Pending Auth &rarr; Sent/Sched" : "Pending Initiation &rarr; Sent/Sched";
+  const stamp = (value) => (value ? escapeHtml(formatTimestamp(value)) : "N/A");
+  const tables = withBatches.map((execution) => {
+    const rows = execution.perBatch.map((entry) => `
+      <tr>
+        <td class="batch-name">${escapeHtml(entry.batchName || "n/a")}</td>
+        <td class="nowrap">${escapeHtml(entry.paymentType || "n/a")}</td>
+        <td class="nowrap">${escapeHtml(entry.rail || "n/a")}</td>
+        <td class="num">${escapeHtml(entry.recordCount ?? "n/a")}</td>
+        <td class="id">${escapeHtml(entry.transactionId || "n/a")}</td>
+        <td class="id">${escapeHtml(entry.bkRef || "n/a")}</td>
+        <td class="num">${escapeHtml(formatDurationMs(entry.initiationApiMs))}</td>
+        <td class="num">${dualAuth ? escapeHtml(formatDurationMs(entry.approvalApiMs)) : "N/A"}</td>
+        <td class="num">${escapeHtml(formatDurationMs(entry.pendingToFinalMs))}</td>
+        <td>${statusBadge(entry.finalStatus || "n/a")}</td>
+      </tr>
+      <tr class="per-bk-detail"><td colspan="10"><div class="per-bk-timestamps">
+        <div><span>Initiation Started:</span> <strong>${stamp(entry.initiationStartedAt)}</strong></div>
+        <div><span>Initiation Finished:</span> <strong>${stamp(entry.initiationFinishedAt)}</strong></div>
+        ${dualAuth ? `<div><span>Pending Approval Observed:</span> <strong>${stamp(entry.pendingApprovalObservedAt)}</strong></div>
+        <div><span>Approval Started:</span> <strong>${stamp(entry.approvalStartedAt)}</strong></div>
+        <div><span>Approval Finished:</span> <strong>${stamp(entry.approvalFinishedAt)}</strong></div>` : ""}
+        <div><span>Final Status Observed:</span> <strong>${stamp(entry.finalStatusObservedAt)}</strong></div>
+      </div></td></tr>`).join("");
+    const heading = withBatches.length > 1 ? `<h3>VU ${escapeHtml(execution.vu)} / Iteration ${escapeHtml(execution.iteration)}</h3>` : "";
+    return `${heading}<div class="table-scroll"><table class="data-table per-bk-table"><thead><tr>
+      <th>Batch</th><th>Payment Type</th><th>Rail</th><th class="num">Records</th><th>Transaction ID</th><th>BKREF</th>
+      <th class="num">Initiation API TAT</th><th class="num">Approval API TAT</th><th class="num">${pendingLabel}</th><th>Final Status</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>`;
+  }).join("");
+
+  return `<section class="section">
+      <h2>Per-BK Transaction Breakdown</h2>
+      ${tables}
+    </section>`;
+}
+
 function renderPerformanceMetricsTable(executions) {
   if (executions.length === 0) {
     return `<div class="empty-state">No execution data was collected before the run ended.</div>`;
@@ -1205,6 +1249,12 @@ ${REPORT_BASE_CSS}
   .trace-failure { border-left:3px solid var(--fail); padding-left:12px; }
   .trace-outcomes { display:flex; flex-wrap:wrap; gap:8px; }
   .trace-outcomes span { background:#ffffff; border:1px solid var(--line); border-radius:4px; padding:5px 10px; font-size:13px; }
+  .per-bk-table th { white-space:normal; vertical-align:bottom; }
+  .per-bk-table td.batch-name { max-width:190px; word-break:break-all; }
+  .per-bk-table tbody tr.per-bk-detail td { background:var(--surface); padding:8px 12px 12px; border-bottom:1px solid var(--line-strong); }
+  .per-bk-timestamps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:4px 20px; font-size:12px; }
+  .per-bk-timestamps span { color:var(--muted); }
+  .per-bk-timestamps strong { color:var(--ink); font-weight:500; }
   .pagination-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin:0 0 10px; font-size:13px; color:var(--muted); }
   .pagination-controls button { background:#ffffff; color:var(--ink); border:1px solid var(--line-strong); border-radius:4px; padding:6px 14px; cursor:pointer; font:inherit; font-weight:600; }
   .pagination-controls button:hover:not(:disabled) { background:var(--head); }
@@ -1232,6 +1282,7 @@ ${REPORT_BASE_CSS}
       <h2>Batch Execution Trace</h2>
       ${renderExecutionTraceTable(executions)}
     </section>
+    ${renderPerBatchBreakdown(executions)}
     <section class="section">
       <h2>Performance Metrics</h2>
       ${renderPerformanceMetricsTable(executions)}

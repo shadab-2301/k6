@@ -112,6 +112,7 @@ function approveParentTransaction(parentTransactionId, approverToken, recordAppr
     endedAt: new Date(approvalEnded).toISOString(),
     apiMs: Number(res.timings?.duration ?? (approvalEnded - approvalStarted)),
     status: res.status,
+    transactionId: parentTransactionId,
   });
   logRuntimeExchange('approve_parent_transaction', 'PATCH', url, approvalHeaders, null, res);
 

@@ -843,6 +843,72 @@ function batchRowPaymentType(row) {
     return String(value || "");
 }
 
+function firstCount(...values) {
+    const found = values.find((value) => value !== undefined && value !== null && value !== "" && Number.isFinite(Number(value)));
+    return found === undefined ? null : Number(found);
+}
+
+function batchRowRecordCount(row) {
+    return firstCount(row?.numberOfPayments, row?.noOfPayments, row?.batchNoOfPayments, row?.batchDetails?.batchNoOfPayments, row?.numberOfRecords, row?.recordCount);
+}
+
+// Per-transaction timing for MIX runs: one entry per get file batches row, keyed by transactionId,
+// with BKREF -> transactionId taken from the same row. Reset each iteration after get file batches.
+let perBatchTracking = null;
+
+function startPerBatchTracking(batchRows, expectedFinalStatus, pendingStartedAt) {
+    const byTransactionId = {};
+    const transactionIdByBkref = {};
+    for (const row of batchRows) {
+        const transactionId = String(row?.transactionId || "");
+        if (!transactionId) continue;
+        const bkRef = extractBkRefId(row);
+        byTransactionId[transactionId] = {
+            transactionId,
+            bkRef,
+            batchName: String(row?.batchName || row?.name || ""),
+            paymentType: batchRowPaymentType(row),
+            rail: String(row?.rail?.code || "").toUpperCase(),
+            recordCount: batchRowRecordCount(row),
+            initiationStartedAt: "",
+            initiationFinishedAt: "",
+            initiationApiMs: null,
+            initiationStatus: "",
+            pendingApprovalObservedAt: "",
+            approvalStartedAt: "",
+            approvalFinishedAt: "",
+            approvalApiMs: null,
+            approvalHttpStatus: null,
+            finalStatus: "",
+            finalStatusObservedAt: "",
+            pendingToFinalMs: null,
+        };
+        if (bkRef) transactionIdByBkref[bkRef] = transactionId;
+    }
+    perBatchTracking = { expectedFinalStatus, pendingStartedAt, byTransactionId, transactionIdByBkref };
+    return Object.values(byTransactionId);
+}
+
+function perBatchEntry(transactionIdOrBkref) {
+    if (!perBatchTracking) return null;
+    const key = String(transactionIdOrBkref || "");
+    return perBatchTracking.byTransactionId[key] || perBatchTracking.byTransactionId[perBatchTracking.transactionIdByBkref[key]] || null;
+}
+
+// Called after each BKREF's records are fetched. The first poll where every record of that BKREF is at
+// the expected final status (and the batch's record count is reached, when known) sets its observed time.
+function updatePerBatchFinalStatus(bkref, records) {
+    const entry = perBatchEntry(bkref);
+    if (!entry || entry.finalStatusObservedAt) return;
+    const statuses = records.map((record) => canonicalInitiateStatus(record?.status?.code)).filter(Boolean);
+    entry.finalStatus = uniqueStatusText(statuses, "NO_RECORDS");
+    const countReached = entry.recordCount ? records.length >= entry.recordCount : records.length > 0;
+    if (!countReached || statuses.length !== records.length || !statuses.every((status) => status === perBatchTracking.expectedFinalStatus)) return;
+    entry.finalStatusObservedAt = new Date().toISOString();
+    const pendingStart = isDualAuth ? entry.pendingApprovalObservedAt || entry.initiationFinishedAt : perBatchTracking.pendingStartedAt;
+    entry.pendingToFinalMs = pendingStart ? Date.parse(entry.finalStatusObservedAt) - Date.parse(pendingStart) : null;
+}
+
 function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
     const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
     const records = [];
@@ -902,6 +968,7 @@ export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSiz
 
     for (const bkref of bkrefs) {
         const result = fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar);
+        updatePerBatchFinalStatus(bkref, result.records);
         records.push(...result.records);
         requests.push(...result.requests);
         lastMeta = result.meta || lastMeta;
@@ -1079,6 +1146,7 @@ function emitExecutionSnapshot(execution) {
         parentTransactionIds: [...execution.parentTransactionIds],
         bkRefIds: [...execution.bkRefIds],
         payments: [...execution.payments],
+        perBatch: (execution.perBatch || []).map((entry) => ({ ...entry })),
         failure: execution.failure ? { ...execution.failure } : null,
     });
 }
@@ -2262,6 +2330,10 @@ export function runBulkFlow(ctx, afterInitiate) {
                 return [extractBkRefId(row), String(row?.transactionId || "")].filter(Boolean).map((key) => [key, label]);
             }))
             : {};
+        perBatchTracking = null;
+        if (isMixBatch) {
+            execution.perBatch = startPerBatchTracking(batchRows, expectedFinalChildStatus(intBatch.paymentDate), execution.timestamps.pendinitEndedAt);
+        }
         execution.parentTransactionIds = transactionIds;
         execution.bkRefIds = bkRefIds;
         emitExecutionSnapshot(execution);
@@ -2331,6 +2403,23 @@ export function runBulkFlow(ctx, afterInitiate) {
             }
             const normalizedStatus = canonicalInitiateStatus(apiStatus);
             initiationStatuses.push(normalizedStatus || apiStatus || `HTTP ${response.status}`);
+            const batchEntry = perBatchEntry(txId);
+            if (batchEntry) {
+                // http.batch sends all initiations together and returns once every response is in, so each
+                // request's own finish time is derived from its k6 timings relative to the shared send time.
+                const timings = response?.timings || {};
+                const requestFinishedMs = initiateStarted + Number(timings.blocked || 0) + Number(timings.connecting || 0) +
+                    Number(timings.tls_handshaking || 0) + Number(timings.duration || 0);
+                batchEntry.initiationStartedAt = new Date(initiateStarted).toISOString();
+                batchEntry.initiationFinishedAt = new Date(requestFinishedMs).toISOString();
+                batchEntry.initiationApiMs = durationMs;
+                batchEntry.initiationStatus = normalizedStatus || apiStatus || `HTTP ${response.status}`;
+                batchEntry.batchName = batchEntry.batchName || String(initiatePayload?.data?.batchName || "");
+                if (batchEntry.recordCount === null) batchEntry.recordCount = firstCount(initiatePayload?.data?.numberOfPayments, initiatePayload?.data?.batchDetails?.batchNoOfPayments);
+                if (isDualAuth && response.status === 200 && String(apiStatus || "").toUpperCase() === "PENDAUTH") {
+                    batchEntry.pendingApprovalObservedAt = batchEntry.initiationFinishedAt;
+                }
+            }
             const expectedCanonicalStatus = canonicalInitiateStatus(expectedStatusAfterInitiate);
             const statusMatchesExpectation = !expectedCanonicalStatus || normalizedStatus === expectedCanonicalStatus;
             const isInProgress = response.status === 200 && isPendingBatchStatus(apiStatus);
@@ -2410,11 +2499,18 @@ export function runBulkFlow(ctx, afterInitiate) {
                 expectedCount: Number(intBatch.numPayments),
                 jar: ctx.jar,
                 pendingAuthStartedAt: execution.timestamps.initiationEndedAt,
-                recordApproval: ({ startedAt, endedAt, apiMs, status }) => {
+                recordApproval: ({ startedAt, endedAt, apiMs, status, transactionId }) => {
                     execution.timestamps.approvalStartedAt = execution.timestamps.approvalStartedAt || startedAt;
                     if (status === 200) execution.timestamps.approvalEndedAt = endedAt;
                     execution.timings.approvalApiMs = Math.max(execution.timings.approvalApiMs || 0, apiMs);
                     execution.statuses.approval = `HTTP ${status}`;
+                    const batchEntry = perBatchEntry(transactionId);
+                    if (batchEntry) {
+                        batchEntry.approvalStartedAt = startedAt;
+                        batchEntry.approvalFinishedAt = endedAt;
+                        batchEntry.approvalApiMs = apiMs;
+                        batchEntry.approvalHttpStatus = status;
+                    }
                     emitExecutionSnapshot(execution);
                 },
                 });
