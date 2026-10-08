@@ -361,4 +361,29 @@ Add `--mix` with comma-separated `TYPE/RAIL:COUNT` entries. All entries go into 
 
 `npm run perf:batch:dual:k6 -- --env UAT --mix "TPT/EFT:5,PRLEX/PAYSHAP:5" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
 
+# Single auth, with three payment types and all three rails:
+
+
+
+`npm run perf:batch:k6 -- --env UAT --mix "TPT/EFT:5,TPT/PAYSHAP:5,ADHOC/RTGS:2,IAB/EFT:3" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
+
+# Dual auth:
+
+`npm run perf:batch:dual:k6 -- --env UAT --mix "TPT/EFT:5,PRLSD/PAYSHAP:3,PRLEX/EFT:2" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
+
+# Using --payments as the count for every entry (here, 10 each, so 30 payments in total):
+
+`npm run perf:batch:k6 -- --env UAT --mix "TPT/EFT,ADHOC/PAYSHAP,IAB/EFT" --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
+
+
+Rules for the mix
+
+# Use at least two entries, and don't repeat the same type/rail pair. TPT/EFT and TPT/PAYSHAP together is fine.
+
+`--payment-type and --rail are ignored when --mix is used.
+UAT only. Add --future 7 to test SCHEDULED instead of SENT.
+In Windows PowerShell, write the separator as '--' or use npm.cmd. Otherwise PowerShell drops the flags.
+
+For a first UAT run, start with two entries, such as "TPT/EFT:2,TPT/PAYSHAP:2". That confirms the backend splits the file into one batch per rail before you try larger mixes.
+
 In Windows PowerShell, quote the separator (`'--'`) or use `npm.cmd`, otherwise PowerShell drops the flags before npm sees them.
