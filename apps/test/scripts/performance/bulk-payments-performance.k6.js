@@ -202,6 +202,10 @@ export const options = {
     thresholds: {
         batch_flow_failure_rate: ["rate<0.05"],
     },
+    // http.batch sends at most batchPerHost requests to one host at a time (k6 default 6); match the
+    // records page concurrency so parallel page reads are not capped below K6_RECORDS_PAGE_CONCURRENCY.
+    batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
+    batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
 };
 
 function metricValues(data, metricName) {
