@@ -186,6 +186,8 @@ function parseMixBatchSpec(spec, defaultCount) {
 const testDataVariant = envText(["K6_TEST_DATA"]).toUpperCase() || "VALID";
 const pollingIntervalMs = envNumber(["K6_POLLING_INTERVAL_MS", "K6_POLL_INTERVAL_MS"], 2000);
 const maxDurationMs = envNumber(["K6_MAX_DURATION_MS", "K6_POLL_TIMEOUT_MS"], 120000);
+// 0 = wait for PENDINIT with no time limit (set by --fileValid <seconds> in the runner).
+const fileValidationTimeoutMs = envNumber(["K6_FILE_VALIDATION_TIMEOUT_MS"], 0);
 const scenarioMaxDuration = envText(["K6_MAX_DURATION"]) || `${Math.ceil((maxDurationMs * 2 + 30000) / 1000)}s`;
 
 export const options = {
@@ -2150,8 +2152,12 @@ export function runBulkFlow(ctx, afterInitiate) {
         console.info("[FLOW] Continuing with existing Get File flow");
 
         stage = "PENDINIT";
-        const filePollTimeoutMs = maxDurationMs;
+        const filePollTimeoutMs = fileValidationTimeoutMs > 0 ? fileValidationTimeoutMs : Infinity;
+        const fileTimeoutText = Number.isFinite(filePollTimeoutMs) ? `${filePollTimeoutMs}ms` : "none";
         const pollIntervalMs = pollingIntervalMs;
+        let lastWaitLogAt = Date.now();
+        let fileValidationRejected = false;
+        console.info(`[k6][PENDINIT] waiting for file validation to reach PENDINIT timeout=${fileTimeoutText}`);
         const pollStarted = Date.now();
         execution.timestamps.pendinitStartedAt = new Date(pollStarted).toISOString();
         let fileId = String(sasData.fileId || "");
@@ -2203,7 +2209,19 @@ export function runBulkFlow(ctx, afterInitiate) {
                     if (fileStatus === "PENDINIT") {
                         break;
                     }
+                    if (/FAIL|REJECT|RJCT|INVALID|ERROR|CANCEL|EXPIRED/i.test(fileStatus)) {
+                        fileValidationRejected = true;
+                        break;
+                    }
                 }
+            }
+
+            if (Date.now() - lastWaitLogAt >= 30000) {
+                lastWaitLogAt = Date.now();
+                console.info(
+                    `[k6][PENDINIT][WAITING] fileId=${fileId || "<not found yet>"} status=${fileStatus || (lastFileHttpStatus ? `HTTP ${lastFileHttpStatus}` : "n/a")} ` +
+                    `elapsedSec=${((Date.now() - pollStarted) / 1000).toFixed(0)} timeout=${fileTimeoutText}`
+                );
             }
 
             const elapsedMs = Date.now() - pollStarted;
@@ -2229,27 +2247,31 @@ export function runBulkFlow(ctx, afterInitiate) {
                 httpStatus: lastFileHttpStatus,
                 timeoutMs: filePollTimeoutMs,
                 elapsedMs: execution.timings.pendinitMs,
-                message: `Uploaded file was not found within ${filePollTimeoutMs}ms. Last backend status: ${execution.statuses.pendinit}`,
+                message: `Uploaded file was not found within ${fileTimeoutText} (--fileValid). Last backend status: ${execution.statuses.pendinit}`,
             });
             console.error(
-                `[k6][FAIL][polling] fileName=${intBatch.fileDisplayName} fileId=<missing> lastStatus=${execution.statuses.pendinit} timeoutMs=${filePollTimeoutMs} elapsedMs=${execution.timings.pendinitMs}`
+                `[k6][FAIL][polling] fileName=${intBatch.fileDisplayName} fileId=<missing> lastStatus=${execution.statuses.pendinit} timeout=${fileTimeoutText} elapsedMs=${execution.timings.pendinitMs}`
             );
             throw new Error(`Uploaded file not found in getFiles for ${intBatch.fileDisplayName}`);
         }
         if (fileStatus !== "PENDINIT") {
-            execution.timeouts.pendinit = { timeoutMs: filePollTimeoutMs, elapsedMs: execution.timings.pendinitMs };
+            if (!fileValidationRejected) {
+                execution.timeouts.pendinit = { timeoutMs: filePollTimeoutMs, elapsedMs: execution.timings.pendinitMs };
+            }
             setExecutionFailure(execution, {
                 stage,
                 expectedStatus: "PENDINIT",
                 lastStatus: execution.statuses.pendinit,
                 httpStatus: lastFileHttpStatus,
-                timeoutMs: filePollTimeoutMs,
+                timeoutMs: fileValidationRejected ? "" : filePollTimeoutMs,
                 elapsedMs: execution.timings.pendinitMs,
-                message: `File did not reach PENDINIT before the polling duration expired. Last backend status: ${execution.statuses.pendinit}`,
+                message: fileValidationRejected
+                    ? `File validation ended with status ${execution.statuses.pendinit} instead of PENDINIT.`
+                    : `File did not reach PENDINIT within ${fileTimeoutText} (--fileValid). Last backend status: ${execution.statuses.pendinit}`,
             });
             logFileValidationFailure(ctx.baseUrl, ctx.authHeaders, fileId, fileStatus, latestFileRecord, ctx.jar);
             console.error(
-                `[k6][FAIL][polling] fileName=${intBatch.fileDisplayName} fileId=${fileId} expectedStatus=PENDINIT actualStatus=${execution.statuses.pendinit} timeoutMs=${filePollTimeoutMs} elapsedMs=${execution.timings.pendinitMs}`
+                `[k6][FAIL][polling] fileName=${intBatch.fileDisplayName} fileId=${fileId} expectedStatus=PENDINIT actualStatus=${execution.statuses.pendinit} timeout=${fileTimeoutText} elapsedMs=${execution.timings.pendinitMs}`
             );
             throw new Error(`File did not reach PENDINIT. fileId=${fileId} lastStatus=${fileStatus}`);
         }

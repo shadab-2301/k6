@@ -387,3 +387,10 @@ In Windows PowerShell, write the separator as '--' or use npm.cmd. Otherwise Pow
 For a first UAT run, start with two entries, such as "TPT/EFT:2,TPT/PAYSHAP:2". That confirms the backend splits the file into one batch per rail before you try larger mixes.
 
 In Windows PowerShell, quote the separator (`'--'`) or use `npm.cmd`, otherwise PowerShell drops the flags before npm sees them.
+
+# File validation wait (upload -> PENDINIT)
+By default the run waits for the uploaded file to reach PENDINIT with no time limit, logging `[k6][PENDINIT][WAITING]` every 30 seconds. It stops early only if the file ends in a failed/rejected validation status. To limit the wait, pass `--fileValid <seconds>`:
+
+`npm run perf:batch:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --fileValid 300`
+
+`--poll-timeout-ms` still limits the later polls (records reaching SENT/SCHEDULED).
