@@ -30,7 +30,7 @@ export const options = {
       maxDuration: __ENV.K6_MAX_DURATION || '10m30s',
     },
   },
-  batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
+  batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10)), String(__ENV.K6_MIX_BATCH || '').split(',').filter((part) => part.trim()).length),
   batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
 };
 
@@ -90,49 +90,54 @@ function generateBapiToken(adoToken, user) {
   return requireValue(`BAPI token for ${user.username}`, token);
 }
 
-function approveParentTransaction(parentTransactionId, approverToken, recordApproval) {
-  requireValue('parentTransactionId', parentTransactionId);
-
-  const url = `${BASE_URL}/payments-manager/api/v1/payment/` +
-    `${encodeURIComponent(parentTransactionId)}/APPROVE?autoForward=true`;
-
-  console.log(`[DUAL AUTH][APPROVER] Approving parent transactionId=${parentTransactionId}`);
+// All parent transactions (one per BK) are approved together in one http.batch call. http.batch returns
+// once every response is in, so each approval's finish time is derived from its own k6 timings.
+function approveParentTransactions(parentTransactionIds, approverToken, recordApproval) {
+  parentTransactionIds.forEach((id) => requireValue('parentTransactionId', id));
 
   const approvalHeaders = {
     Authorization: `Bearer ${approverToken}`,
     GCN: approver.gcn,
     channel: __ENV.K6_CHANNEL || 'WEB',
   };
-  const approvalStarted = Date.now();
-  const res = http.patch(url, null, {
-    headers: approvalHeaders,
-    tags: { name: 'approve_parent_transaction' },
-  });
-  const approvalEnded = Date.now();
-  if (recordApproval) recordApproval({
-    startedAt: new Date(approvalStarted).toISOString(),
-    endedAt: new Date(approvalEnded).toISOString(),
-    apiMs: Number(res.timings?.duration ?? (approvalEnded - approvalStarted)),
-    status: res.status,
-    transactionId: parentTransactionId,
-  });
-  logRuntimeExchange('approve_parent_transaction', 'PATCH', url, approvalHeaders, null, res);
+  const urlFor = (id) => `${BASE_URL}/payments-manager/api/v1/payment/${encodeURIComponent(id)}/APPROVE?autoForward=true`;
 
-  check(res, {
-    'approve status is 200': (r) => r.status === 200,
+  console.log(`[DUAL AUTH][APPROVER] Approving ${parentTransactionIds.length} parent transaction(s) in parallel: ${parentTransactionIds.join(', ')}`);
+  const sentAt = Date.now();
+  const responses = http.batch(parentTransactionIds.map((id) => [
+    'PATCH', urlFor(id), null, { headers: approvalHeaders, tags: { name: 'approve_parent_transaction' } },
+  ]));
+
+  const failures = [];
+  responses.forEach((res, index) => {
+    const id = parentTransactionIds[index];
+    const timings = res.timings || {};
+    const finishedAt = sentAt + Number(timings.blocked || 0) + Number(timings.connecting || 0) +
+      Number(timings.tls_handshaking || 0) + Number(timings.duration || 0);
+    if (recordApproval) recordApproval({
+      startedAt: new Date(sentAt).toISOString(),
+      endedAt: new Date(finishedAt).toISOString(),
+      apiMs: Number(timings.duration || 0),
+      status: res.status,
+      transactionId: id,
+    });
+    logRuntimeExchange('approve_parent_transaction', 'PATCH', urlFor(id), approvalHeaders, null, res);
+    check(res, { 'approve status is 200': (r) => r.status === 200 });
+
+    if (res.status !== 200) {
+      failures.push(`${id}: HTTP ${res.status}`);
+      return;
+    }
+    try { res.json(); } catch (_) {
+      failures.push(`${id}: response was not JSON`);
+      return;
+    }
+    console.log(`[DUAL AUTH][APPROVER] Approval completed parentTransactionId=${id} apiMs=${Number(timings.duration || 0).toFixed(0)}`);
   });
 
-  if (res.status !== 200) {
-    fail(`[dual-auth] Approval failed for parentTransactionId=${parentTransactionId}, HTTP ${res.status}`);
+  if (failures.length > 0) {
+    fail(`[dual-auth] Approval failed for ${failures.length} of ${parentTransactionIds.length} parent transaction(s): ${failures.join('; ')}`);
   }
-
-  let body;
-  try { body = res.json(); } catch (_) {
-    fail('[dual-auth] Approve response was not JSON');
-  }
-
-  console.log(`[DUAL AUTH][APPROVER] Approval completed parentTransactionId=${parentTransactionId}`);
-  return body;
 }
 
 function expectedFinalStatus(paymentDate) {
@@ -156,9 +161,7 @@ export default function (ctx) {
     const expectedStatus = expectedFinalStatus(paymentDate);
     console.log(`[dual-auth][auth-context] authMode=DUAL_AUTH company=${COMPANY} role=APPROVER`);
     const approverToken = generateBapiToken(adoToken, approver);
-    for (const parentTransactionId of context.parentTransactionIds) {
-      approveParentTransaction(parentTransactionId, approverToken, context.recordApproval);
-    }
+    approveParentTransactions(context.parentTransactionIds, approverToken, context.recordApproval);
     return pollApprovedChildren(context, expectedStatus, approverToken);
   });
 }

@@ -204,7 +204,8 @@ export const options = {
     },
     // http.batch sends at most batchPerHost requests to one host at a time (k6 default 6); match the
     // records page concurrency so parallel page reads are not capped below K6_RECORDS_PAGE_CONCURRENCY.
-    batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
+    // Also at least the number of --mix entries so every BK is initiated / approved at the same time.
+    batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10)), String(__ENV.K6_MIX_BATCH || "").split(",").filter((part) => part.trim()).length),
     batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
 };
 
@@ -2555,7 +2556,7 @@ export function runBulkFlow(ctx, afterInitiate) {
                 pendingAuthStartedAt: execution.timestamps.initiationEndedAt,
                 recordApproval: ({ startedAt, endedAt, apiMs, status, transactionId }) => {
                     execution.timestamps.approvalStartedAt = execution.timestamps.approvalStartedAt || startedAt;
-                    if (status === 200) execution.timestamps.approvalEndedAt = endedAt;
+                    if (status === 200 && (!execution.timestamps.approvalEndedAt || endedAt > execution.timestamps.approvalEndedAt)) execution.timestamps.approvalEndedAt = endedAt;
                     execution.timings.approvalApiMs = Math.max(execution.timings.approvalApiMs || 0, apiMs);
                     execution.statuses.approval = `HTTP ${status}`;
                     const batchEntry = perBatchEntry(transactionId);
