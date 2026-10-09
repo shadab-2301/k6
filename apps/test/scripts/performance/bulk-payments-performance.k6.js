@@ -916,17 +916,20 @@ function updatePerBatchFinalStatus(bkref, records) {
 const recordsPageConcurrency = Math.max(1, Math.floor(envNumber(["K6_RECORDS_PAGE_CONCURRENCY"], 10)));
 let recordFieldsLogged = false;
 
-function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
+// A failed page does not stop the fetch: every page is requested, failed pages are retried once at
+// the end, and records on pages that still fail are simply absent (reported as unvalidated/missing).
+function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar, expectedRecords = null) {
     const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
-    const records = [];
     const requests = [];
+    const rowsByPage = {};
     let lastMeta = null;
     const pageUrl = (page) => `${baseUrl}/payments-manager/api/v1/batch-payments/${bkref}/records?page=${page}&size=${size}`;
     const params = { jar, headers: authHeaders, timeout: __ENV.K6_REQUEST_TIMEOUT || "60s", tags: { stage: "get_records" } };
     const label = recordBatchLabels[bkref];
 
-    // Returns false when the page failed, so later pages are not merged out of order.
-    const acceptPage = (page, url, res) => {
+    const acceptPage = (page, res) => {
+        const url = pageUrl(page);
+        requests.push({ bkref, page, size, url, status: res.status });
         if (res.status !== 200) {
             logHttpFailure("get_records", { status: res.status, timings: res.timings, url, body: res.body, txId: bkref });
             return false;
@@ -937,7 +940,7 @@ function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
             recordFieldsLogged = true;
             console.info(`[k6][RECORDS][FIELDS] record keys=${JSON.stringify(Object.keys(rows[0] || {}))} status keys=${JSON.stringify(Object.keys(rows[0]?.status || {}))}`);
         }
-        records.push(...(label ? rows.map((row) => ({ ...row, __batchPaymentType: label.paymentType, __batchRail: label.railType })) : rows));
+        rowsByPage[page] = label ? rows.map((row) => ({ ...row, __batchPaymentType: label.paymentType, __batchRail: label.railType })) : rows;
         lastMeta = payload.meta || lastMeta;
         if (rows.length === 0 && page === 1) {
             console.warn(
@@ -946,23 +949,39 @@ function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
         }
         return true;
     };
-
-    const firstUrl = pageUrl(1);
-    requests.push({ bkref, page: 1, size, url: firstUrl });
-    if (!acceptPage(1, firstUrl, http.get(firstUrl, params))) return { records, meta: lastMeta, requests };
-    const totalPages = Number(lastMeta?.totalPages || 1);
-
-    for (let chunkStart = 2; chunkStart <= totalPages; chunkStart += recordsPageConcurrency) {
-        const pages = [];
-        for (let page = chunkStart; page <= Math.min(totalPages, chunkStart + recordsPageConcurrency - 1); page++) pages.push(page);
-        const responses = http.batch(pages.map((page) => ["GET", pageUrl(page), null, params]));
-        for (let i = 0; i < pages.length; i++) {
-            requests.push({ bkref, page: pages[i], size, url: pageUrl(pages[i]) });
-            if (!acceptPage(pages[i], pageUrl(pages[i]), responses[i])) return { records, meta: lastMeta, requests };
+    const fetchPages = (pages) => {
+        const failed = [];
+        for (let i = 0; i < pages.length; i += recordsPageConcurrency) {
+            const chunk = pages.slice(i, i + recordsPageConcurrency);
+            const responses = http.batch(chunk.map((page) => ["GET", pageUrl(page), null, params]));
+            chunk.forEach((page, index) => { if (!acceptPage(page, responses[index])) failed.push(page); });
         }
+        return failed;
+    };
+
+    // Page 1 tells us how many pages there are; without it, fall back to the expected record count.
+    const pageOneOk = acceptPage(1, http.get(pageUrl(1), params)) || acceptPage(1, http.get(pageUrl(1), params));
+    let totalPages = pageOneOk
+        ? Number(lastMeta?.totalPages || 1)
+        : Number(expectedRecords) > 0 ? Math.ceil(Number(expectedRecords) / size) : 0;
+    if (!pageOneOk && totalPages === 0) {
+        console.warn(`[k6][RECORDS][PAGES_FAILED] bkref=${bkref} page 1 failed twice and the page count is unknown; no statuses read for this BKREF this pass`);
+        return { records: [], meta: lastMeta, requests, failedPages: [1] };
     }
 
-    return { records, meta: lastMeta, requests };
+    const remaining = [];
+    for (let page = pageOneOk ? 2 : 1; page <= totalPages; page++) remaining.push(page);
+    let failedPages = fetchPages(remaining);
+    if (failedPages.length > 0) failedPages = fetchPages(failedPages);
+    if (failedPages.length > 0) {
+        console.warn(
+            `[k6][RECORDS][PAGES_FAILED] bkref=${bkref} pages=[${failedPages.join(",")}] of ${totalPages} still failing after retry; ` +
+            `up to ${failedPages.length * size} payment(s) have no status this pass`
+        );
+    }
+
+    const records = Object.keys(rowsByPage).map(Number).sort((a, b) => a - b).flatMap((page) => rowsByPage[page]);
+    return { records, meta: lastMeta, requests, failedPages };
 }
 
 /**
@@ -975,7 +994,8 @@ export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSiz
     let lastMeta = null;
 
     for (const bkref of bkrefs) {
-        const result = fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar);
+        const expectedRecords = bkrefs.length === 1 ? configuredNumPayments : perBatchEntry(bkref)?.recordCount ?? null;
+        const result = fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar, expectedRecords);
         updatePerBatchFinalStatus(bkref, result.records);
         records.push(...result.records);
         requests.push(...result.requests);
@@ -1212,7 +1232,7 @@ function fetchAndValidateBatchRecordsWithRetry(baseUrl, authHeaders, bkrefs, exp
         lastMeta = meta;
         lastRequests = requests;
         lastValidation = validateBatchRecords(records, expectedCount, expectedFinalStatus);
-        console.log(`[k6][RECORDS][POLL] pass=${attempt} records=${records.length}/${expectedCount} at${expectedFinalStatus || "Final"}=${lastValidation.buckets.PASSED.length} pages=${requests.length} passMs=${Date.now() - passStarted}`);
+        console.log(`[k6][RECORDS][POLL] pass=${attempt} records=${records.length}/${expectedCount} at${expectedFinalStatus || "Final"}=${lastValidation.buckets.PASSED.length} requests=${requests.length} passMs=${Date.now() - passStarted}`);
 
         if (lastValidation.shortfall === 0 && lastValidation.buckets.IN_PROGRESS.length === 0) {
             break;

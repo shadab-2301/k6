@@ -178,7 +178,7 @@ function pollApprovedChildren(context, expectedStatus, approverToken) {
       statusCode: String(record.status?.code || '').toUpperCase(),
       resultGroup: normalizeFinalStatus(record.status?.code) === expectedStatus ? 'PASSED' : 'IN_PROGRESS',
     }));
-    console.log(`[k6][RECORDS][POLL] pass=${pass} records=${payments.length}/${context.expectedCount} at${expectedStatus}=${payments.filter((payment) => payment.resultGroup === 'PASSED').length} pages=${result.requests.length} passMs=${Date.now() - passStarted}`);
+    console.log(`[k6][RECORDS][POLL] pass=${pass} records=${payments.length}/${context.expectedCount} at${expectedStatus}=${payments.filter((payment) => payment.resultGroup === 'PASSED').length} requests=${result.requests.length} passMs=${Date.now() - passStarted}`);
     const uniqueIds = new Set(payments.map((payment) => payment.ftId).filter(Boolean));
     const complete = payments.length === context.expectedCount && uniqueIds.size === context.expectedCount &&
       payments.every((payment) => payment.resultGroup === 'PASSED');
