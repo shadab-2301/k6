@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { check, fail, sleep } from 'k6';
-import { setup, handleSummary, runBulkFlow, fetchBatchRecordsForBkrefs, logRuntimeExchange } from './bulk-payments-performance.k6.js';
+import { setup, handleSummary, runBulkFlow, fetchBatchRecordsForBkrefs, logRuntimeExchange, waitForBatchLevelFinalStatus } from './bulk-payments-performance.k6.js';
 
 export { setup, handleSummary };
 
@@ -171,6 +171,12 @@ function pollApprovedChildren(context, expectedStatus, approverToken) {
   let result;
   let payments = [];
   let pass = 0;
+  // Cheap per-poll check first: one get file batches request returns every BK's status. The FT records are
+  // then read to confirm every FT's actual status (same time budget).
+  const batchLevel = waitForBatchLevelFinalStatus({
+    baseUrl: context.baseUrl, authHeaders: authHeaders(approverToken, approver.gcn), fileId: context.fileId, jar: context.jar,
+    expectedStatus, deadlineMs: started + POLL_TIMEOUT_MS, intervalMs: POLL_INTERVAL_SECONDS * 1000,
+  });
   while (Date.now() - started < POLL_TIMEOUT_MS) {
     pass += 1;
     const passStarted = Date.now();
@@ -190,12 +196,14 @@ function pollApprovedChildren(context, expectedStatus, approverToken) {
     if (complete) {
       check(true, { 'all Dual Auth children reached expected status': () => true });
       console.log(`[PASS][DUAL AUTH] children=${payments.length} finalStatus=${expectedStatus}`);
-      const finalStatusObservedAt = new Date(Date.now()).toISOString();
+      // Use the batch-level time only when every BK was seen moving to final and the FTs now confirm it.
+      const finalStatusObservedAt = batchLevel && batchLevel.transitionObserved ? batchLevel.observedAt : new Date().toISOString();
+      console.log(`[k6][FINAL-STATUS] observedAt=${finalStatusObservedAt} source=${batchLevel && batchLevel.transitionObserved ? 'batch status transition (confirmed by FT records)' : 'FT records poll'}`);
       const pendingAuthStarted = new Date(context.pendingAuthStartedAt || started).getTime();
       return {
         expectedStatus, payments, records: result.records, requests: result.requests, meta: result.meta,
         finalStatusObservedAt,
-        pendingAuthToFinalMs: Date.now() - pendingAuthStarted,
+        pendingAuthToFinalMs: Date.parse(finalStatusObservedAt) - pendingAuthStarted,
       };
     }
     if (payments.some((payment) => /^(FAILED|REJECTED)$/.test(payment.statusCode))) {

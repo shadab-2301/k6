@@ -888,6 +888,7 @@ function startPerBatchTracking(batchRows, expectedFinalStatus, pendingStartedAt)
             approvalHttpStatus: null,
             finalStatus: "",
             finalStatusObservedAt: "",
+            batchStatusFinalAt: "",
             pendingToFinalMs: null,
         };
         if (bkRef) transactionIdByBkref[bkRef] = transactionId;
@@ -902,6 +903,49 @@ function perBatchEntry(transactionIdOrBkref) {
     return perBatchTracking.byTransactionId[key] || perBatchTracking.byTransactionId[perBatchTracking.transactionIdByBkref[key]] || null;
 }
 
+// Dual auth: poll get file batches (one request returns every BK's status) until every batch is at a final
+// status. Each BK's final time is only kept when that BK was first seen non-final (a real transition), and it
+// is applied only after the records pass confirms all of that BK's FTs. Gives up after 3 failed requests.
+export function waitForBatchLevelFinalStatus({ baseUrl, authHeaders, fileId, jar, expectedStatus, deadlineMs, intervalMs }) {
+    if (!fileId) return null;
+    const url = `${baseUrl}/payments-manager/api/v1/batch-payments/${fileId}/batches`;
+    const isFinal = (status) => status === expectedStatus || /FAIL|REJECT|RJCT|CANCEL|EXPIRED/.test(status);
+    const seenNotFinal = new Set();
+    let failures = 0;
+    let poll = 0;
+    while (Date.now() < deadlineMs) {
+        poll += 1;
+        const res = http.get(url, { jar, headers: authHeaders, timeout: __ENV.K6_REQUEST_TIMEOUT || "60s", tags: { stage: "get_batches_status" } });
+        if (res.status !== 200) {
+            logHttpFailure("get_batches_status", { status: res.status, timings: res.timings, url, body: res.body, txId: fileId });
+            failures += 1;
+            if (failures >= 3) {
+                console.warn(`[k6][BATCH-STATUS] get file batches failed ${failures} times; falling back to records polling`);
+                return null;
+            }
+        } else {
+            const rows = Array.isArray((res.json() || {}).data) ? res.json().data : [];
+            const now = new Date().toISOString();
+            const states = rows.map((row) => {
+                const transactionId = String(row?.transactionId || "");
+                const status = canonicalInitiateStatus(row?.status?.code);
+                const final = isFinal(status);
+                if (!final) seenNotFinal.add(transactionId);
+                const entry = perBatchEntry(transactionId);
+                if (entry && final && seenNotFinal.has(transactionId) && !entry.batchStatusFinalAt) entry.batchStatusFinalAt = now;
+                return { transactionId, status, final };
+            });
+            console.log(`[k6][BATCH-STATUS] poll=${poll} ${states.map((s) => `${s.transactionId}:${s.status || "n/a"}`).join(" ")}`);
+            if (states.length > 0 && states.every((s) => s.final)) {
+                return { observedAt: now, transitionObserved: states.every((s) => seenNotFinal.has(s.transactionId)), polls: poll };
+            }
+        }
+        const remainingMs = deadlineMs - Date.now();
+        if (remainingMs > 0) sleep(Math.min(intervalMs, remainingMs) / 1000);
+    }
+    return null;
+}
+
 // Called after each BKREF's records are fetched. The first poll where every record of that BKREF is at
 // the expected final status (and the batch's record count is reached, when known) sets its observed time.
 function updatePerBatchFinalStatus(bkref, records) {
@@ -911,7 +955,7 @@ function updatePerBatchFinalStatus(bkref, records) {
     entry.finalStatus = uniqueStatusText(statuses, "NO_RECORDS");
     const countReached = entry.recordCount ? records.length >= entry.recordCount : records.length > 0;
     if (!countReached || statuses.length !== records.length || !statuses.every((status) => status === perBatchTracking.expectedFinalStatus)) return;
-    entry.finalStatusObservedAt = new Date().toISOString();
+    entry.finalStatusObservedAt = entry.batchStatusFinalAt || new Date().toISOString();
     const pendingStart = isDualAuth ? entry.pendingApprovalObservedAt || entry.initiationFinishedAt : perBatchTracking.pendingStartedAt;
     entry.pendingToFinalMs = pendingStart ? Date.parse(entry.finalStatusObservedAt) - Date.parse(pendingStart) : null;
 }
@@ -2547,6 +2591,7 @@ export function runBulkFlow(ctx, afterInitiate) {
             try {
                 result = afterInitiate({
                 adoToken: ctx.singleAuthAdoAccessToken,
+                fileId,
                 baseUrl: ctx.baseUrl,
                 parentTransactionIds: transactionIds,
                 bkRefIds: bkRefIds.length > 0 ? bkRefIds : transactionIds,
