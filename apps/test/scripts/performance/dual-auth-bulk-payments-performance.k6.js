@@ -182,7 +182,7 @@ function pollApprovedChildren(context, expectedStatus, approverToken) {
     pass += 1;
     const passStarted = Date.now();
     result = fetchBatchRecordsForBkrefs(
-      context.baseUrl, authHeaders(approverToken, approver.gcn), context.bkRefIds, 100, context.jar
+      context.baseUrl, authHeaders(approverToken, approver.gcn), context.bkRefIds, null, context.jar
     );
     payments = result.records.map((record) => ({
       ftId: String(record.refId || ''),

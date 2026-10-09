@@ -965,6 +965,8 @@ function updatePerBatchFinalStatus(bkref, records) {
 // time): page 1 of every BKREF first, then every remaining page of every BKREF. A failed page does not stop
 // the read; failed pages are retried once and records on pages that still fail are absent (reported missing).
 const recordsPageConcurrency = Math.max(1, Math.floor(envNumber(["K6_RECORDS_PAGE_CONCURRENCY"], 20)));
+// Records per page requested from /batch-payments/:BKREF/records (runner flag --records-page-size).
+const recordsPageSize = Math.max(1, Math.floor(envNumber(["K6_RECORDS_PAGE_SIZE"], 2000)));
 let recordFieldsLogged = false;
 
 /**
@@ -972,7 +974,7 @@ let recordFieldsLogged = false;
  * get file batches, merging the pages from each into one record list.
  */
 export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar) {
-    const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
+    const size = Math.max(1, Math.floor(Number(pageSize) || recordsPageSize));
     const params = { jar, headers: authHeaders, timeout: __ENV.K6_REQUEST_TIMEOUT || "60s", tags: { stage: "get_records" } };
     const requests = [];
     let lastMeta = null;
@@ -1126,7 +1128,7 @@ function captureActualChildPayments({ ctx, execution, intBatch, fileId, transact
     const expectedTotal = Number(intBatch.numPayments || 0);
     if (bkrefs.length === 0) return null;
     try {
-        const { records, meta, requests } = fetchBatchRecordsForBkrefs(ctx.baseUrl, ctx.authHeaders, bkrefs, 100, ctx.jar);
+        const { records, meta, requests } = fetchBatchRecordsForBkrefs(ctx.baseUrl, ctx.authHeaders, bkrefs, recordsPageSize, ctx.jar);
         const validation = validateBatchRecords(records, expectedTotal, expectedFinalChildStatus(intBatch.paymentDate));
         execution.payments = paymentsFromValidation(validation);
         execution.requestDetails.ftIds = requests;
@@ -2675,7 +2677,6 @@ export function runBulkFlow(ctx, afterInitiate) {
 
         // Fetch FT IDs (refId) for every initiated payment and bucket them by outcome. Records
         // can lag briefly behind initiation, so poll until the expected payment count shows up.
-        const recordsPageSize = envNumber(["K6_RECORDS_PAGE_SIZE"], Math.min(100, Math.max(10, expectedRecordCount)));
         const recordsPollTimeoutMs = maxDurationMs;
         const recordsPollIntervalMs = pollingIntervalMs;
         const recordsStart = Date.now();
