@@ -409,8 +409,13 @@ need to run from  `apps` folder -- the last arg nin the command would be the FM 
 
 node split-validation.js "..\reports\performance\bulk-payments-report-2026-10-09T09-24-19-567Z.html" 15.4
  
-# Dual auth approval (v2 bulk)
-All initiated parent transactions (one per BK) are approved in one call: `PATCH /payments-manager/api/v2/payment/action` with a body of `[{ "transactionId", "operation": "APPROVE", "reason", "autoForward" }, …]`. Optional environment variables: `K6_APPROVE_AUTO_FORWARD` (default `false`) and `K6_APPROVE_REASON` (default `k6 performance test approval`).
+# TO run all payment type and rail time 
 
-# Request/response logs
-`[k6][trace]` logs print each request and response body as indented JSON (secrets redacted, response headers omitted). Bodies longer than 6000 characters are cut; raise the limit with the `K6_TRACE_MAX_CHARS` environment variable.
+# need to move to cd apps from k6 dir and then run beloe command, it will update results in apps\performance-results.xlsx
+
+node run-performance-matrix.js --concurrency 8
+
+
+# for seperate payment type
+
+node run-performance-matrix.js --only TPT:EFT:1000
