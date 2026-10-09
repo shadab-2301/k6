@@ -906,11 +906,12 @@ function perBatchEntry(transactionIdOrBkref) {
 // Dual auth: poll get file batches (one request returns every BK's status) until every batch is at a final
 // status. Each BK's final time is only kept when that BK was first seen non-final (a real transition), and it
 // is applied only after the records pass confirms all of that BK's FTs. Gives up after 3 failed requests.
-export function waitForBatchLevelFinalStatus({ baseUrl, authHeaders, fileId, jar, expectedStatus, deadlineMs, intervalMs }) {
+// initiallyNotFinal: BKs already seen non-final (PENDAUTH on their initiate response) before polling starts.
+export function waitForBatchLevelFinalStatus({ baseUrl, authHeaders, fileId, jar, expectedStatus, deadlineMs, intervalMs, initiallyNotFinal = [] }) {
     if (!fileId) return null;
     const url = `${baseUrl}/payments-manager/api/v1/batch-payments/${fileId}/batches`;
     const isFinal = (status) => status === expectedStatus || /FAIL|REJECT|RJCT|CANCEL|EXPIRED/.test(status);
-    const seenNotFinal = new Set();
+    const seenNotFinal = new Set(initiallyNotFinal.map(String));
     let failures = 0;
     let poll = 0;
     while (Date.now() < deadlineMs) {
@@ -2478,6 +2479,7 @@ export function runBulkFlow(ctx, afterInitiate) {
         const slowestRequestBody = initiateRequests[slowestIndex]?.[2] || "";
 
         let allInitiated = true;
+        const pendingAuthTransactionIds = [];
         const initiationStatuses = [];
         const expectedStatusAfterInitiate = expectedInitiateStatus(intBatch.paymentDate);
 
@@ -2496,6 +2498,7 @@ export function runBulkFlow(ctx, afterInitiate) {
                 }
             })();
             const apiStatus = extractStatusCodeFromPayload(initiatePayload);
+            if (isDualAuth && response.status === 200 && String(apiStatus || "").toUpperCase() === "PENDAUTH") pendingAuthTransactionIds.push(txId);
             if (isDualAuth && response.status === 200 && String(apiStatus || "").toUpperCase() === "PENDAUTH" &&
                 !execution.timestamps.pendingApprovalObservedAt) {
                 execution.timestamps.pendingApprovalObservedAt = new Date().toISOString();
@@ -2592,6 +2595,7 @@ export function runBulkFlow(ctx, afterInitiate) {
                 result = afterInitiate({
                 adoToken: ctx.singleAuthAdoAccessToken,
                 fileId,
+                pendingAuthTransactionIds,
                 baseUrl: ctx.baseUrl,
                 parentTransactionIds: transactionIds,
                 bkRefIds: bkRefIds.length > 0 ? bkRefIds : transactionIds,

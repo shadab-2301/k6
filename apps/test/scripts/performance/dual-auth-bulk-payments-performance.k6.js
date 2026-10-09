@@ -176,6 +176,7 @@ function pollApprovedChildren(context, expectedStatus, approverToken) {
   const batchLevel = waitForBatchLevelFinalStatus({
     baseUrl: context.baseUrl, authHeaders: authHeaders(approverToken, approver.gcn), fileId: context.fileId, jar: context.jar,
     expectedStatus, deadlineMs: started + POLL_TIMEOUT_MS, intervalMs: POLL_INTERVAL_SECONDS * 1000,
+    initiallyNotFinal: context.pendingAuthTransactionIds || [],
   });
   while (Date.now() - started < POLL_TIMEOUT_MS) {
     pass += 1;
