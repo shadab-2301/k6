@@ -396,6 +396,6 @@ By default the run waits for the uploaded file to reach PENDINIT with no time li
 `--poll-timeout-ms` still limits the later polls (records reaching SENT/SCHEDULED).
 
 # Final status (SENT/SCHED) polling speed
-Each poll reads every payment record of the batch (100 per page). Pages after the first are fetched in parallel, 10 at a time by default, so the time to Final Status Observed is close to when the payments actually reached SENT/SCHED. Each poll logs `[k6][RECORDS][POLL] pass=… records=… passMs=…`. Change the parallelism with `--records-concurrency <n>`, e.g. `--records-concurrency 20`.
+Each poll reads every payment record of the batch (100 per page). Pages of all BKREFs are fetched together in parallel, 20 at a time by default, so the time to Final Status Observed is close to when the payments actually reached SENT/SCHED. Each poll logs `[k6][RECORDS][POLL] pass=… records=… passMs=…`. Change the parallelism with `--records-concurrency <n>`, e.g. `--records-concurrency 20`.
 
 Dual auth reads the final status in two steps: it polls get file batches (one request returns every BK's status, logged as `[k6][BATCH-STATUS]`) until every BK is final, then reads the FT records once to confirm each FT's actual status. The BK-level time is used for Final Status Observed only when the BKs were seen moving to SENT/SCHED and the FT records confirm it (`[k6][FINAL-STATUS] … source=…`); otherwise the records-based time is used.

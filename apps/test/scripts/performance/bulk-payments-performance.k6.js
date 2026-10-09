@@ -205,8 +205,8 @@ export const options = {
     // http.batch sends at most batchPerHost requests to one host at a time (k6 default 6); match the
     // records page concurrency so parallel page reads are not capped below K6_RECORDS_PAGE_CONCURRENCY.
     // Also at least the number of --mix entries so every BK is initiated / approved at the same time.
-    batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10)), String(__ENV.K6_MIX_BATCH || "").split(",").filter((part) => part.trim()).length),
-    batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
+    batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 20)), String(__ENV.K6_MIX_BATCH || "").split(",").filter((part) => part.trim()).length),
+    batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 20))),
 };
 
 function metricValues(data, metricName) {
@@ -961,27 +961,36 @@ function updatePerBatchFinalStatus(bkref, records) {
     entry.pendingToFinalMs = pendingStart ? Date.parse(entry.finalStatusObservedAt) - Date.parse(pendingStart) : null;
 }
 
-// Pages after the first are fetched in parallel batches so a full pass over large batches (e.g. 20k
-// records = 200 pages) takes seconds instead of minutes; the pass time bounds when SENT/SCHED is observed.
-const recordsPageConcurrency = Math.max(1, Math.floor(envNumber(["K6_RECORDS_PAGE_CONCURRENCY"], 10)));
+// Record pages for ALL BKREFs are read through one shared parallel pool (K6_RECORDS_PAGE_CONCURRENCY at a
+// time): page 1 of every BKREF first, then every remaining page of every BKREF. A failed page does not stop
+// the read; failed pages are retried once and records on pages that still fail are absent (reported missing).
+const recordsPageConcurrency = Math.max(1, Math.floor(envNumber(["K6_RECORDS_PAGE_CONCURRENCY"], 20)));
 let recordFieldsLogged = false;
 
-// A failed page does not stop the fetch: every page is requested, failed pages are retried once at
-// the end, and records on pages that still fail are simply absent (reported as unvalidated/missing).
-function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar, expectedRecords = null) {
+/**
+ * Fetches records for every parent/batch transaction ID (BKREF) returned by
+ * get file batches, merging the pages from each into one record list.
+ */
+export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar) {
     const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
-    const requests = [];
-    const rowsByPage = {};
-    let lastMeta = null;
-    const pageUrl = (page) => `${baseUrl}/payments-manager/api/v1/batch-payments/${bkref}/records?page=${page}&size=${size}`;
     const params = { jar, headers: authHeaders, timeout: __ENV.K6_REQUEST_TIMEOUT || "60s", tags: { stage: "get_records" } };
-    const label = recordBatchLabels[bkref];
+    const requests = [];
+    let lastMeta = null;
+    const batches = bkrefs.map((bkref) => ({
+        bkref,
+        label: recordBatchLabels[bkref],
+        expectedRecords: bkrefs.length === 1 ? configuredNumPayments : perBatchEntry(bkref)?.recordCount ?? null,
+        rowsByPage: {},
+        totalPages: 0,
+        pageOneMeta: null,
+    }));
+    const pageUrl = (batch, page) => `${baseUrl}/payments-manager/api/v1/batch-payments/${batch.bkref}/records?page=${page}&size=${size}`;
 
-    const acceptPage = (page, res) => {
-        const url = pageUrl(page);
-        requests.push({ bkref, page, size, url, status: res.status });
+    const acceptPage = (batch, page, res) => {
+        const url = pageUrl(batch, page);
+        requests.push({ bkref: batch.bkref, page, size, url, status: res.status });
         if (res.status !== 200) {
-            logHttpFailure("get_records", { status: res.status, timings: res.timings, url, body: res.body, txId: bkref });
+            logHttpFailure("get_records", { status: res.status, timings: res.timings, url, body: res.body, txId: batch.bkref });
             return false;
         }
         const payload = res.json() || {};
@@ -990,66 +999,57 @@ function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar, expectedR
             recordFieldsLogged = true;
             console.info(`[k6][RECORDS][FIELDS] record keys=${JSON.stringify(Object.keys(rows[0] || {}))} status keys=${JSON.stringify(Object.keys(rows[0]?.status || {}))}`);
         }
-        rowsByPage[page] = label ? rows.map((row) => ({ ...row, __batchPaymentType: label.paymentType, __batchRail: label.railType })) : rows;
+        batch.rowsByPage[page] = batch.label ? rows.map((row) => ({ ...row, __batchPaymentType: batch.label.paymentType, __batchRail: batch.label.railType })) : rows;
         lastMeta = payload.meta || lastMeta;
+        if (page === 1) batch.pageOneMeta = payload.meta || null;
         if (rows.length === 0 && page === 1) {
             console.warn(
-                `[k6][RECORDS][DIAGNOSTIC] bkref=${bkref} url=${url} httpStatus=${res.status} meta=${JSON.stringify(payload.meta || null)} bodySnippet=${safeBodySnippet(res.body) || "<empty>"}`
+                `[k6][RECORDS][DIAGNOSTIC] bkref=${batch.bkref} url=${url} httpStatus=${res.status} meta=${JSON.stringify(payload.meta || null)} bodySnippet=${safeBodySnippet(res.body) || "<empty>"}`
             );
         }
         return true;
     };
-    const fetchPages = (pages) => {
+    // Runs [batch, page] jobs through the shared pool; returns the jobs that failed.
+    const runJobs = (jobs) => {
         const failed = [];
-        for (let i = 0; i < pages.length; i += recordsPageConcurrency) {
-            const chunk = pages.slice(i, i + recordsPageConcurrency);
-            const responses = http.batch(chunk.map((page) => ["GET", pageUrl(page), null, params]));
-            chunk.forEach((page, index) => { if (!acceptPage(page, responses[index])) failed.push(page); });
+        for (let i = 0; i < jobs.length; i += recordsPageConcurrency) {
+            const chunk = jobs.slice(i, i + recordsPageConcurrency);
+            const responses = http.batch(chunk.map(([batch, page]) => ["GET", pageUrl(batch, page), null, params]));
+            chunk.forEach((job, index) => { if (!acceptPage(job[0], job[1], responses[index])) failed.push(job); });
         }
         return failed;
     };
 
-    // Page 1 tells us how many pages there are; without it, fall back to the expected record count.
-    const pageOneOk = acceptPage(1, http.get(pageUrl(1), params)) || acceptPage(1, http.get(pageUrl(1), params));
-    let totalPages = pageOneOk
-        ? Number(lastMeta?.totalPages || 1)
-        : Number(expectedRecords) > 0 ? Math.ceil(Number(expectedRecords) / size) : 0;
-    if (!pageOneOk && totalPages === 0) {
-        console.warn(`[k6][RECORDS][PAGES_FAILED] bkref=${bkref} page 1 failed twice and the page count is unknown; no statuses read for this BKREF this pass`);
-        return { records: [], meta: lastMeta, requests, failedPages: [1] };
-    }
-
+    // Page 1 of every BKREF tells us its page count; retry once, then fall back to the expected record count.
+    let pageOneFailed = runJobs(batches.map((batch) => [batch, 1]));
+    if (pageOneFailed.length > 0) pageOneFailed = runJobs(pageOneFailed);
     const remaining = [];
-    for (let page = pageOneOk ? 2 : 1; page <= totalPages; page++) remaining.push(page);
-    let failedPages = fetchPages(remaining);
-    if (failedPages.length > 0) failedPages = fetchPages(failedPages);
-    if (failedPages.length > 0) {
-        console.warn(
-            `[k6][RECORDS][PAGES_FAILED] bkref=${bkref} pages=[${failedPages.join(",")}] of ${totalPages} still failing after retry; ` +
-            `up to ${failedPages.length * size} payment(s) have no status this pass`
-        );
+    for (const batch of batches) {
+        const pageOneOk = Boolean(batch.rowsByPage[1]);
+        batch.totalPages = pageOneOk
+            ? Number(batch.pageOneMeta?.totalPages || 1)
+            : Number(batch.expectedRecords) > 0 ? Math.ceil(Number(batch.expectedRecords) / size) : 0;
+        if (!pageOneOk && batch.totalPages === 0) {
+            console.warn(`[k6][RECORDS][PAGES_FAILED] bkref=${batch.bkref} page 1 failed twice and the page count is unknown; no statuses read for this BKREF this pass`);
+            continue;
+        }
+        for (let page = pageOneOk ? 2 : 1; page <= batch.totalPages; page++) remaining.push([batch, page]);
     }
+    let failedJobs = runJobs(remaining);
+    if (failedJobs.length > 0) failedJobs = runJobs(failedJobs);
 
-    const records = Object.keys(rowsByPage).map(Number).sort((a, b) => a - b).flatMap((page) => rowsByPage[page]);
-    return { records, meta: lastMeta, requests, failedPages };
-}
-
-/**
- * Fetches records for every parent/batch transaction ID (BKREF) returned by
- * get file batches, merging the pages from each into one record list.
- */
-export function fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar) {
     const records = [];
-    const requests = [];
-    let lastMeta = null;
-
-    for (const bkref of bkrefs) {
-        const expectedRecords = bkrefs.length === 1 ? configuredNumPayments : perBatchEntry(bkref)?.recordCount ?? null;
-        const result = fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar, expectedRecords);
-        updatePerBatchFinalStatus(bkref, result.records);
-        records.push(...result.records);
-        requests.push(...result.requests);
-        lastMeta = result.meta || lastMeta;
+    for (const batch of batches) {
+        const stillFailed = [...pageOneFailed, ...failedJobs].filter(([b]) => b === batch).map(([, page]) => page);
+        if (stillFailed.length > 0 && batch.totalPages > 0) {
+            console.warn(
+                `[k6][RECORDS][PAGES_FAILED] bkref=${batch.bkref} pages=[${[...new Set(stillFailed)].sort((a, b) => a - b).join(",")}] of ${batch.totalPages} still failing after retry; ` +
+                `up to ${new Set(stillFailed).size * size} payment(s) have no status this pass`
+            );
+        }
+        const batchRecords = Object.keys(batch.rowsByPage).map(Number).sort((a, b) => a - b).flatMap((page) => batch.rowsByPage[page]);
+        updatePerBatchFinalStatus(batch.bkref, batchRecords);
+        records.push(...batchRecords);
     }
 
     return { records, meta: lastMeta, requests };

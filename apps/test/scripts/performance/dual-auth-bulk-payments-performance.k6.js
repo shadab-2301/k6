@@ -30,8 +30,8 @@ export const options = {
       maxDuration: __ENV.K6_MAX_DURATION || '10m30s',
     },
   },
-  batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10)), String(__ENV.K6_MIX_BATCH || '').split(',').filter((part) => part.trim()).length),
-  batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 10))),
+  batchPerHost: Math.max(6, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 20)), String(__ENV.K6_MIX_BATCH || '').split(',').filter((part) => part.trim()).length),
+  batch: Math.max(20, Math.floor(Number(__ENV.K6_RECORDS_PAGE_CONCURRENCY || 20))),
 };
 
 function authHeaders(token, gcn) {
