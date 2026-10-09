@@ -365,7 +365,7 @@ Add `--mix` with comma-separated `TYPE/RAIL:COUNT` entries. All entries go into 
 
 
 
-`npm run perf:batch:k6 -- --env UAT --mix "TPT/EFT:5,TPT/PAYSHAP:5,ADHOC/RTGS:2,IAB/EFT:3" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s`
+`npm run perf:batch:k6 -- --env UAT --mix "TPT/EFT:500,TPT/PAYSHAP:500,ADHOC/RTGS:500,PRLSD/EFT:500" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s --future 180`
 
 # Dual auth:
 
@@ -380,6 +380,10 @@ Rules for the mix
 
 # Use at least two entries, and don't repeat the same type/rail pair. TPT/EFT and TPT/PAYSHAP together is fine.
 
+# Future date MIx
+
+`npm run perf:batch:dual:k6 -- --env UAT --mix "TPT/EFT:5000,TPT/PAYSHAP:5000,ADHOC/RTGS:2500,PRLSD/EFT:2500,PRLEX/EFT:4800,INT/INT:200" --iterations 1 --vus 1 --poll-timeout-ms 300000 --max-duration 30s --future 180
+
 `--payment-type and --rail are ignored when --mix is used.
 UAT only. Add --future 7 to test SCHEDULED instead of SENT.
 In Windows PowerShell, write the separator as '--' or use npm.cmd. Otherwise PowerShell drops the flags.
@@ -388,14 +392,20 @@ For a first UAT run, start with two entries, such as "TPT/EFT:2,TPT/PAYSHAP:2". 
 
 In Windows PowerShell, quote the separator (`'--'`) or use `npm.cmd`, otherwise PowerShell drops the flags before npm sees them.
 
+
 # File validation wait (upload -> PENDINIT)
 By default the run waits for the uploaded file to reach PENDINIT with no time limit, logging `[k6][PENDINIT][WAITING]` every 30 seconds. It stops early only if the file ends in a failed/rejected validation status. To limit the wait, pass `--fileValid <seconds>`:
-
+ 
 `npm run perf:batch:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --fileValid 300`
-
+ 
 `--poll-timeout-ms` still limits the later polls (records reaching SENT/SCHEDULED).
 
-# Final status (SENT/SCHED) polling speed
-Each poll reads every payment record of the batch (2000 per page by default; change with `--records-page-size <n>`). Pages of all BKREFs are fetched together in parallel, 20 at a time by default, so the time to Final Status Observed is close to when the payments actually reached SENT/SCHED. Each poll logs `[k6][RECORDS][POLL] pass=… records=… passMs=…`. Change the parallelism with `--records-concurrency <n>`, e.g. `--records-concurrency 20`.
 
-Dual auth reads the final status in two steps: it polls get file batches (one request returns every BK's status, logged as `[k6][BATCH-STATUS]`) until every BK is final, then reads the FT records once to confirm each FT's actual status. The BK-level time is used for Final Status Observed only when the BKs were seen moving to SENT/SCHED and the FT records confirm it (`[k6][FINAL-STATUS] … source=…`); otherwise the records-based time is used.
+# To update html report with FM timevalidation
+
+
+need to run from  `apps` folder -- the last arg nin the command would be the FM validatioj time and path to the html report before it
+
+
+node split-validation.js "..\reports\performance\bulk-payments-report-2026-10-09T09-24-19-567Z.html" 15.4
+ 
