@@ -394,3 +394,6 @@ By default the run waits for the uploaded file to reach PENDINIT with no time li
 `npm run perf:batch:k6 -- --env UAT --payment-type TPT --rail EFT --payments 10 --iterations 1 --vus 1 --poll-timeout-ms 300000 --fileValid 300`
 
 `--poll-timeout-ms` still limits the later polls (records reaching SENT/SCHEDULED).
+
+# Final status (SENT/SCHED) polling speed
+Each poll reads every payment record of the batch (100 per page). Pages after the first are fetched in parallel, 10 at a time by default, so the time to Final Status Observed is close to when the payments actually reached SENT/SCHED. Each poll logs `[k6][RECORDS][POLL] pass=… records=… passMs=…`. Change the parallelism with `--records-concurrency <n>`, e.g. `--records-concurrency 20`.

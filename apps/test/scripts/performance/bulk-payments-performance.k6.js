@@ -911,50 +911,56 @@ function updatePerBatchFinalStatus(bkref, records) {
     entry.pendingToFinalMs = pendingStart ? Date.parse(entry.finalStatusObservedAt) - Date.parse(pendingStart) : null;
 }
 
+// Pages after the first are fetched in parallel batches so a full pass over large batches (e.g. 20k
+// records = 200 pages) takes seconds instead of minutes; the pass time bounds when SENT/SCHED is observed.
+const recordsPageConcurrency = Math.max(1, Math.floor(envNumber(["K6_RECORDS_PAGE_CONCURRENCY"], 10)));
+let recordFieldsLogged = false;
+
 function fetchBatchRecords(baseUrl, authHeaders, bkref, pageSize, jar) {
     const size = Math.max(1, Math.min(100, Number(pageSize) || 50));
     const records = [];
     const requests = [];
-    let page = 1;
-    let totalPages = 1;
     let lastMeta = null;
+    const pageUrl = (page) => `${baseUrl}/payments-manager/api/v1/batch-payments/${bkref}/records?page=${page}&size=${size}`;
+    const params = { jar, headers: authHeaders, timeout: __ENV.K6_REQUEST_TIMEOUT || "60s", tags: { stage: "get_records" } };
+    const label = recordBatchLabels[bkref];
 
-    do {
-        const url = `${baseUrl}/payments-manager/api/v1/batch-payments/${bkref}/records?page=${page}&size=${size}`;
-        requests.push({ bkref, page, size, url });
-        const res = http.get(url, {
-            jar,
-            headers: authHeaders,
-            timeout: __ENV.K6_REQUEST_TIMEOUT || "60s",
-            tags: { stage: "get_records" },
-        });
-
+    // Returns false when the page failed, so later pages are not merged out of order.
+    const acceptPage = (page, url, res) => {
         if (res.status !== 200) {
-            logHttpFailure("get_records", {
-                status: res.status,
-                timings: res.timings,
-                url,
-                body: res.body,
-                txId: bkref,
-            });
-            break;
+            logHttpFailure("get_records", { status: res.status, timings: res.timings, url, body: res.body, txId: bkref });
+            return false;
         }
-
         const payload = res.json() || {};
         const rows = Array.isArray(payload.data) ? payload.data : [];
-        const label = recordBatchLabels[bkref];
+        if (!recordFieldsLogged && rows.length > 0) {
+            recordFieldsLogged = true;
+            console.info(`[k6][RECORDS][FIELDS] record keys=${JSON.stringify(Object.keys(rows[0] || {}))} status keys=${JSON.stringify(Object.keys(rows[0]?.status || {}))}`);
+        }
         records.push(...(label ? rows.map((row) => ({ ...row, __batchPaymentType: label.paymentType, __batchRail: label.railType })) : rows));
-        lastMeta = payload.meta || null;
-        totalPages = Number(lastMeta?.totalPages || 1);
-
+        lastMeta = payload.meta || lastMeta;
         if (rows.length === 0 && page === 1) {
             console.warn(
-                `[k6][RECORDS][DIAGNOSTIC] bkref=${bkref} url=${url} httpStatus=${res.status} meta=${JSON.stringify(lastMeta)} bodySnippet=${safeBodySnippet(res.body) || "<empty>"}`
+                `[k6][RECORDS][DIAGNOSTIC] bkref=${bkref} url=${url} httpStatus=${res.status} meta=${JSON.stringify(payload.meta || null)} bodySnippet=${safeBodySnippet(res.body) || "<empty>"}`
             );
         }
+        return true;
+    };
 
-        page += 1;
-    } while (page <= totalPages);
+    const firstUrl = pageUrl(1);
+    requests.push({ bkref, page: 1, size, url: firstUrl });
+    if (!acceptPage(1, firstUrl, http.get(firstUrl, params))) return { records, meta: lastMeta, requests };
+    const totalPages = Number(lastMeta?.totalPages || 1);
+
+    for (let chunkStart = 2; chunkStart <= totalPages; chunkStart += recordsPageConcurrency) {
+        const pages = [];
+        for (let page = chunkStart; page <= Math.min(totalPages, chunkStart + recordsPageConcurrency - 1); page++) pages.push(page);
+        const responses = http.batch(pages.map((page) => ["GET", pageUrl(page), null, params]));
+        for (let i = 0; i < pages.length; i++) {
+            requests.push({ bkref, page: pages[i], size, url: pageUrl(pages[i]) });
+            if (!acceptPage(pages[i], pageUrl(pages[i]), responses[i])) return { records, meta: lastMeta, requests };
+        }
+    }
 
     return { records, meta: lastMeta, requests };
 }
@@ -1200,11 +1206,13 @@ function fetchAndValidateBatchRecordsWithRetry(baseUrl, authHeaders, bkrefs, exp
 
     while (attempt === 0 || Date.now() - startedAt < timeoutMs) {
         attempt += 1;
+        const passStarted = Date.now();
         const { records, meta, requests } = fetchBatchRecordsForBkrefs(baseUrl, authHeaders, bkrefs, pageSize, jar);
         lastRecords = records;
         lastMeta = meta;
         lastRequests = requests;
         lastValidation = validateBatchRecords(records, expectedCount, expectedFinalStatus);
+        console.log(`[k6][RECORDS][POLL] pass=${attempt} records=${records.length}/${expectedCount} at${expectedFinalStatus || "Final"}=${lastValidation.buckets.PASSED.length} pages=${requests.length} passMs=${Date.now() - passStarted}`);
 
         if (lastValidation.shortfall === 0 && lastValidation.buckets.IN_PROGRESS.length === 0) {
             break;

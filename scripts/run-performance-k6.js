@@ -93,6 +93,7 @@ const pollTimeoutMs = readArg("--poll-timeout-ms", "120000");
 setEnvFromArg("K6_POLL_TIMEOUT_MS", "--poll-timeout-ms", pollTimeoutMs);
 env.K6_MAX_DURATION_MS = pollTimeoutMs;
 setEnvFromArg("K6_POLL_INTERVAL_MS", "--poll-interval-ms", readArg("--poll-interval-ms", "2000"));
+setEnvFromArg("K6_RECORDS_PAGE_CONCURRENCY", "--records-concurrency", readArg("--records-concurrency", ""));
 // --fileValid <seconds>: limit for the upload -> PENDINIT file validation wait. Omitted = wait with no limit.
 const fileValidArg = String(readArg("--fileValid", readArg("--file-valid", ""))).trim();
 const fileValidSeconds = fileValidArg === "" ? 0 : Number(fileValidArg);
