@@ -90,54 +90,77 @@ function generateBapiToken(adoToken, user) {
   return requireValue(`BAPI token for ${user.username}`, token);
 }
 
-// All parent transactions (one per BK) are approved together in one http.batch call. http.batch returns
-// once every response is in, so each approval's finish time is derived from its own k6 timings.
+const APPROVE_AUTO_FORWARD = String(__ENV.K6_APPROVE_AUTO_FORWARD || 'false').trim().toLowerCase() === 'true';
+const APPROVE_REASON = __ENV.K6_APPROVE_REASON || 'k6 performance test approval';
+
+// Item-level failures in the v2 bulk action response (shape not fixed: a plain array or { data: [...] } of
+// per-transaction results, or a top-level error). Returns transactionId -> reason for every failed item.
+function bulkApprovalFailures(payload, parentTransactionIds) {
+  const failures = new Map();
+  if (payload && !Array.isArray(payload) && payload.error) {
+    const reason = payload.error.message || JSON.stringify(payload.error);
+    parentTransactionIds.forEach((id) => failures.set(id, reason));
+    return failures;
+  }
+  const items = Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : [];
+  for (const item of items) {
+    const id = String(item?.transactionId || item?.data?.transactionId || '');
+    if (!id) continue;
+    const status = String(item?.status?.code || item?.status || '').toUpperCase();
+    const failed = Boolean(item?.error || (Array.isArray(item?.errors) && item.errors.length > 0)) || item?.success === false ||
+      /FAIL|REJECT|ERROR|DECLIN/.test(status);
+    if (failed) failures.set(id, item?.error?.message || item?.errors?.[0]?.message || item?.message || status || 'failed');
+  }
+  return failures;
+}
+
+// Every initiated parent transaction (one per BK) is approved in ONE call to the v2 bulk action endpoint,
+// with all transaction IDs in the request body. Each BK records that call's start, finish and API TAT.
 function approveParentTransactions(parentTransactionIds, approverToken, recordApproval) {
   parentTransactionIds.forEach((id) => requireValue('parentTransactionId', id));
 
+  const url = `${BASE_URL}/payments-manager/api/v2/payment/action`;
   const approvalHeaders = {
     Authorization: `Bearer ${approverToken}`,
     GCN: approver.gcn,
     channel: __ENV.K6_CHANNEL || 'WEB',
+    'Content-Type': 'application/json',
   };
-  const urlFor = (id) => `${BASE_URL}/payments-manager/api/v1/payment/${encodeURIComponent(id)}/APPROVE?autoForward=true`;
+  const body = parentTransactionIds.map((transactionId) => ({
+    transactionId,
+    operation: 'APPROVE',
+    reason: APPROVE_REASON,
+    autoForward: APPROVE_AUTO_FORWARD,
+  }));
 
-  console.log(`[DUAL AUTH][APPROVER] Approving ${parentTransactionIds.length} parent transaction(s) in parallel: ${parentTransactionIds.join(', ')}`);
-  const sentAt = Date.now();
-  const responses = http.batch(parentTransactionIds.map((id) => [
-    'PATCH', urlFor(id), null, { headers: approvalHeaders, tags: { name: 'approve_parent_transaction' } },
-  ]));
+  console.log(`[DUAL AUTH][APPROVER] Approving ${parentTransactionIds.length} parent transaction(s) in one v2 bulk call: ${parentTransactionIds.join(', ')}`);
+  const startedAt = Date.now();
+  const res = http.patch(url, JSON.stringify(body), { headers: approvalHeaders, tags: { name: 'approve_parent_transactions_bulk' } });
+  const endedAt = Date.now();
+  logRuntimeExchange('approve_parent_transactions', 'PATCH', url, approvalHeaders, body, res);
 
-  const failures = [];
-  responses.forEach((res, index) => {
-    const id = parentTransactionIds[index];
-    const timings = res.timings || {};
-    const finishedAt = sentAt + Number(timings.blocked || 0) + Number(timings.connecting || 0) +
-      Number(timings.tls_handshaking || 0) + Number(timings.duration || 0);
+  const httpOk = res.status >= 200 && res.status < 300;
+  let payload = null;
+  try { payload = res.body ? res.json() : null; } catch (_) { payload = null; }
+  const failures = httpOk ? bulkApprovalFailures(payload, parentTransactionIds) : new Map(parentTransactionIds.map((id) => [id, `HTTP ${res.status}`]));
+  const apiMs = Number(res.timings?.duration ?? (endedAt - startedAt));
+
+  for (const id of parentTransactionIds) {
     if (recordApproval) recordApproval({
-      startedAt: new Date(sentAt).toISOString(),
-      endedAt: new Date(finishedAt).toISOString(),
-      apiMs: Number(timings.duration || 0),
-      status: res.status,
+      startedAt: new Date(startedAt).toISOString(),
+      endedAt: new Date(endedAt).toISOString(),
+      apiMs,
+      status: failures.has(id) ? (httpOk ? 'FAILED' : res.status) : 200,
       transactionId: id,
     });
-    logRuntimeExchange('approve_parent_transaction', 'PATCH', urlFor(id), approvalHeaders, null, res);
-    check(res, { 'approve status is 200': (r) => r.status === 200 });
-
-    if (res.status !== 200) {
-      failures.push(`${id}: HTTP ${res.status}`);
-      return;
-    }
-    try { res.json(); } catch (_) {
-      failures.push(`${id}: response was not JSON`);
-      return;
-    }
-    console.log(`[DUAL AUTH][APPROVER] Approval completed parentTransactionId=${id} apiMs=${Number(timings.duration || 0).toFixed(0)}`);
-  });
-
-  if (failures.length > 0) {
-    fail(`[dual-auth] Approval failed for ${failures.length} of ${parentTransactionIds.length} parent transaction(s): ${failures.join('; ')}`);
   }
+  check(res, { 'bulk approve status is 2xx': () => httpOk });
+  check(null, { 'all parent transactions approved': () => failures.size === 0 });
+
+  if (failures.size > 0) {
+    fail(`[dual-auth] Bulk approval failed for ${failures.size} of ${parentTransactionIds.length} parent transaction(s): ${[...failures].map(([id, reason]) => `${id}: ${reason}`).join('; ')}`);
+  }
+  console.log(`[DUAL AUTH][APPROVER] Bulk approval completed for ${parentTransactionIds.length} parent transaction(s) apiMs=${apiMs.toFixed(0)}`);
 }
 
 function expectedFinalStatus(paymentDate) {

@@ -2825,15 +2825,25 @@ function redactRuntimeValue(value, key = "") {
     return value;
 }
 
-function safeRuntimeBody(body, key = "body") {
+// Bodies are parsed (when JSON) and redacted, then printed as indented JSON instead of an escaped one-line string.
+function runtimeBodyValue(body, key = "body") {
     if (body === undefined || body === null || body === "") return "<empty>";
-    if (typeof body !== "string") return JSON.stringify(redactRuntimeValue(body, key));
+    if (typeof body !== "string") return redactRuntimeValue(body, key);
     try {
-        return JSON.stringify(redactRuntimeValue(JSON.parse(body), key));
+        return redactRuntimeValue(JSON.parse(body), key);
     } catch {
         if (/csv|xml|password|token|cookie|otp|secret/i.test(key)) return `<${key} omitted>`;
         return safeSasErrorSnippet(body);
     }
+}
+
+const traceMaxChars = Math.max(500, Math.floor(envNumber(["K6_TRACE_MAX_CHARS"], 6000)));
+
+function prettyTrace(value) {
+    const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
+    return text.length > traceMaxChars
+        ? `${text.slice(0, traceMaxChars)}\n... (${text.length - traceMaxChars} more characters not shown; set K6_TRACE_MAX_CHARS to see more)`
+        : text;
 }
 
 function safeRuntimeHeaders(headers) {
@@ -2846,8 +2856,9 @@ function safeRuntimeHeaders(headers) {
 
 export function logRuntimeExchange(step, method, url, requestHeaders, requestBody, response) {
     const safeUrl = String(url || "").replace(/([?&](?:sig|se|sp|sv|sr|token|key)=[^&]*)/gi, "$1=<redacted>");
-    console.info(`[k6][trace][${step}] request=${JSON.stringify({ method, url: safeUrl, headers: safeRuntimeHeaders(requestHeaders), body: safeRuntimeBody(requestBody) })}`);
-    console.info(`[k6][trace][${step}] response=${JSON.stringify({ status: response?.status, headers: safeRuntimeHeaders(response?.headers), body: safeRuntimeBody(response?.body, "response") })}`);
+    const durationMs = Number(response?.timings?.duration);
+    console.info(`[k6][trace][${step}] REQUEST ${method} ${safeUrl}\n${prettyTrace({ headers: safeRuntimeHeaders(requestHeaders), body: runtimeBodyValue(requestBody) })}`);
+    console.info(`[k6][trace][${step}] RESPONSE status=${response?.status}${Number.isFinite(durationMs) ? ` durationMs=${durationMs.toFixed(0)}` : ""}\n${prettyTrace(runtimeBodyValue(response?.body, "response"))}`);
 }
 
 function runtimeValue(key) {
